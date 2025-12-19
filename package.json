@@ -1,0 +1,40 @@
+{
+  "name": "curiosity-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "server": "node server/index.js",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.4",
+    "axios": "1.7.7",
+    "dotenv": "16.4.5",
+    "express": "4.19.2",
+    "framer-motion": "^11.3.31",
+    "livekit-client": "^2.15.8",
+    "pixi.js": "^8.14.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.26.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.3.0",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "@vitejs/plugin-react": "4.3.1",
+    "autoprefixer": "10.4.20",
+    "eslint": "8.57.0",
+    "eslint-plugin-react": "7.37.2",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "postcss": "8.4.47",
+    "tailwindcss": "3.4.13",
+    "vite": "5.4.8"
+  }
+}
