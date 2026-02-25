@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# Curiosity Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend with an Express API server for form submissions and ActiveCampaign/Calendly integrations.
 
-Currently, two official plugins are available:
+## Requirements
+- Node.js LTS
+- npm
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Local setup
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+1. Create your env file:
+   ```bash
+   cp .env.example .env
+   ```
+1. Update `.env` with real values for your environment.
+1. For local API calls from the frontend, add this to `.env`:
+   ```bash
+   VITE_API_BASE_URL=http://localhost:3001
+   ```
+1. Start the API server:
+   ```bash
+   npm run server
+   ```
+1. Start the frontend dev server:
+   ```bash
+   npm run dev
+   ```
+1. Open `http://localhost:3000`.
 
-## React Compiler
+Notes:
+- Vite dev server proxies `/api` to `http://localhost:3001` (see `vite.config.ts`).
+- The API server reads `.env` from the repo root when started with `npm run server`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Scripts
+- `npm run dev` - Frontend dev server on port 3000
+- `npm run build` - Production build into `dist/`
+- `npm run preview` - Preview production build on port 4173
+- `npm run server` - Local API server on port 3001
+- `npm run lint` - ESLint
 
-## Expanding the ESLint configuration
+## Netlify deploy
+This repo includes `netlify.toml`:
+- Build command: `npm run build`
+- Publish directory: `dist`
+- SPA redirect for React Router
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The Express API server is not deployed on Netlify. Deploy the server separately (for example on Fly or another Node host), then set:
+- `VITE_API_BASE_URL` in Netlify environment variables to your API base URL
