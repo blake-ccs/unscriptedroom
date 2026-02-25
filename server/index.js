@@ -647,23 +647,155 @@ const removeTagsFromContact = async (contactId, tagNames) => {
 };
 
 const STAGE_TAGS = {
-  captured: "stage:captured",
-  nurturing: "stage:nurturing",
-  booked: "stage:booked",
-  cancelled: "stage:cancelled",
+  captured: "LIFECYCLE: Lead",
+  nurturing: "LIFECYCLE: Engaged",
+  booked: "LIFECYCLE: Registered",
+  cancelled: "LIFECYCLE: Cancelled UR",
 };
 const SOURCE_TAG = "src:web";
+const QR_SOURCE_TAG = "src: Envelope QR";
+const UR_EVENT_DATE_TAG_PREFIX = "Event: UR - ";
+const UR_HISTORY_BOOKED_TAG_PREFIX = "History: UR Booked - ";
+const UR_HISTORY_CANCELLED_TAG_PREFIX = "History: UR Cancelled - ";
+const UR_EVENT_BOOKED_ACTION_TAG = "ACTION: Booked UR";
+const UR_EVENT_CANCELLED_ACTION_TAG = "ACTION: UR Cancelled";
+const SURVEY_COMPLETED_ACTION_TAG = "Action: CompSurvey";
+
+const buildNpiTagFromAttendAgain = (attendAgain) => {
+  const normalized = String(attendAgain || "").trim().toLowerCase();
+  if (normalized === "yes") return "NPI: 1";
+  if (normalized === "maybe") return "NPI: 0";
+  if (normalized === "no" || normalized === "not right now") return "NPI: -1";
+  return null;
+};
+
+const buildPodcastInterestTag = (podcastAnswer) => {
+  const normalized = String(podcastAnswer || "").trim().toLowerCase();
+  return normalized === "yes" ? "INTEREST: Podguest" : null;
+};
+
+const buildAvailabilityTags = (availability) => {
+  if (!Array.isArray(availability)) return [];
+  const tags = new Set();
+  availability.forEach((value) => {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "weekday mornings") {
+      tags.add("AVAIL: Weekdays");
+      tags.add("AVAIL: AM");
+    } else if (normalized === "weekday afternoons") {
+      tags.add("AVAIL: Weekdays");
+      tags.add("AVAIL: PM");
+    } else if (normalized === "weekday evenings") {
+      tags.add("AVAIL: Weekdays");
+      tags.add("AVAIL: Evenings");
+    } else if (normalized === "weekend mornings") {
+      tags.add("AVAIL: Weekends");
+      tags.add("AVAIL: AM");
+    } else if (normalized === "weekend afternoons") {
+      tags.add("AVAIL: Weekends");
+      tags.add("AVAIL: PM");
+    } else if (normalized === "weekend evenings") {
+      tags.add("AVAIL: Weekends");
+      tags.add("AVAIL: Evenings");
+    } else if (normalized === "my availability varies" || normalized === "not sure yet") {
+      tags.add("AVAIL: NP");
+    }
+  });
+  return [...tags];
+};
+
+const resolveSourceTagForContact = async (contactId) => {
+  if (!contactId) return SOURCE_TAG;
+  try {
+    const tagNames = await getContactTagNames(contactId);
+    return tagNames.includes(QR_SOURCE_TAG) ? QR_SOURCE_TAG : SOURCE_TAG;
+  } catch (error) {
+    console.warn("Source tag resolution failed; defaulting to web", { contactId, error: error?.message || error });
+    return SOURCE_TAG;
+  }
+};
+
+const formatTagDate = (startTime, timezone) => {
+  if (!startTime) return null;
+  const date = new Date(startTime);
+  if (Number.isNaN(date.getTime())) return null;
+  let parts;
+  try {
+    parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+  } catch {
+    parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+  }
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) return null;
+  return `${year}-${month}-${day}`;
+};
+
+const buildUrEventDateTag = (startTime, timezone) => {
+  const formatted = formatTagDate(startTime, timezone);
+  return formatted ? `${UR_EVENT_DATE_TAG_PREFIX}${formatted}` : null;
+};
+
+const buildUrHistoryBookedTag = (startTime, timezone) => {
+  const formatted = formatTagDate(startTime, timezone);
+  return formatted ? `${UR_HISTORY_BOOKED_TAG_PREFIX}${formatted}` : null;
+};
+
+const buildUrHistoryCancelledTag = (startTime, timezone) => {
+  const formatted = formatTagDate(startTime, timezone);
+  return formatted ? `${UR_HISTORY_CANCELLED_TAG_PREFIX}${formatted}` : null;
+};
+
+const syncUrEventDateTags = async ({ contactId, startTime, timezone, cancelled = false, extraTags = [] }) => {
+  if (!contactId) return;
+  const tagNames = await getContactTagNames(contactId);
+  const eventDateTags = tagNames.filter((tag) => tag.startsWith(UR_EVENT_DATE_TAG_PREFIX));
+
+  const tagsToRemove = [
+    ...eventDateTags,
+    ...(cancelled ? [] : [UR_EVENT_CANCELLED_ACTION_TAG]),
+  ].filter(Boolean);
+
+  if (tagsToRemove.length) {
+    await removeTagsFromContact(contactId, tagsToRemove);
+  }
+
+  if (cancelled) {
+    await addTagsToContactWithRetry(contactId, [UR_EVENT_CANCELLED_ACTION_TAG, ...extraTags]);
+    return;
+  }
+
+  const eventDateTag = buildUrEventDateTag(startTime, timezone);
+  if (!eventDateTag) return;
+  await addTagsToContactWithRetry(contactId, [eventDateTag, ...extraTags]);
+};
 
 const ensureContactTags = async ({ contactId, stage, extraTags = [] }) => {
   if (!contactId) return;
   await waitForContactVisible(contactId, 3);
-  const baseTags = [SOURCE_TAG, stage ? STAGE_TAGS[stage] : null].filter(Boolean);
+  const sourceTag = await resolveSourceTagForContact(contactId);
+  const baseTags = [sourceTag, stage ? STAGE_TAGS[stage] : null].filter(Boolean);
   const allTags = [...baseTags, ...(extraTags || [])].filter(Boolean);
   if (stage) {
     await applyStageTransition(contactId, stage);
   }
   if (allTags.length) {
     await addTagsToContactNoCheck(contactId, allTags);
+  }
+  if (sourceTag === QR_SOURCE_TAG) {
+    await removeTagsFromContact(contactId, [SOURCE_TAG]);
   }
 };
 
@@ -680,7 +812,8 @@ const applyStageTransition = async (contactId, stage) => {
     console.log("Stage update skipped due to existing booking", { contactId, stage });
     return;
   }
-  const add = [SOURCE_TAG, STAGE_TAGS[stage]].filter(Boolean);
+  const sourceTag = await resolveSourceTagForContact(contactId);
+  const add = [sourceTag, STAGE_TAGS[stage]].filter(Boolean);
   const remove =
     stage === "nurturing"
       ? [STAGE_TAGS.captured]
@@ -690,6 +823,9 @@ const applyStageTransition = async (contactId, stage) => {
           ? [STAGE_TAGS.captured, STAGE_TAGS.nurturing, STAGE_TAGS.booked]
           : [];
   await addTagsToContactNoCheck(contactId, add);
+  if (sourceTag === QR_SOURCE_TAG) {
+    remove.push(SOURCE_TAG);
+  }
   if (remove.length) {
     await removeTagsFromContact(contactId, remove);
   }
@@ -1065,15 +1201,44 @@ app.post("/api/webhooks/calendly", express.raw({ type: "application/json" }), as
     console.log("Calendly webhook updated ok", { contactId: contact.id, ok: updatedOk });
 
     if (eventType === "invitee.created") {
-      await ensureContactTags({ contactId: contact.id, stage: "booked", extraTags: ["cal:booked"] });
+      await ensureContactTags({ contactId: contact.id, stage: "booked", extraTags: [UR_EVENT_BOOKED_ACTION_TAG] });
+      const historyBookedTag = buildUrHistoryBookedTag(
+        calendlyFields[AC_FIELD_CALENDLY_START_TIME] || eventData?.start_time || eventData?.startTime,
+        calendlyFields[AC_FIELD_CALENDLY_TIMEZONE] || eventData?.timezone || invitee?.timezone || ""
+      );
+      await syncUrEventDateTags({
+        contactId: contact.id,
+        startTime: calendlyFields[AC_FIELD_CALENDLY_START_TIME] || eventData?.start_time || eventData?.startTime,
+        timezone: calendlyFields[AC_FIELD_CALENDLY_TIMEZONE] || eventData?.timezone || invitee?.timezone || "",
+        extraTags: historyBookedTag ? [historyBookedTag] : [],
+      });
     } else if (eventType === "invitee.canceled") {
       if (isRescheduleCancel) {
         await ensureContactTags({ contactId: contact.id, stage: "booked" });
         return res.status(200).json({ ok: true });
       }
       await ensureContactTags({ contactId: contact.id, stage: "cancelled" });
+      const historyCancelledTag = buildUrHistoryCancelledTag(
+        calendlyFields[AC_FIELD_CALENDLY_START_TIME] || eventData?.start_time || eventData?.startTime,
+        calendlyFields[AC_FIELD_CALENDLY_TIMEZONE] || eventData?.timezone || invitee?.timezone || ""
+      );
+      await syncUrEventDateTags({
+        contactId: contact.id,
+        cancelled: true,
+        extraTags: historyCancelledTag ? [historyCancelledTag] : [],
+      });
     } else if (eventType === "invitee.rescheduled") {
       await ensureContactTags({ contactId: contact.id, stage: "booked" });
+      const historyBookedTag = buildUrHistoryBookedTag(
+        calendlyFields[AC_FIELD_CALENDLY_START_TIME] || eventData?.start_time || eventData?.startTime,
+        calendlyFields[AC_FIELD_CALENDLY_TIMEZONE] || eventData?.timezone || invitee?.timezone || ""
+      );
+      await syncUrEventDateTags({
+        contactId: contact.id,
+        startTime: calendlyFields[AC_FIELD_CALENDLY_START_TIME] || eventData?.start_time || eventData?.startTime,
+        timezone: calendlyFields[AC_FIELD_CALENDLY_TIMEZONE] || eventData?.timezone || invitee?.timezone || "",
+        extraTags: historyBookedTag ? [historyBookedTag] : [],
+      });
     }
 
     return res.status(200).json({ ok: true });
@@ -1092,6 +1257,13 @@ const buildCustomFields = (entries) => {
     fields[id] = value;
   });
   return fields;
+};
+
+const buildContactSubjectTag = (subject) => {
+  const compact = String(subject || "")
+    .trim()
+    .replace(/[^a-z]/gi, "");
+  return compact ? `contact us: ${compact}` : null;
 };
 
 const requiredFields = ["name", "email", "ageConfirmed", "days", "times", "curiosityLevel", "heardFrom"];
@@ -1277,16 +1449,19 @@ app.post("/api/survey", rateLimit, async (req, res) => {
         externalId: `survey-${contact.id}-${Date.now()}`,
         fields: [
           { id: SURVEY_FIELD_IDS.name, value: payload.name || "" },
-          { id: SURVEY_FIELD_IDS.q1, value: payload.curiosityImportance || "" },
-          { id: SURVEY_FIELD_IDS.q2, value: payload.curiosityReason || "" },
-          { id: SURVEY_FIELD_IDS.q3, value: payload.conversationFeel || "" },
-          { id: SURVEY_FIELD_IDS.q4, value: payload.standoutMoment || "" },
-          { id: SURVEY_FIELD_IDS.q5, value: payload.appreciation || "" },
-          { id: SURVEY_FIELD_IDS.q6, value: payload.shift || "" },
-          { id: SURVEY_FIELD_IDS.q7, value: payload.connectionLevel || "" },
-          { id: SURVEY_FIELD_IDS.q8, value: payload.betterExperience || "" },
-          { id: SURVEY_FIELD_IDS.q9, value: payload.attendAgain || "" },
-          { id: SURVEY_FIELD_IDS.q10, value: Array.isArray(payload.availability) ? payload.availability.join(", ") : "" },
+          { id: SURVEY_FIELD_IDS.q1, value: payload.impactLevel || payload.curiosityImportance || "" },
+          { id: SURVEY_FIELD_IDS.q2, value: payload.honestySpace || "" },
+          { id: SURVEY_FIELD_IDS.q3, value: payload.standoutMoment || payload.conversationFeel || "" },
+          { id: SURVEY_FIELD_IDS.q4, value: payload.betterExperience || "" },
+          { id: SURVEY_FIELD_IDS.q5, value: payload.attendAgain || "" },
+          { id: SURVEY_FIELD_IDS.q6, value: Array.isArray(payload.availability) ? payload.availability.join(", ") : "" },
+          {
+            id: SURVEY_FIELD_IDS.q7,
+            value: payload.podcastInterest ?? payload.podcastInvitation ?? payload.podcastOpenToConversation ?? "",
+          },
+          { id: SURVEY_FIELD_IDS.q8, value: "" },
+          { id: SURVEY_FIELD_IDS.q9, value: "" },
+          { id: SURVEY_FIELD_IDS.q10, value: "" },
           { id: SURVEY_FIELD_IDS.optional, value: payload.anythingElse || "" },
         ],
         relationships: {
@@ -1296,6 +1471,15 @@ app.post("/api/survey", rateLimit, async (req, res) => {
     };
 
     await acV3Request("POST", `/api/3/customObjects/records/${AC_SURVEY_SCHEMA_ID}`, record);
+    const npiTag = buildNpiTagFromAttendAgain(payload.attendAgain);
+    const podcastInterestTag = buildPodcastInterestTag(
+      payload.podcastInterest ?? payload.podcastInvitation ?? payload.podcastOpenToConversation
+    );
+    const availabilityTags = buildAvailabilityTags(payload.availability);
+    await addTagsToContactWithRetry(
+      contact.id,
+      [SURVEY_COMPLETED_ACTION_TAG, npiTag, podcastInterestTag, ...availabilityTags].filter(Boolean)
+    );
     return res.json({ ok: true });
   } catch (error) {
     console.error("Survey submit failed", error?.message || error);
@@ -1379,7 +1563,7 @@ app.post("/api/register", async (req, res) => {
         email: payload.email,
         firstName,
         lastName,
-        tags: "register-interest,src:web,stage:captured",
+        tags: "register-interest,src:web,LIFECYCLE: Lead",
         listIds,
         ip4: req.ip,
         fields: buildCustomFields([
@@ -1491,6 +1675,7 @@ app.post("/api/contact", async (req, res) => {
 
     const [firstName, ...lastParts] = String(payload.name || "").trim().split(/\s+/);
     const lastName = lastParts.join(" ");
+    const subjectTag = buildContactSubjectTag(payload.subject);
     const listId = AC_LIST_ID_CONTACT || ACTIVE_CAMPAIGN_LIST_ID;
     const listIds = [listId, ACTIVE_CAMPAIGN_MASTER_LIST_ID].filter(Boolean);
 
@@ -1499,7 +1684,7 @@ app.post("/api/contact", async (req, res) => {
         email: payload.email,
         firstName,
         lastName,
-        tags: "contact-us,src:web,stage:nurturing",
+        tags: [subjectTag, "src:web", "LIFECYCLE: Engaged"].filter(Boolean).join(","),
         listIds,
         ip4: req.ip,
         fields: buildCustomFields([
@@ -1518,7 +1703,11 @@ app.post("/api/contact", async (req, res) => {
             ...(AC_FIELD_CONTACT_SUBJECT ? { [AC_FIELD_CONTACT_SUBJECT]: payload.subject ?? "" } : {}),
             ...(AC_FIELD_CONTACT_MESSAGE ? { [AC_FIELD_CONTACT_MESSAGE]: payload.message ?? "" } : {}),
           });
-          await ensureContactTags({ contactId: contact.id, stage: "nurturing" });
+          await ensureContactTags({
+            contactId: contact.id,
+            stage: "nurturing",
+            extraTags: subjectTag ? [subjectTag] : [],
+          });
           if (AC_CONTACT_MESSAGE_SCHEMA_ID) {
             const fieldIds = await getContactMessageFieldIds();
             const record = {
@@ -1680,8 +1869,9 @@ app.post("/api/qr/lead", rateLimit, async (req, res) => {
     try {
       console.log("QR tagging start", { contactId: contact.id, stage: resolvedStage });
       await waitForContactVisible(contact.id, 3);
-      const baseTags = [SOURCE_TAG, STAGE_TAGS[resolvedStage]].filter(Boolean);
+      const baseTags = [QR_SOURCE_TAG, STAGE_TAGS[resolvedStage]].filter(Boolean);
       await addTagsToContactNoCheck(contact.id, baseTags);
+      await removeTagsFromContact(contact.id, [SOURCE_TAG]);
       console.log("QR tagging result", { contactId: contact.id, applied: baseTags });
     } catch (error) {
       console.error("QR tagging failed", error?.message || error);

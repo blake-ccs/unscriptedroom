@@ -8,32 +8,26 @@ const logoImageUrl = new URL("../assets/UR LOGO dark.png", import.meta.url).href
 type SurveyForm = {
   email: string;
   name: string;
-  curiosityImportance: string;
-  curiosityReason: string;
-  conversationFeel: string;
+  impactLevel: string;
+  honestySpace: string;
   standoutMoment: string;
-  appreciation: string;
-  shift: string;
-  connectionLevel: string;
   betterExperience: string;
   attendAgain: string;
   availability: string[];
+  podcastInterest: string;
   anythingElse: string;
 };
 
 const initialForm: SurveyForm = {
   email: "",
   name: "",
-  curiosityImportance: "",
-  curiosityReason: "",
-  conversationFeel: "",
+  impactLevel: "",
+  honestySpace: "",
   standoutMoment: "",
-  appreciation: "",
-  shift: "",
-  connectionLevel: "",
   betterExperience: "",
   attendAgain: "",
   availability: [],
+  podcastInterest: "",
   anythingElse: "",
 };
 
@@ -61,17 +55,17 @@ export default function Survey() {
     setIsSubmitting(true);
     setError("");
     try {
-      if (!form.curiosityImportance) {
+      if (!form.impactLevel) {
         throw new Error("Question 1 is required.");
       }
-      if (!form.connectionLevel) {
-        throw new Error("Question 7 is required.");
+      if (!form.honestySpace) {
+        throw new Error("Question 2 is required.");
       }
       if (!form.attendAgain) {
-        throw new Error("Question 9 is required.");
+        throw new Error("Question 5 is required.");
       }
       if (!form.availability.length) {
-        throw new Error("Question 10 is required.");
+        throw new Error("Question 6 is required.");
       }
       const token = localStorage.getItem("access_token");
       const res = await fetch(`${API_BASE}/api/survey`, {
@@ -164,105 +158,20 @@ export default function Survey() {
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-base font-semibold font-montserrat text-black pl-5">
-                  Personal Reflection
-                </div>
+                <div className="text-base font-semibold font-montserrat text-black pl-5">Reflection</div>
                 <div className="grid gap-4">
                   <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">1. How important is curiosity to you? (Scale 1–10)</div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {Array.from({ length: 10 }, (_, i) => String(i + 1)).map((value) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => update("curiosityImportance", value)}
-                          className={`h-11 min-w-[2.5rem] rounded-xl border border-black/10 px-4 text-sm font-semibold text-black/70 transition ${
-                            form.curiosityImportance === value
-                              ? "bg-[#6b2a5e] text-white border-[#6b2a5e] shadow-[0_6px_14px_rgba(107,42,94,0.25)]"
-                              : "bg-white hover:bg-black/5"
-                          }`}
-                        >
-                          {value}
-                        </button>
-                      ))}
+                    <div className="text-sm font-semibold">
+                      1. How impactful was this conversation for you? (Scale 1-5)
                     </div>
-                  </div>
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">2. What made you curious to join The Unscripted Room?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.curiosityReason}
-                      onChange={(e) => update("curiosityReason", e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-base font-semibold font-montserrat text-black pl-5">
-                  Experience Reflection
-                </div>
-                <div className="grid gap-4">
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">3. How did the conversation feel for you overall?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.conversationFeel}
-                      onChange={(e) => update("conversationFeel", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">4. What stood out to you during the conversation?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.standoutMoment}
-                      onChange={(e) => update("standoutMoment", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">5. What did you appreciate most about the experience?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.appreciation}
-                      onChange={(e) => update("appreciation", e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-base font-semibold font-montserrat text-black pl-5">
-                  Learning & Connection
-                </div>
-                <div className="grid gap-4">
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">6. Did anything shift for you during or after the conversation?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.shift}
-                      onChange={(e) => update("shift", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">7. How connected did you feel to the other people in the room? (Scale 1–5)</div>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {["1", "2", "3", "4", "5"].map((value) => (
                         <button
                           key={value}
                           type="button"
-                          onClick={() => update("connectionLevel", value)}
+                          onClick={() => update("impactLevel", value)}
                           className={`h-11 min-w-[2.5rem] rounded-xl border border-black/10 px-4 text-sm font-semibold text-black/70 transition ${
-                            form.connectionLevel === value
+                            form.impactLevel === value
                               ? "bg-[#6b2a5e] text-white border-[#6b2a5e] shadow-[0_6px_14px_rgba(107,42,94,0.25)]"
                               : "bg-white hover:bg-black/5"
                           }`}
@@ -271,6 +180,53 @@ export default function Survey() {
                         </button>
                       ))}
                     </div>
+                  </div>
+                  <div className="rounded-2xl bg-white p-5">
+                    <div className="text-sm font-semibold">
+                      2. Did the room feel like a space where you could show up honestly? (Scale 1-5)
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {["1", "2", "3", "4", "5"].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => update("honestySpace", value)}
+                          className={`h-11 min-w-[2.5rem] rounded-xl border border-black/10 px-4 text-sm font-semibold text-black/70 transition ${
+                            form.honestySpace === value
+                              ? "bg-[#6b2a5e] text-white border-[#6b2a5e] shadow-[0_6px_14px_rgba(107,42,94,0.25)]"
+                              : "bg-white hover:bg-black/5"
+                          }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-base font-semibold font-montserrat text-black pl-5">Reflection</div>
+                <div className="grid gap-4">
+                  <div className="rounded-2xl bg-white p-5">
+                    <div className="text-sm font-semibold">3. What stood out most about the experience? (Optional)</div>
+                    <textarea
+                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
+                      rows={4}
+                      value={form.standoutMoment}
+                      onChange={(e) => update("standoutMoment", e.target.value)}
+                    />
+                  </div>
+                  <div className="rounded-2xl bg-white p-5">
+                    <div className="text-sm font-semibold">
+                      4. What, if anything, would make the experience even better? (Optional)
+                    </div>
+                    <textarea
+                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
+                      rows={4}
+                      value={form.betterExperience}
+                      onChange={(e) => update("betterExperience", e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
@@ -281,17 +237,7 @@ export default function Survey() {
                 </div>
                 <div className="grid gap-4">
                   <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">8. What, if anything, would make this experience even better?</div>
-                    <textarea
-                      className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      rows={4}
-                      value={form.betterExperience}
-                      onChange={(e) => update("betterExperience", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="rounded-2xl bg-white p-5">
-                    <div className="text-sm font-semibold">9. Would you be interested in attending another session?</div>
+                    <div className="text-sm font-semibold">5. Would you join another Unscripted Room?</div>
                     <div className="mt-4 flex flex-wrap gap-4 text-sm">
                       {["Yes", "Maybe", "Not right now"].map((value) => (
                         <label key={value} className="flex items-center gap-2">
@@ -311,7 +257,7 @@ export default function Survey() {
                   </div>
                   <div className="rounded-2xl bg-white p-5">
                     <div className="text-sm font-semibold">
-                      10. When would you be most likely to attend another session?
+                      6. When would you most likely attend another session?
                     </div>
                     <div className="mt-4 flex flex-wrap gap-3 text-sm">
                       {[
@@ -340,14 +286,40 @@ export default function Survey() {
                 </div>
               </div>
 
+              <div className="space-y-1">
+                <div className="text-base font-semibold font-montserrat text-black pl-5">Podcast Invitation</div>
+                <div className="grid gap-4">
+                  <div className="rounded-2xl bg-white p-5">
+                    <div className="text-sm font-semibold">
+                      7. Would you be open to participating in a future Unscripted Room podcast conversation?
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                      {["Yes", "Maybe", "Not at this time"].map((value) => (
+                        <label key={value} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="podcastInterest"
+                            value={value}
+                            checked={form.podcastInterest === value}
+                            onChange={() => update("podcastInterest", value)}
+                            className="h-4 w-4 aspect-square appearance-none rounded-full border border-black/20 bg-white checked:border-[#6b2a5e] checked:bg-[#6b2a5e] shrink-0 inline-block align-middle"
+                            style={{ borderRadius: "999px" }}
+                          />
+                          {value}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-2xl bg-white p-5">
-                <div className="text-sm font-semibold">Optional: Anything else you’d like us to consider?</div>
+                <div className="text-sm font-semibold">Optional: Is there anything else you’d like to share?</div>
                 <textarea
                   className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm"
                   rows={4}
                   value={form.anythingElse}
                   onChange={(e) => update("anythingElse", e.target.value)}
-                  required
                 />
               </div>
 
