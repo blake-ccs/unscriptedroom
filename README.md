@@ -35,6 +35,7 @@ Notes:
 - The API server reads `.env` from the repo root when started with `npm run server`.
 
 ## Scripts
+//im am slow i swear
 - `npm run dev` - Frontend dev server on port 3000
 - `npm run build` - Production build into `dist/`
 - `npm run preview` - Preview production build on port 4173
@@ -42,6 +43,7 @@ Notes:
 - `npm run lint` - ESLint
 
 ## Netlify deploy
+//open the right folder
 This repo includes `netlify.toml`:
 - Build command: `npm run build`
 - Publish directory: `dist`
