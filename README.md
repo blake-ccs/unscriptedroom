@@ -35,6 +35,7 @@ Notes:
 - The API server reads `.env` from the repo root when started with `npm run server`.
 
 ## Scripts
+//im not slow i swear
 - `npm run dev` - Frontend dev server on port 3000
 - `npm run build` - Production build into `dist/`
 - `npm run preview` - Preview production build on port 4173
