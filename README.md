@@ -42,6 +42,7 @@ Notes:
 - `npm run lint` - ESLint
 
 ## Netlify deploy
+//open the right folder
 This repo includes `netlify.toml`:
 - Build command: `npm run build`
 - Publish directory: `dist`
