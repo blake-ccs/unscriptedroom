@@ -1,0 +1,27 @@
+# fly.toml app configuration file generated for server-winter-pond-1948 on 2025-12-22T11:36:46-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'server-winter-pond-1948'
+primary_region = 'ord'
+
+[build]
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 2
+  processes = ['app']
+
+[[vm]]
+  memory = '4gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024
+
+[[mounts]]
+  source = "submissions_data"
+  destination = "/data"

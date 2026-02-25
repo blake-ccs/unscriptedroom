@@ -12,6 +12,19 @@ html, body, #root {
 
 body {
   @apply bg-white text-ink antialiased;
+  font-family: "Nunito", "Segoe UI", Tahoma, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Montserrat", "Segoe UI", Tahoma, sans-serif;
+}
+
+.font-montserrat {
+  font-family: "Montserrat", "Segoe UI", Tahoma, sans-serif;
+}
+
+.font-nunito {
+  font-family: "Nunito", "Segoe UI", Tahoma, sans-serif;
 }
 
 .btn {

@@ -1,14 +1,37 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useHoverIntent } from "../hooks/useHoverIntent";
 import Dropdown from "./Dropdown";
-import { isAuthed, clearAuth } from "../lib/auth";
+import { clearAuth, isAuthed } from "../lib/auth";
+import { openCalendlyPopup } from "../lib/calendly";
+import API_BASE from "../lib/apiBase";
 
 export default function Navbar() {
   const platform = useHoverIntent();
   const services = useHoverIntent();
   const company = useHoverIntent();
-  const navigate = useNavigate();
   const authed = isAuthed();
+  const navigate = useNavigate();
+
+  const handleAccountClick = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/register");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        navigate("/my");
+        return;
+      }
+    } catch {
+      // fallthrough
+    }
+    clearAuth();
+    navigate("/register");
+  };
 
   const NavLink = (p: { to: string; label: string }) => (
     <Link
@@ -103,22 +126,44 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-        {authed ? (
+          {authed ? (
             <>
-            <Link to="/my" className="btn btn-ghost">My Curiosity Strategy</Link>
-            <button
-                className="btn btn-primary"
-                onClick={() => { clearAuth(); navigate("/login"); }}
-            >
-                Sign out
-            </button>
+              <button type="button" className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
+                Reserve a Seat
+              </button>
+              <button
+                type="button"
+                onClick={handleAccountClick}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                aria-label="Account"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
             </>
-        ) : (
+          ) : (
             <>
-            <Link to="/login" className="btn btn-ghost">Sign in</Link>
-            <Link to="/register?next=/start" className="btn btn-primary">Try for free</Link>
+              <button type="button" className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
+                Reserve a Seat
+              </button>
+              <Link
+                to="/login"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                aria-label="Register or login"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </Link>
             </>
-        )}
+          )}
         </div>
 
       </div>

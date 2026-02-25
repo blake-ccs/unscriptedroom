@@ -1,22 +1,34 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import API_BASE from "../lib/apiBase";
 
 export default function Contact() {
-  const [form, setForm] = useState({ email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.email || !form.message) return alert("Please complete all fields.");
+    if (!form.name || !form.email || !form.subject || !form.message) {
+      setError("Please complete all fields.");
+      return;
+    }
     setSending(true);
+    setError("");
     try {
-      // Hook up to backend later
-      await new Promise((res) => setTimeout(res, 1000));
+      const response = await fetch(`${API_BASE}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
       setSent(true);
-      setForm({ email: "", message: "" });
+      setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
-      alert("Failed to send. Please try again.");
+      setError("Failed to send. Please try again.");
     } finally {
       setSending(false);
     }
@@ -45,10 +57,22 @@ export default function Contact() {
         <div className="w-full max-w-xl rounded-3xl border border-gray-200 bg-white/60 p-8 shadow-lg backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="grid gap-5">
             <FloatingInput
+              label="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+            <FloatingInput
               label="Email"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+            />
+            <FloatingInput
+              label="Subject"
+              value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
               required
             />
             <FloatingTextarea
@@ -57,6 +81,8 @@ export default function Contact() {
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               required
             />
+
+            {error && <div className="text-sm text-red-600">{error}</div>}
 
             <motion.button
               type="submit"

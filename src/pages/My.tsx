@@ -1,116 +1,419 @@
-import { useEffect, useState } from "react";
-import { api } from "../lib/api";
-import { Link } from "react-router-dom";
-import { getActiveTeamId, setActiveTeamId } from "../lib/flow";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import API_BASE from "../lib/apiBase";
+import { openCalendlyPopup } from "../lib/calendly";
+import ContactUsModal from "../components/ContactUsModal";
+import { getAuthEmail, clearAuth } from "../lib/auth";
+
+const logoImageUrl = new URL("../assets/UR LOGO dark.png", import.meta.url).href;
 
 export default function My() {
-  const [me, setMe] = useState<any>(null);
-  const [subs, setSubs] = useState<any>(null);
-  const [teams, setTeams] = useState<any[]>([]);
-  const [activeTeam, setActiveTeam] = useState<number | null>(getActiveTeamId());
+  const [status, setStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveNotice, setSaveNotice] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [logoDance, setLogoDance] = useState(false);
 
   useEffect(() => {
-    (async () => {
+    const loadProfile = async () => {
+      setStatus(null);
+      setForm({});
       try {
-        const m = await api.get("/auth/me").then(r => r.data);
-        setMe(m);
-        const s = await api.get("/subscription").then(r => r.data);
-        setSubs(s);
-        const t = await api.get("/teams/my").then(r => r.data);
-        setTeams(t);
-        if (!activeTeam && t?.[0]?.id) {
-          setActiveTeam(t[0].id);
-          setActiveTeamId(t[0].id);
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          navigate("/register");
+          return;
         }
-      } catch {}
-    })();
-  }, []);
+        const emailParam = getAuthEmail();
+        const url = emailParam ? `${API_BASE}/auth/me?email=${encodeURIComponent(emailParam)}` : `${API_BASE}/auth/me`;
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          clearAuth();
+          navigate("/register");
+          return;
+        }
+        const data = await res.json();
+        setStatus(data);
+      } catch (err) {
+        setError("We could not load your profile yet.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, [location.key]);
 
-  const ent = subs?.entitlements || {};
-  const owned = [
-    ent.has_team_chemistry && { label: "Team Chemistry", path: "/app/team-chemistry" },
-    ent.has_personal_performance && { label: "Personal Performance", path: "/platform/personal-performance" },
-    ent.has_live_training && { label: "Live Training", path: "/services/live-training" }
-  ].filter(Boolean) as {label:string; path:string}[];
+  const refreshProfile = async () => {
+    setLoading(true);
+    setError("");
+    setStatus(null);
+    setForm({});
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/register");
+      return;
+    }
+    try {
+      const emailParam = getAuthEmail();
+      const url = emailParam ? `${API_BASE}/auth/me?email=${encodeURIComponent(emailParam)}` : `${API_BASE}/auth/me`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        clearAuth();
+        navigate("/register");
+        return;
+      }
+      const data = await res.json();
+      setStatus(data);
+    } catch (err) {
+      setError("We could not load your profile yet.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const contact = status?.contact || {};
+  const general = status?.generalDetails || {};
+  const booking = status?.bookingDetails || {};
+  const startTime = status?.startTime || booking.startTime || null;
+  const endTime = status?.endTime || booking.endTime || null;
+  const eventName = status?.eventName || booking.eventName || null;
+  const bookingLocation = status?.location || booking.location || null;
+  const timezone = status?.timezone || booking.timezone || null;
+  const rescheduleUrl = status?.rescheduleUrl || booking.rescheduleUrl || null;
+  const calendlyStatus = status?.calendlyStatus || booking.status || null;
+
+  const formattedStart = useMemo(() => (startTime ? new Date(startTime).toLocaleString() : null), [startTime]);
+  const formattedEnd = useMemo(() => (endTime ? new Date(endTime).toLocaleString() : null), [endTime]);
+  const isUpcoming = useMemo(() => (endTime ? new Date(endTime).getTime() > Date.now() : false), [endTime]);
+
+  const [form, setForm] = useState<Record<string, string>>({});
+  useEffect(() => {
+    setForm({
+      firstName: contact.firstName || "",
+      lastName: contact.lastName || "",
+      phone: contact.phone || "",
+      leadSource: general.leadSource || "",
+      preferredLanguage: general.preferredLanguage || "",
+      dateOfBirth: general.dateOfBirth || "",
+      gender: general.gender || "",
+      streetAddress: general.streetAddress || "",
+      city: general.city || "",
+      stateProvince: general.stateProvince || "",
+      zipPostalCode: general.zipPostalCode || "",
+      jobTitle: general.jobTitle || "",
+      companyName: general.companyName || "",
+      bioAboutMe: general.bioAboutMe || "",
+      interestsHobbies: general.interestsHobbies || "",
+      preferredCommunicationMethod: general.preferredCommunicationMethod || "",
+      linkedInProfile: general.linkedInProfile || "",
+      twitterXHandle: general.twitterXHandle || "",
+      instagramHandle: general.instagramHandle || "",
+      preferredDay: general.preferredDay || "",
+      preferredTime: general.preferredTime || "",
+      reasonsForSignup: general.reasonsForSignup || "",
+      reasonsForJoining: general.reasonsForJoining || "",
+      urEventDateTime: general.urEventDateTime || "",
+      trevorExample: general.trevorExample || "",
+      eventDay: general.eventDay || "",
+    });
+  }, [status]);
+
+  const updateField = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveProfile = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    setIsSaving(true);
+    setSaveNotice("");
+    try {
+      const res = await fetch(`${API_BASE}/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to save profile.");
+      }
+      const data = await res.json();
+      setStatus(data);
+      setSaveNotice("Saved!");
+      setIsEditing(false);
+    } catch (err) {
+      setSaveNotice("Save failed. Try again.");
+    } finally {
+      setIsSaving(false);
+      window.setTimeout(() => setSaveNotice(""), 2000);
+    }
+  };
+
+  const generalRows = [
+    { label: "Lead Source", key: "leadSource" },
+    { label: "Preferred Language", key: "preferredLanguage" },
+    { label: "Date of Birth", key: "dateOfBirth" },
+    { label: "Gender", key: "gender" },
+    { label: "Street Address", key: "streetAddress" },
+    { label: "City", key: "city" },
+    { label: "State/Province", key: "stateProvince" },
+    { label: "ZIP/Postal Code", key: "zipPostalCode" },
+    { label: "Job Title", key: "jobTitle" },
+    { label: "Company Name", key: "companyName" },
+    { label: "Bio/About Me", key: "bioAboutMe" },
+    { label: "Interests/Hobbies", key: "interestsHobbies" },
+    { label: "Preferred Communication", key: "preferredCommunicationMethod" },
+    { label: "LinkedIn", key: "linkedInProfile" },
+    { label: "Twitter/X", key: "twitterXHandle" },
+    { label: "Instagram", key: "instagramHandle" },
+    { label: "Preferred Day", key: "preferredDay" },
+    { label: "Preferred Time", key: "preferredTime" },
+    { label: "Reasons for Signup", key: "reasonsForSignup" },
+    { label: "Reasons for Joining", key: "reasonsForJoining" },
+  ];
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-12">
-      <div className="grid gap-8 md:grid-cols-[1fr_320px]">
-        <div>
-          <h2 className="text-2xl font-bold">Welcome{me?.given_name ? `, ${me.given_name}` : ""}</h2>
-          <p className="mt-1 text-sm text-mute">Your products & teams</p>
-
-          <div className="mt-6 grid gap-4">
-            {owned.length ? owned.map((p) => (
-              <div key={p.label} className="rounded-xl2 border border-brand-200 bg-brand-50/50 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold">{p.label}</div>
-                    <div className="text-xs text-mute">Included in your plan</div>
-                  </div>
-                  <Link to={p.path} className="btn btn-primary">Open</Link>
-                </div>
-              </div>
-            )) : (
-              <div className="rounded-xl2 border border-gray-200 bg-white p-4 text-sm">
-                You don’t have any products yet. The website has details — head to <Link className="link" to="/pricing">Pricing</Link>.
-              </div>
-            )}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <Link
+                to="/"
+                onClick={() => {
+                  setLogoDance(true);
+                  window.setTimeout(() => setLogoDance(false), 900);
+                }}
+                className="group flex items-center focus:outline-none"
+                aria-label="The Unscripted Room logo"
+              >
+                <img
+                  src={logoImageUrl}
+                  alt="The Unscripted Room logo"
+                  className={`h-10 w-auto transition duration-300 group-hover:drop-shadow-[0_0_12px_rgba(0,0,0,0.25)] sm:h-12 ${
+                    logoDance ? "logo-dance" : ""
+                  }`}
+                />
+              </Link>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
+                Reserve a Seat
+              </button>
+              <button className="btn btn-ghost" onClick={() => setIsContactOpen(true)}>
+                Contact Us
+              </button>
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">My Profile</h2>
+            <p className="mt-1 text-sm text-mute">Your Profile contact + booking details.</p>
           </div>
 
-          <div className="mt-10">
-            <h3 className="text-lg font-semibold">Your teams</h3>
-            <div className="mt-2 grid gap-3 sm:grid-cols-2">
-              {teams.map((t) => {
-                const isActive = activeTeam === t.id;
-                return (
-                  <div key={t.id} className="rounded-xl2 border border-gray-200 bg-white p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-semibold">{t.name}</div>
-                        <div className="text-xs text-mute">Role: {t.role}</div>
-                        {isActive && <span className="mt-1 inline-block rounded-md bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Active</span>}
-                      </div>
-                      {!isActive && (
-                        <button
-                          className="btn btn-ghost"
-                          onClick={() => { setActiveTeamId(t.id); setActiveTeam(t.id); }}
-                        >
-                          Make active
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              {!teams.length && <div className="text-sm text-mute">No teams yet — create one from Pricing → Start.</div>}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3">
+            <div className="text-sm text-mute">
+              {saveNotice ? saveNotice : "Review your profile and booking details below."}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {isEditing ? (
+                <button className="btn btn-primary" onClick={saveProfile} disabled={isSaving}>
+                  {isSaving ? "Saving..." : "Save updates"}
+                </button>
+              ) : (
+                <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+                  Edit profile
+                </button>
+              )}
+              <button
+                className="btn btn-ghost"
+                onClick={() => {
+                  if (rescheduleUrl) {
+                    openCalendlyPopup(rescheduleUrl);
+                  } else {
+                    openCalendlyPopup();
+                  }
+                }}
+              >
+                Reschedule
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => {
+              clearAuth();
+              navigate("/register");
+            }}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Right rail */}
-        <aside className="sticky top-24 h-fit space-y-4">
-          <div className="card p-4">
-            <div className="text-sm font-semibold">My Curiosity Strategy</div>
-            <ul className="mt-2 space-y-2 text-sm">
-              {ent.has_team_chemistry && <li><Link className="link" to="/app/team-chemistry">Team Chemistry</Link></li>}
-              {ent.has_personal_performance && <li><Link className="link" to="/platform/personal-performance">Personal Performance</Link></li>}
-              {ent.has_live_training && <li><Link className="link" to="/services/live-training">Live Training</Link></li>}
-              {!ent.has_team_chemistry && !ent.has_personal_performance && !ent.has_live_training && (
-                <li className="text-mute">No products yet.</li>
+      {loading && <div className="mt-6 text-sm text-mute">Loading your details...</div>}
+      {error && <div className="mt-6 text-sm text-red-600">{error}</div>}
+
+      {!loading && !error && (
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-gray-200 bg-white/80 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-black">Contact details</div>
+                  <div className="mt-1 text-xs text-mute">Primary identity for your account.</div>
+                </div>
+                <div className="rounded-full bg-[#f4ece1] px-3 py-1 text-xs font-semibold text-black">
+                  Contact #{contact.id || "—"}
+                </div>
+              </div>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                  <div className="text-xs uppercase tracking-wide text-mute">Name</div>
+                  {isEditing ? (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <input
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        placeholder="First name"
+                        value={form.firstName || ""}
+                        onChange={(e) => updateField("firstName", e.target.value)}
+                      />
+                      <input
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        placeholder="Last name"
+                        value={form.lastName || ""}
+                        onChange={(e) => updateField("lastName", e.target.value)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-1 text-sm font-medium">
+                      {[contact.firstName, contact.lastName].filter(Boolean).join(" ") || "—"}
+                    </div>
+                  )}
+                </div>
+                <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                  <div className="text-xs uppercase tracking-wide text-mute">Email</div>
+                  <div className="mt-1 text-sm font-medium">{contact.email || "—"}</div>
+                </div>
+                <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                  <div className="text-xs uppercase tracking-wide text-mute">Phone</div>
+                  {isEditing ? (
+                    <input
+                      className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      placeholder="Phone"
+                      value={form.phone || ""}
+                      onChange={(e) => updateField("phone", e.target.value)}
+                    />
+                  ) : (
+                    <div className="mt-1 text-sm font-medium">{contact.phone || "—"}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white/80 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+              <div className="text-sm font-semibold text-black">General details</div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {generalRows.map((row) => (
+                  <div key={row.label} className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">{row.label}</div>
+                    {isEditing ? (
+                      <input
+                        className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        placeholder={row.label}
+                        value={form[row.key] || ""}
+                        onChange={(e) => updateField(row.key, e.target.value)}
+                      />
+                    ) : (
+                      <div className="mt-1 text-sm font-medium">{form[row.key] || "—"}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-gray-200 bg-white/80 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-black">Upcoming booking</div>
+                  <div className="mt-1 text-xs text-mute">Next scheduled session.</div>
+                </div>
+                <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-medium text-brand-700">
+                  {calendlyStatus || "—"}
+                </span>
+              </div>
+              {eventName ? (
+                <div className="mt-4 grid gap-3 text-sm">
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">Event</div>
+                    <div className="mt-1 font-medium">{eventName}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">Start</div>
+                    <div className="mt-1 font-medium">{formattedStart || "—"}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">End</div>
+                    <div className="mt-1 font-medium">{formattedEnd || "—"}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">Timezone</div>
+                    <div className="mt-1 font-medium">{timezone || "—"}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div className="text-xs uppercase tracking-wide text-mute">Location</div>
+                    <div className="mt-1 font-medium whitespace-pre-line">{bookingLocation || "—"}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 text-sm text-mute">No booking details yet.</div>
               )}
-            </ul>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white/80 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+              <div className="text-sm font-semibold text-black">Past booking</div>
+              {eventName && !isUpcoming ? (
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="font-medium">{eventName}</div>
+                  <div className="text-mute">{formattedStart}</div>
+                  <div className="text-mute">{bookingLocation || "—"}</div>
+                </div>
+              ) : (
+                <div className="mt-3 text-sm text-mute">No past bookings yet.</div>
+              )}
+            </div>
           </div>
-          <div className="card p-4">
-            <div className="text-sm font-semibold">Billing</div>
-            <p className="mt-1 text-xs text-mute">Manage your subscription</p>
-            <a className="btn btn-ghost mt-3" href="#" onClick={async (e)=>{e.preventDefault(); try {
-              const { data } = await api.post("/portal/session");
-              window.location.href = data.url;
-            } catch { alert("No customer yet. Buy a plan first."); }}}>Open portal</a>
-          </div>
-        </aside>
-      </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes logoDance {
+          0% { transform: rotate(0deg) translateY(0); }
+          25% { transform: rotate(-8deg) translateY(-2px); }
+          50% { transform: rotate(8deg) translateY(2px); }
+          75% { transform: rotate(-4deg) translateY(-1px); }
+          100% { transform: rotate(0deg) translateY(0); }
+        }
+        .logo-dance {
+          animation: logoDance 0.8s ease-in-out;
+        }
+      `}</style>
+      <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </section>
   );
 }

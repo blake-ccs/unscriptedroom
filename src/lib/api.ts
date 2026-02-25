@@ -1,7 +1,6 @@
 import axios from "axios";
 
-
-const API_URL = import.meta.env.VITE_API_URL ?? "https://unsuggestive-darian-irremediable.ngrok-free.dev/api/v1/";
+const API_URL = import.meta.env.VITE_API_BASE_URL ?? "https://server-winter-pond-1948.fly.dev";
 
 export const api = axios.create({
   baseURL: API_URL,
