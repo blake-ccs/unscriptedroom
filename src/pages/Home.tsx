@@ -31,11 +31,11 @@ const principlesImageUrl = new URL(
   import.meta.url
 ).href;
 const chairImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR Chair Image.jpg",
+  "../assets/Unscripted Room-seating.home-2400.jpg",
   import.meta.url
 ).href;
 const podcastImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/Screenshot 2025-12-19 at 7.17.59 AM.png",
+  "../assets/Unscripted Room-mic.home-2400.jpg",
   import.meta.url
 ).href;
 
