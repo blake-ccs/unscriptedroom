@@ -544,24 +544,24 @@ function TileOverlayModal({
       onClick={onClose}
     >
       <div className="tile-overlay-panel relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
-          <div className="relative mx-auto w-full">
-            <img
-              src={overlay.imageUrl}
-              alt={`${overlay.title} details`}
-              className="max-h-[88vh] w-full rounded-[20px] object-contain bg-[#f4ece1] shadow-2xl"
-            />
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-black/50"
-              style={{
-                top: `${overlay.hotspot.topPct}%`,
-                width: `${overlay.hotspot.widthPct}%`,
-                height: `${overlay.hotspot.heightPct}%`,
-              }}
-              aria-label="Got it"
-            />
-          </div>
+        <div className="relative mx-auto w-full">
+          <img
+            src={overlay.imageUrl}
+            alt={`${overlay.title} details`}
+            className="max-h-[88vh] w-full rounded-[20px] object-contain bg-[#f4ece1] shadow-2xl"
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-black/50"
+            style={{
+              top: `${overlay.hotspot.topPct}%`,
+              width: `${overlay.hotspot.widthPct}%`,
+              height: `${overlay.hotspot.heightPct}%`,
+            }}
+            aria-label="Got it"
+          />
+        </div>
       </div>
     </div>
   );
