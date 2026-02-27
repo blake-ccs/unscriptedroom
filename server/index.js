@@ -1444,6 +1444,16 @@ app.post("/api/survey", rateLimit, async (req, res) => {
       return res.status(500).json({ error: "Failed to upsert contact." });
     }
 
+    const npiTag = buildNpiTagFromAttendAgain(payload.attendAgain);
+    const podcastInterestTag = buildPodcastInterestTag(
+      payload.podcastInterest ?? payload.podcastInvitation ?? payload.podcastOpenToConversation
+    );
+    const availabilityTags = buildAvailabilityTags(payload.availability);
+    await addTagsToContactWithRetry(
+      contact.id,
+      [SURVEY_COMPLETED_ACTION_TAG, npiTag, podcastInterestTag, ...availabilityTags].filter(Boolean)
+    );
+
     const record = {
       record: {
         externalId: `survey-${contact.id}-${Date.now()}`,
@@ -1471,15 +1481,6 @@ app.post("/api/survey", rateLimit, async (req, res) => {
     };
 
     await acV3Request("POST", `/api/3/customObjects/records/${AC_SURVEY_SCHEMA_ID}`, record);
-    const npiTag = buildNpiTagFromAttendAgain(payload.attendAgain);
-    const podcastInterestTag = buildPodcastInterestTag(
-      payload.podcastInterest ?? payload.podcastInvitation ?? payload.podcastOpenToConversation
-    );
-    const availabilityTags = buildAvailabilityTags(payload.availability);
-    await addTagsToContactWithRetry(
-      contact.id,
-      [SURVEY_COMPLETED_ACTION_TAG, npiTag, podcastInterestTag, ...availabilityTags].filter(Boolean)
-    );
     return res.json({ ok: true });
   } catch (error) {
     console.error("Survey submit failed", error?.message || error);
