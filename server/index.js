@@ -527,44 +527,122 @@ const upsertFieldValues = async (contactId, fields) => {
 };
 
 const tagCache = new Map();
+const tagLookupInFlight = new Map();
 const tagIdToNameCache = new Map();
+
+const normalizeTagName = (value) => String(value || "").trim().toLowerCase();
+
+const findExistingTagId = async (tagName, { exhaustive = false } = {}) => {
+  const normalized = normalizeTagName(tagName);
+  if (!normalized) return null;
+
+  const limit = 100;
+  const maxPages = exhaustive ? 25 : 1;
+  for (let page = 0; page < maxPages; page += 1) {
+    const offset = page * limit;
+    const basePath = exhaustive ? `/api/3/tags?limit=${limit}&offset=${offset}` : `/api/3/tags?search=${encodeURIComponent(tagName)}&limit=${limit}`;
+    const response = await acV3Request("GET", basePath);
+    const tags = response?.tags || [];
+    const existing = tags.find((tag) => normalizeTagName(tag?.tag) === normalized);
+    if (existing?.id) return String(existing.id);
+    if (!exhaustive || tags.length < limit) break;
+  }
+  return null;
+};
+
+const isDuplicateTagCreateError = (error) => {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("activecampaign v3 post /api/3/tags failed: 422") &&
+    message.includes("duplicate entry") &&
+    message.includes("em_tag.typetag")
+  );
+};
+
 const ensureTagId = async (tagName) => {
   if (!tagName) return null;
-  if (tagCache.has(tagName)) return tagCache.get(tagName);
-  const response = await acV3Request("GET", `/api/3/tags?search=${encodeURIComponent(tagName)}`);
-  const existing = response?.tags?.find((tag) => tag.tag === tagName);
-  if (existing?.id) {
-    tagCache.set(tagName, existing.id);
-    return existing.id;
+  const cacheKey = normalizeTagName(tagName);
+  if (!cacheKey) return null;
+  if (tagCache.has(cacheKey)) return tagCache.get(cacheKey);
+  if (tagLookupInFlight.has(cacheKey)) return tagLookupInFlight.get(cacheKey);
+
+  const lookup = (async () => {
+    const existingId = await findExistingTagId(tagName);
+    if (existingId) {
+      tagCache.set(cacheKey, existingId);
+      return existingId;
+    }
+
+    try {
+      const created = await acV3Request("POST", "/api/3/tags", { tag: { tag: tagName, tagType: "contact" } });
+      const createdId = created?.tag?.id ? String(created.tag.id) : null;
+      if (createdId) tagCache.set(cacheKey, createdId);
+      return createdId;
+    } catch (error) {
+      if (!isDuplicateTagCreateError(error)) throw error;
+      const recoveredId = (await findExistingTagId(tagName)) || (await findExistingTagId(tagName, { exhaustive: true }));
+      if (recoveredId) {
+        tagCache.set(cacheKey, recoveredId);
+        console.warn("Tag already exists; recovered existing tag id after create conflict", { tagName, tagId: recoveredId });
+        return recoveredId;
+      }
+      throw error;
+    }
+  })();
+
+  tagLookupInFlight.set(cacheKey, lookup);
+  try {
+    return await lookup;
+  } finally {
+    tagLookupInFlight.delete(cacheKey);
   }
-  const created = await acV3Request("POST", "/api/3/tags", { tag: { tag: tagName, tagType: "contact" } });
-  const createdId = created?.tag?.id || null;
-  if (createdId) tagCache.set(tagName, createdId);
-  return createdId;
+};
+
+const getContactTags = async (contactId, { limit = 100, maxPages = 25 } = {}) => {
+  if (!contactId) return [];
+  const tags = [];
+  let previousSignature = null;
+  for (let page = 0; page < maxPages; page += 1) {
+    const offset = page * limit;
+    const response = await acV3Request("GET", `/api/3/contacts/${contactId}/contactTags?limit=${limit}&offset=${offset}`);
+    const batch = response?.contactTags || [];
+    if (!batch.length) break;
+
+    const signature = batch.map((tag) => String(tag?.id || "")).join(",");
+    if (signature && signature === previousSignature) break;
+    previousSignature = signature;
+
+    tags.push(...batch);
+    if (batch.length < limit) break;
+  }
+  return tags;
 };
 
 const addTagsToContact = async (contactId, tagNames) => {
-  const tags = (tagNames || []).filter(Boolean);
+  const tags = [...new Set((tagNames || []).filter(Boolean))];
   if (tags.length === 0) return;
-  await Promise.all(
-    tags.map(async (tagName) => {
-      const tagId = await ensureTagId(tagName);
-      if (!tagId) {
-        console.warn("Tag apply skipped (no tag id)", { contactId, tagName });
-        return;
-      }
-      const existing = await acV3Request("GET", `/api/3/contactTags?contact=${contactId}&tag=${tagId}`);
-      if (existing?.contactTags?.length) return;
-      const created = await acV3Request("POST", "/api/3/contactTags", {
-        contactTag: { contact: contactId, tag: tagId },
-      });
-      if (!created?.contactTag?.id) {
-        console.warn("Tag apply response missing id", { contactId, tagName, tagId });
-      } else {
-        console.log("Tag applied", { contactId, tagName, tagId, contactTagId: created.contactTag.id });
-      }
-    })
-  );
+  const current = await getContactTags(contactId);
+  const existingTagIds = new Set(current.map((contactTag) => String(contactTag?.tag || "")));
+
+  for (const tagName of tags) {
+    const tagId = await ensureTagId(tagName);
+    if (!tagId) {
+      console.warn("Tag apply skipped (no tag id)", { contactId, tagName });
+      continue;
+    }
+    const normalizedTagId = String(tagId);
+    if (existingTagIds.has(normalizedTagId)) continue;
+
+    const created = await acV3Request("POST", "/api/3/contactTags", {
+      contactTag: { contact: contactId, tag: tagId },
+    });
+    if (!created?.contactTag?.id) {
+      console.warn("Tag apply response missing id", { contactId, tagName, tagId });
+    } else {
+      existingTagIds.add(normalizedTagId);
+      console.log("Tag applied", { contactId, tagName, tagId, contactTagId: created.contactTag.id });
+    }
+  }
 };
 
 const addTagsToContactNoCheck = async (contactId, tagNames) => {
@@ -586,27 +664,39 @@ const addTagsToContactNoCheck = async (contactId, tagNames) => {
 };
 
 const addTagsToContactWithRetry = async (contactId, tagNames, retries = 1) => {
-  const tags = (tagNames || []).filter(Boolean);
+  const tags = [...new Set((tagNames || []).filter(Boolean))];
   if (!tags.length) return;
-  try {
-    await addTagsToContact(contactId, tags);
-    const applied = await getContactTagNames(contactId);
-    const missing = tags.filter((tag) => !applied.includes(tag));
-    if (missing.length) {
-      console.warn("Tag verify missing", { contactId, missing, applied });
-    } else {
-      console.log("Tag verify ok", { contactId, tags: applied });
+
+  let remaining = tags;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      await addTagsToContact(contactId, remaining);
+      const appliedContactTags = await getContactTags(contactId);
+      const appliedTagIds = new Set(
+        appliedContactTags.map((contactTag) => String(contactTag?.tag || "")).filter(Boolean)
+      );
+      const missing = [];
+      for (const tag of tags) {
+        const tagId = await ensureTagId(tag);
+        if (!tagId || !appliedTagIds.has(String(tagId))) {
+          missing.push(tag);
+        }
+      }
+      if (!missing.length) {
+        console.log("Tag verify ok", { contactId, tags });
+        return;
+      }
+
+      console.warn("Tag verify missing", { contactId, missing, attempt: attempt + 1 });
+      if (attempt >= retries) {
+        throw new Error(`Tag verification failed. Missing tags: ${missing.join(", ")}`);
+      }
+      remaining = missing;
+    } catch (error) {
+      if (attempt >= retries) throw error;
+      console.warn("Tag apply retry", { contactId, attempt: attempt + 1, error: error?.message || error });
     }
-    if (missing.length && retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await addTagsToContactWithRetry(contactId, missing, retries - 1);
-    }
-  } catch (error) {
-    if (retries <= 0) {
-      throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await addTagsToContactWithRetry(contactId, tags, retries - 1);
+    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
   }
 };
 
@@ -622,8 +712,7 @@ const resolveTagNameById = async (tagId) => {
 
 const getContactTagNames = async (contactId) => {
   if (!contactId) return [];
-  const response = await acV3Request("GET", `/api/3/contacts/${contactId}/contactTags`);
-  const contactTags = response?.contactTags || [];
+  const contactTags = await getContactTags(contactId);
   const names = await Promise.all(
     contactTags.map(async (contactTag) => resolveTagNameById(contactTag?.tag))
   );
@@ -633,14 +722,14 @@ const getContactTagNames = async (contactId) => {
 const removeTagsFromContact = async (contactId, tagNames) => {
   const tags = (tagNames || []).filter(Boolean);
   if (tags.length === 0) return;
+  const contactTags = await getContactTags(contactId);
   await Promise.all(
     tags.map(async (tagName) => {
       const tagId = await ensureTagId(tagName);
       if (!tagId) return;
-      const response = await acV3Request("GET", `/api/3/contactTags?contact=${contactId}&tag=${tagId}`);
-      const contactTags = response?.contactTags || [];
+      const matches = contactTags.filter((contactTag) => String(contactTag?.tag || "") === String(tagId));
       await Promise.all(
-        contactTags.map((contactTag) => acV3Request("DELETE", `/api/3/contactTags/${contactTag.id}`))
+        matches.map((contactTag) => acV3Request("DELETE", `/api/3/contactTags/${contactTag.id}`))
       );
     })
   );
@@ -1449,10 +1538,14 @@ app.post("/api/survey", rateLimit, async (req, res) => {
       payload.podcastInterest ?? payload.podcastInvitation ?? payload.podcastOpenToConversation
     );
     const availabilityTags = buildAvailabilityTags(payload.availability);
-    await addTagsToContactWithRetry(
-      contact.id,
-      [SURVEY_COMPLETED_ACTION_TAG, npiTag, podcastInterestTag, ...availabilityTags].filter(Boolean)
-    );
+    try {
+      await addTagsToContactWithRetry(
+        contact.id,
+        [SURVEY_COMPLETED_ACTION_TAG, npiTag, podcastInterestTag, ...availabilityTags].filter(Boolean)
+      );
+    } catch (error) {
+      console.warn("Survey tag sync failed", { contactId: contact.id, error: error?.message || error });
+    }
 
     const record = {
       record: {

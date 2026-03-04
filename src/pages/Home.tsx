@@ -7,7 +7,7 @@ import { clearAuth, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
 const heroImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR Table Image.jpg",
+  "../assets/hero.png",
   import.meta.url
 ).href;
 const logoImageUrl = new URL(
