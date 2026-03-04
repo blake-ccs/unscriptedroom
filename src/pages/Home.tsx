@@ -7,7 +7,7 @@ import { clearAuth, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
 const heroImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR Table Image.jpg",
+  "../assets/hero.png",
   import.meta.url
 ).href;
 const logoImageUrl = new URL(
@@ -31,18 +31,34 @@ const principlesImageUrl = new URL(
   import.meta.url
 ).href;
 const chairImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR Chair Image.jpg",
+  "../assets/Unscripted Room-seating.home-2400.jpg",
   import.meta.url
 ).href;
 const podcastImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/Screenshot 2025-12-19 at 7.17.59 AM.png",
+  "../assets/Unscripted Room-mic.home-2400.jpg",
   import.meta.url
 ).href;
+const nineQuestionsOverlayImageUrl = new URL("../assets/9questions.png", import.meta.url).href;
+const communityOverlayImageUrl = new URL("../assets/community.png", import.meta.url).href;
+const principlesOverlayImageUrl = new URL("../assets/principles.png", import.meta.url).href;
+
+type TileOverlayHotspot = {
+  topPct: number;
+  widthPct: number;
+  heightPct: number;
+};
+
+type TileOverlay = {
+  title: string;
+  imageUrl: string;
+  hotspot: TileOverlayHotspot;
+};
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [logoDance, setLogoDance] = useState(false);
+  const [activeTileOverlay, setActiveTileOverlay] = useState<TileOverlay | null>(null);
   const authed = isAuthed();
   const navigate = useNavigate();
   const location = useLocation();
@@ -115,6 +131,20 @@ export default function Home() {
     setLogoDance(true);
     window.setTimeout(() => setLogoDance(false), 900);
   };
+
+  useEffect(() => {
+    if (!activeTileOverlay) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveTileOverlay(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [activeTileOverlay]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -252,6 +282,20 @@ export default function Home() {
           0%, 100% { background-position: 20% 20%; }
           50% { background-position: 80% 60%; }
         }
+        @keyframes overlayFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes overlayScaleIn {
+          from { opacity: 0; transform: translateY(8px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .tile-overlay-backdrop {
+          animation: overlayFadeIn 180ms ease-out;
+        }
+        .tile-overlay-panel {
+          animation: overlayScaleIn 220ms ease-out;
+        }
       `}</style>
       <section
         className="relative isolate min-h-[88vh] bg-cover bg-center"
@@ -356,52 +400,25 @@ export default function Home() {
             <FlipCard
               title="9 Questions"
               imageUrl={nineQuestionsImageUrl}
-              body={[
-                "An intentionally developed sequence of nine questions guides the experience.",
-                "They’re designed to open perspective, not prompt performance, helping the conversation move beyond the surface, naturally.",
-              ]}
+              overlayImageUrl={nineQuestionsOverlayImageUrl}
+              overlayHotspot={{ topPct: 82.1, widthPct: 24, heightPct: 15.5 }}
+              onOpenOverlay={setActiveTileOverlay}
             />
             <FlipCard
               title="Community"
               imageUrl={communityImageUrl}
-              body={[
-                "The Unscripted Room is a group experience, bringing people from the community together in shared conversation.",
-                "It reminds you that you’re not alone in how you think, or what you wrestle with.",
-                "When strangers speak from real experience, and you see yourself in their words, that’s when community begins.",
-              ]}
+              overlayImageUrl={communityOverlayImageUrl}
+              overlayHotspot={{ topPct: 82.3, widthPct: 17.8, heightPct: 13.2 }}
+              onOpenOverlay={setActiveTileOverlay}
             />
             <FlipCard
               title="Conversation Principles"
               imageUrl={principlesImageUrl}
               objectPosition="54% 50%"
-              body={[
-                "Three principles that shape how the room is held.",
-                "",
-                "1. We strive to understand the difference between perspective and truth.",
-                "We are here to listen and share from our lived experiences. In The Unscripted Room, our focus is on finding truth through the richness of differing perspectives.",
-                "",
-                "2. We are all equals.",
-                "In this room, equality is expressed through how we listen, and how we learn from those who’ve turned time into wisdom. That wisdom is our opportunity.",
-                "",
-                "3. We choose curiosity over authority.",
-                "Our goal is to find authentic connection through alignment. Curiosity is the social tool we use to get there.",
-                "",
-                "If we drift, we simply pause, reset, and return to curiosity.",
-              ]}
+              overlayImageUrl={principlesOverlayImageUrl}
+              overlayHotspot={{ topPct: 84.7, widthPct: 20.5, heightPct: 11.8 }}
+              onOpenOverlay={setActiveTileOverlay}
             />
-          </div>
-          <div className="mt-8 text-center">
-            <p className="text-base font-semibold text-black/70 sm:text-lg">
-              Curious why the room works the way it does?
-            </p>
-            <div className="mt-4">
-              <Link
-                to="/why"
-                className="inline-flex items-center justify-center rounded-full border border-[#d9c2a8] bg-[#f4ece1] px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md font-nunito"
-              >
-                Explore the Design
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -470,6 +487,7 @@ export default function Home() {
 
       <RegisterInterestModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
       <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <TileOverlayModal overlay={activeTileOverlay} onClose={() => setActiveTileOverlay(null)} />
     </div>
   );
 }
@@ -477,58 +495,74 @@ export default function Home() {
 function FlipCard({
   title,
   imageUrl,
-  body,
+  overlayImageUrl,
+  overlayHotspot,
+  onOpenOverlay,
   objectPosition,
 }: {
   title: string;
   imageUrl: string;
-  body: string[];
+  overlayImageUrl: string;
+  overlayHotspot: TileOverlayHotspot;
+  onOpenOverlay: (overlay: TileOverlay) => void;
   objectPosition?: string;
 }) {
-  const [isFlipped, setIsFlipped] = useState(false);
-
   return (
     <button
       type="button"
-      onClick={() => setIsFlipped((v) => !v)}
+      onClick={() => onOpenOverlay({ title, imageUrl: overlayImageUrl, hotspot: overlayHotspot })}
       className="group relative h-[180px] w-full rounded-[24px] transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 sm:h-[200px] lg:h-[220px]"
-      aria-pressed={isFlipped}
-      aria-label={`Flip card: ${title}`}
+      aria-label={`Open ${title} details`}
     >
-      <div className="relative h-full w-full [perspective:1200px]">
-        <div
-          className="absolute inset-0 h-full w-full transition-transform duration-500 [transform-style:preserve-3d]"
-          style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
-        >
-          <div className="absolute inset-0 h-full w-full overflow-hidden rounded-[24px] bg-white shadow-xl transition-transform duration-300 group-hover:rotate-1 group-hover:scale-[1.01] [backface-visibility:hidden]">
-            <img
-              src={imageUrl}
-              alt={title}
-              className="h-full w-full object-cover"
-              style={{ objectPosition: objectPosition || "50% 50%" }}
-            />
-          </div>
-          <div className="absolute inset-0 flex h-full w-full flex-col overflow-hidden rounded-[24px] bg-[#f5ede1] p-4 text-left shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)] sm:p-5">
-            <div className="text-lg font-semibold text-black">{title}</div>
-            <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 text-sm leading-relaxed text-black/80">
-              {body.map((line, index) => (
-                <p
-                  key={`${title}-${index}`}
-                  className={
-                    line
-                      ? line.match(/^\d+\./)
-                        ? "font-semibold text-black"
-                        : ""
-                      : "h-3"
-                  }
-                >
-                  {line}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="relative h-full w-full overflow-hidden rounded-[24px] bg-white shadow-xl transition-transform duration-300 group-hover:rotate-1 group-hover:scale-[1.01]">
+        <img
+          src={imageUrl}
+          alt={title}
+          className="h-full w-full object-cover"
+          style={{ objectPosition: objectPosition || "50% 50%" }}
+        />
       </div>
     </button>
+  );
+}
+
+function TileOverlayModal({
+  overlay,
+  onClose,
+}: {
+  overlay: TileOverlay | null;
+  onClose: () => void;
+}) {
+  if (!overlay) return null;
+
+  return (
+    <div
+      className="tile-overlay-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${overlay.title} overlay`}
+      onClick={onClose}
+    >
+      <div className="tile-overlay-panel relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative mx-auto w-full">
+            <img
+              src={overlay.imageUrl}
+              alt={`${overlay.title} details`}
+              className="max-h-[88vh] w-full rounded-[20px] object-contain bg-[#f4ece1] shadow-2xl"
+            />
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-black/50"
+              style={{
+                top: `${overlay.hotspot.topPct}%`,
+                width: `${overlay.hotspot.widthPct}%`,
+                height: `${overlay.hotspot.heightPct}%`,
+              }}
+              aria-label="Got it"
+            />
+          </div>
+      </div>
+    </div>
   );
 }
