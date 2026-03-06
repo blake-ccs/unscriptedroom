@@ -38,20 +38,58 @@ const podcastImageUrl = new URL(
   "../assets/Unscripted Room-mic.home-2400.jpg",
   import.meta.url
 ).href;
-const nineQuestionsOverlayImageUrl = new URL("../assets/9questions.png", import.meta.url).href;
-const communityOverlayImageUrl = new URL("../assets/community.png", import.meta.url).href;
-const principlesOverlayImageUrl = new URL("../assets/principles.png", import.meta.url).href;
-
-type TileOverlayHotspot = {
-  topPct: number;
-  widthPct: number;
-  heightPct: number;
-};
+type TileOverlayKind = "nineQuestions" | "community" | "principles";
 
 type TileOverlay = {
+  kind: TileOverlayKind;
+};
+
+type TileOverlayCopy = {
   title: string;
-  imageUrl: string;
-  hotspot: TileOverlayHotspot;
+  paragraphs?: string[];
+  intro?: string;
+  principles?: Array<{
+    heading: string;
+    body: string;
+  }>;
+};
+
+const TILE_OVERLAY_COPY: Record<TileOverlayKind, TileOverlayCopy> = {
+  nineQuestions: {
+    title: "9 Questions",
+    paragraphs: [
+      "They aren't random. They're intentionally sequenced to move the room from personal insight to shared understanding.",
+      "Each question invites reflection rooted in lived experience, not opinion, so something deeper can surface.",
+      "The design creates the conditions. What people choose to share shapes what unfolds.",
+    ],
+  },
+  community: {
+    title: "Community",
+    paragraphs: [
+      "This is a group experience where people come together in shared conversation.",
+      "You're reminded that you're not alone in how you think, or what you wrestle with. When someone speaks from lived experience and you recognize yourself in their words, that's where community begins.",
+      "Curiosity isn't just welcomed here. It's practiced. Listening becomes a form of leadership, and we build connection through clarity, not control.",
+      "Community forms when curiosity is practiced long enough to understand one another.",
+    ],
+  },
+  principles: {
+    title: "Conversation Principles",
+    intro: "Three principles shape how the room is held.",
+    principles: [
+      {
+        heading: "We strive to understand the difference between perspective and truth.",
+        body: "We listen and speak from lived experience. Our focus is understanding truth through the richness of differing perspectives.",
+      },
+      {
+        heading: "We are all equals.",
+        body: "Equality is expressed through how we listen and how we learn from the wisdom in the room.",
+      },
+      {
+        heading: "We choose curiosity over authority.",
+        body: "Our goal isn't to win. It's to understand. When we drift, we pause and return to curiosity.",
+      },
+    ],
+  },
 };
 
 export default function Home() {
@@ -400,23 +438,20 @@ export default function Home() {
             <FlipCard
               title="9 Questions"
               imageUrl={nineQuestionsImageUrl}
-              overlayImageUrl={nineQuestionsOverlayImageUrl}
-              overlayHotspot={{ topPct: 82.1, widthPct: 24, heightPct: 15.5 }}
+              overlayKind="nineQuestions"
               onOpenOverlay={setActiveTileOverlay}
             />
             <FlipCard
               title="Community"
               imageUrl={communityImageUrl}
-              overlayImageUrl={communityOverlayImageUrl}
-              overlayHotspot={{ topPct: 82.3, widthPct: 17.8, heightPct: 13.2 }}
+              overlayKind="community"
               onOpenOverlay={setActiveTileOverlay}
             />
             <FlipCard
               title="Conversation Principles"
               imageUrl={principlesImageUrl}
               objectPosition="54% 50%"
-              overlayImageUrl={principlesOverlayImageUrl}
-              overlayHotspot={{ topPct: 84.7, widthPct: 20.5, heightPct: 11.8 }}
+              overlayKind="principles"
               onOpenOverlay={setActiveTileOverlay}
             />
           </div>
@@ -495,22 +530,20 @@ export default function Home() {
 function FlipCard({
   title,
   imageUrl,
-  overlayImageUrl,
-  overlayHotspot,
+  overlayKind,
   onOpenOverlay,
   objectPosition,
 }: {
   title: string;
   imageUrl: string;
-  overlayImageUrl: string;
-  overlayHotspot: TileOverlayHotspot;
+  overlayKind: TileOverlayKind;
   onOpenOverlay: (overlay: TileOverlay) => void;
   objectPosition?: string;
 }) {
   return (
     <button
       type="button"
-      onClick={() => onOpenOverlay({ title, imageUrl: overlayImageUrl, hotspot: overlayHotspot })}
+      onClick={() => onOpenOverlay({ kind: overlayKind })}
       className="group relative h-[180px] w-full rounded-[24px] transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 sm:h-[200px] lg:h-[220px]"
       aria-label={`Open ${title} details`}
     >
@@ -534,34 +567,43 @@ function TileOverlayModal({
   onClose: () => void;
 }) {
   if (!overlay) return null;
+  const copy = TILE_OVERLAY_COPY[overlay.kind];
 
   return (
     <div
       className="tile-overlay-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label={`${overlay.title} overlay`}
+      aria-label={`${copy.title} overlay`}
       onClick={onClose}
     >
-      <div className="tile-overlay-panel relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
-          <div className="relative mx-auto w-full">
-            <img
-              src={overlay.imageUrl}
-              alt={`${overlay.title} details`}
-              className="max-h-[88vh] w-full rounded-[20px] object-contain bg-[#f4ece1] shadow-2xl"
-            />
+      <div className="tile-overlay-panel relative w-full max-w-[920px]" onClick={(e) => e.stopPropagation()}>
+        <div className="relative mx-auto max-h-[78vh] w-full overflow-y-auto rounded-[26px] bg-[#e8e2d9] px-6 py-7 shadow-2xl sm:px-10 sm:py-9">
+          <h3 className="text-center font-montserrat text-[2rem] font-bold tracking-tight text-[#1f1c22] sm:text-[3rem]">
+            {copy.title}
+          </h3>
+          <div className="mx-auto mt-6 max-w-[760px] space-y-4 text-[1rem] leading-[1.5] text-[#5f6670] sm:text-[1.125rem]">
+            {copy.intro ? <p>{copy.intro}</p> : null}
+            {copy.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {copy.principles?.map((principle, index) => (
+              <div key={principle.heading} className="space-y-1.5">
+                <p className="font-semibold text-[#59616b]">
+                  {index + 1}. {principle.heading}
+                </p>
+                <p>{principle.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex justify-center">
             <button
               type="button"
               onClick={onClose}
-              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-black/50"
-              style={{
-                top: `${overlay.hotspot.topPct}%`,
-                width: `${overlay.hotspot.widthPct}%`,
-                height: `${overlay.hotspot.heightPct}%`,
-              }}
-              aria-label="Got it"
-            />
+              className="inline-flex items-center justify-center rounded-full bg-[#1f1c22] px-9 py-3 text-xl font-medium text-white transition hover:opacity-90"
+            >
+              Back to the Room
+            </button>
           </div>
+        </div>
       </div>
     </div>
   );
