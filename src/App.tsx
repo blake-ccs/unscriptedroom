@@ -4,6 +4,8 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import PodcastLanding from "./pages/PodcastLanding";
 import Why from "./pages/Why";
+import Episodes from "./pages/Episodes";
+import Player from "./pages/Player";
 
 // LANDERS
 import TeamChemistryLanding from "./pages/platform/TeamChemistryLanding";
@@ -61,6 +63,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/podcast" element={<PodcastLanding />} />
+          <Route path="/episodes" element={<Episodes />} />
+          <Route path="/player" element={<Player />} />
           <Route path="/why" element={<Why />} />
 
           {/* Landers (always public) */}

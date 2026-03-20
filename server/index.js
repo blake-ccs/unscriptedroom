@@ -96,6 +96,13 @@ const LEAD_STATUS_TOKEN_SECRET = process.env.LEAD_STATUS_TOKEN_SECRET;
 const AUTH_TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET || LEAD_STATUS_TOKEN_SECRET;
 const LEAD_STATUS_TOKEN_TTL_SECONDS = Number(process.env.LEAD_STATUS_TOKEN_TTL_SECONDS || 60 * 60 * 24 * 30);
 const CALENDLY_WEBHOOK_SECRET = process.env.CALENDLY_WEBHOOK_SECRET;
+const VIMEO_PAT = process.env.VIMEO_PAT;
+const VIMEO_CLIENT_SECRET = process.env.VIMEO_CLIENT_SECRET;
+const VIMEO_OAUTH_AUTHORIZE_URL = process.env.VIMEO_OAUTH_AUTHORIZE_URL;
+const VIMEO_OAUTH_ACCESS_TOKEN_URL = process.env.VIMEO_OAUTH_ACCESS_TOKEN_URL;
+const VIMEO_ALBUM_ID = process.env.VIMEO_ALBUM_ID;
+const VIMEO_PROJECT_ID = process.env.VIMEO_PROJECT_ID;
+const VIMEO_USER_ID = process.env.VIMEO_USER_ID;
 
 const AC_FIELD_OFFER_REGISTERED = normalizeFieldId(process.env.AC_FIELD_OFFER_REGISTERED);
 const AC_FIELD_LEAD_SOURCE = normalizeFieldId(process.env.AC_FIELD_LEAD_SOURCE);
@@ -115,6 +122,11 @@ const AC_FIELD_CALENDLY_EVENT_URI = normalizeFieldId(process.env.AC_FIELD_CALEND
 const AC_FIELD_CALENDLY_REBOOK_URI = normalizeFieldId(process.env.AC_FIELD_CALENDLY_REBOOK_URI);
 const AC_SURVEY_SCHEMA_ID = process.env.AC_SURVEY_SCHEMA_ID;
 const AC_CONTACT_MESSAGE_SCHEMA_ID = process.env.AC_CONTACT_MESSAGE_SCHEMA_ID;
+const AC_COIN_SCHEMA_ID = process.env.AC_COIN_SCHEMA_ID;
+const AC_COIN_FIELD_NAME = process.env.AC_COIN_FIELD_NAME || "%CO:transaction:name%";
+const AC_COIN_FIELD_AMOUNT = process.env.AC_COIN_FIELD_AMOUNT || "%CO:transaction:amount%";
+const AC_COIN_FIELD_TIMESTAMP = process.env.AC_COIN_FIELD_TIMESTAMP || "%CO:transaction:timestamp%";
+const AC_COIN_FIELD_IS_SPEND = process.env.AC_COIN_FIELD_IS_SPEND || "%CO:transaction:isspend-1%";
 
 const SURVEY_FIELD_IDS = {
   name: "name",
@@ -140,6 +152,203 @@ const contactMessageSchemaCache = {
   schemaId: null,
   fields: null,
   expiresAt: 0,
+};
+const coinSchemaCache = {
+  schemaId: null,
+  fields: null,
+  expiresAt: 0,
+};
+
+const normalizePerstag = (value) => String(value || "").replace(/%/g, "").toLowerCase();
+const normalizeSchemaId = (value) => String(value || "").replace(/^schemas\//, "");
+
+const getCoinFieldIds = async () => {
+  const schemaId = normalizeSchemaId(AC_COIN_SCHEMA_ID);
+  if (!schemaId) return null;
+  const directAmount = String(AC_COIN_FIELD_AMOUNT || "").trim();
+  const directTimestamp = String(AC_COIN_FIELD_TIMESTAMP || "").trim();
+  const directName = String(AC_COIN_FIELD_NAME || "").trim();
+  const isNumericId = (value) => value && /^[0-9]+$/.test(value);
+  if (isNumericId(directAmount) && isNumericId(directTimestamp)) {
+    return {
+      schemaId,
+      name: isNumericId(directName) ? directName : null,
+      amount: directAmount,
+      timestamp: directTimestamp,
+    };
+  }
+  const now = Date.now();
+  if (
+    coinSchemaCache.schemaId === schemaId &&
+    coinSchemaCache.fields &&
+    coinSchemaCache.expiresAt > now
+  ) {
+    return coinSchemaCache.fields;
+  }
+  try {
+    const response = await acV3Request(
+      "GET",
+      `/api/3/customObjects/schemas/${schemaId}`
+    );
+    const fields =
+      response?.schema?.fields ||
+      response?.schema?.data?.fields ||
+      response?.fields ||
+      response?.data?.fields ||
+      [];
+    const byPerstag = (target) =>
+      fields.find((field) => normalizePerstag(field.perstag) === normalizePerstag(target));
+    const byLabel = (target) =>
+      fields.find((field) => normalizePerstag(field?.label) === normalizePerstag(target));
+    const byId = (target) =>
+      fields.find((field) => String(field.id || "").toLowerCase() === String(target || "").toLowerCase());
+    const byContains = (needle) =>
+      fields.find((field) => {
+        const perstag = normalizePerstag(field?.perstag);
+        const label = normalizePerstag(field?.label);
+        return perstag.includes(needle) || label.includes(needle);
+      });
+    const resolve = (target, fallbackId, containsNeedle) =>
+      byPerstag(target) || byLabel(target) || byId(fallbackId) || (containsNeedle ? byContains(containsNeedle) : null);
+    const resolved = {
+      schemaId,
+      name: resolve(AC_COIN_FIELD_NAME, "name", "name")?.id || null,
+      amount: resolve(AC_COIN_FIELD_AMOUNT, "amount", "amount")?.id || null,
+      timestamp: resolve(AC_COIN_FIELD_TIMESTAMP, "timestamp", "timestamp")?.id || null,
+      isSpend: resolve(AC_COIN_FIELD_IS_SPEND, "isSpend", "isspend")?.id || null,
+    };
+    if (!resolved.amount || !resolved.timestamp) {
+      console.error("Coin schema fields unresolved", {
+        schemaId,
+        fields: fields.map((field) => ({
+          id: field.id,
+          label: field.label,
+          perstag: field.perstag,
+        })),
+        resolved,
+      });
+    }
+    coinSchemaCache.schemaId = schemaId;
+    coinSchemaCache.fields = resolved;
+    coinSchemaCache.expiresAt = now + 10 * 60 * 1000;
+    return resolved;
+  } catch (error) {
+    console.error("Coin schema lookup failed", error?.message || error);
+    return null;
+  }
+};
+
+const createCoinTransaction = async ({ contactId, name, amount, timestamp, isSpend, externalId }) => {
+  const ids = await getCoinFieldIds();
+  if (!ids?.schemaId || !ids?.amount || !ids?.timestamp) {
+    throw new Error("Coin schema or fields not configured.");
+  }
+  const fields = [
+    ...(ids.name ? [{ id: ids.name, value: name || "" }] : []),
+    { id: ids.amount, value: String(amount ?? 0) },
+    { id: ids.timestamp, value: timestamp || new Date().toISOString() },
+    ...(ids.isSpend ? [{ id: ids.isSpend, value: String(isSpend ? 1 : 0) }] : []),
+  ];
+  const record = {
+    record: {
+      externalId: externalId || `coin-${contactId}-${Date.now()}`,
+      fields,
+      relationships: {
+        "primary-contact": [Number(contactId)],
+      },
+    },
+  };
+  return acV3Request("POST", `/api/3/customObjects/records/${ids.schemaId}`, record);
+};
+
+const listCoinTransactions = async (contactId) => {
+  const ids = await getCoinFieldIds();
+  if (!ids?.schemaId) {
+    throw new Error("Coin schema not configured.");
+  }
+  const records = [];
+  let page = 1;
+  const perPage = 100;
+  while (page <= 10) {
+    const response = await acV3Request(
+      "GET",
+      `/api/3/customObjects/records/${ids.schemaId}?page=${page}&limit=${perPage}`
+    );
+    const batch = response?.records || response?.data || [];
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    records.push(...batch);
+    if (batch.length < perPage) break;
+    page += 1;
+  }
+  const matchesContact = (relationships) => {
+    if (!relationships) return false;
+    const rel = relationships["primary-contact"] || relationships.primaryContact || relationships["primary-contact[]"];
+    if (!rel) return false;
+    if (Array.isArray(rel)) {
+      return rel.some((entry) => {
+        if (entry === null || entry === undefined) return false;
+        if (typeof entry === "object") {
+          return String(entry.id || entry.contactId || "") === String(contactId);
+        }
+        return String(entry) === String(contactId);
+      });
+    }
+    if (typeof rel === "object") {
+      return String(rel.id || rel.contactId || "") === String(contactId);
+    }
+    return String(rel) === String(contactId);
+  };
+  const filtered = records.filter((record) => matchesContact(record?.relationships));
+  return { records: filtered, fieldIds: ids };
+};
+
+const getCoinBalance = async (contactId) => {
+  const { records, fieldIds } = await listCoinTransactions(contactId);
+  let total = 0;
+  records.forEach((record) => {
+    const fields = record?.fields || [];
+    const amountField = fields.find((field) => String(field.field) === String(fieldIds.amount));
+    const spendField = fields.find((field) => String(field.field) === String(fieldIds.isSpend));
+    let amountValue = Number(amountField?.value ?? 0);
+    if (!fieldIds.amount || !amountField) {
+      const numericField = fields.find((field) => Number.isFinite(Number(field?.value)));
+      amountValue = Number(numericField?.value ?? 0);
+    }
+    const isSpendValue = Number(spendField?.value ?? 0);
+    if (!Number.isFinite(amountValue)) return;
+    if (fieldIds.isSpend && spendField) {
+      if (isSpendValue === 1) {
+        total -= Math.abs(amountValue);
+      } else {
+        total += Math.abs(amountValue);
+      }
+      return;
+    }
+    // Fallback if isSpend field is missing: infer by sign or name prefix.
+    const nameField = fields.find((field) => String(field.field) === String(fieldIds.name));
+    const nameValue = String(nameField?.value || "").toLowerCase();
+    if (amountValue < 0 || nameValue.includes(":spend")) {
+      total -= Math.abs(amountValue);
+    } else {
+      total += Math.abs(amountValue);
+    }
+  });
+  return total;
+};
+
+const getContactFromRequest = async (req) => {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const payload = verifyAuthToken(token);
+  const bodyEmail = req.body?.email ? normalizeEmail(String(req.body.email)) : null;
+  const queryEmail = req.query?.email ? normalizeEmail(String(req.query.email)) : null;
+  const email = payload?.email ? normalizeEmail(payload.email) : (bodyEmail || queryEmail);
+  if (!email) return null;
+  const contact = await getContactByEmail(email);
+  if (contact?.id) return { contact, email };
+  const created = await upsertContact({ email });
+  if (!created?.id) return null;
+  return { contact: created, email };
 };
 
 const getContactMessageFieldIds = async () => {
@@ -1339,6 +1548,128 @@ app.post("/api/webhooks/calendly", express.raw({ type: "application/json" }), as
 
 app.use(express.json({ limit: "1mb" }));
 
+const VIMEO_BASE_URL = "https://api.vimeo.com";
+const vimeoCache = {
+  items: [],
+  fetchedAt: 0,
+  ttlMs: 5 * 60 * 1000,
+};
+const watchSessions = new Map();
+
+const buildVimeoListPath = () => {
+  if (VIMEO_ALBUM_ID) return `/albums/${VIMEO_ALBUM_ID}/videos`;
+  if (VIMEO_PROJECT_ID) return `/projects/${VIMEO_PROJECT_ID}/videos`;
+  if (VIMEO_USER_ID) return `/users/${VIMEO_USER_ID}/videos`;
+  return "/me/videos";
+};
+
+const pickVimeoThumbnail = (pictures) => {
+  const sizes = pictures?.sizes || [];
+  if (!sizes.length) return null;
+  const preferred = sizes.find((size) => size.width >= 640) || sizes[sizes.length - 1];
+  return preferred?.link || sizes[sizes.length - 1]?.link || null;
+};
+
+const normalizeVimeoVideo = (video) => {
+  const uri = String(video?.uri || "");
+  const id = uri.split("/").filter(Boolean).pop();
+  if (!id) return null;
+  return {
+    id,
+    vimeoId: id,
+    title: video?.name || "Untitled Episode",
+    summary: video?.description || "",
+    duration: Number(video?.duration || 0),
+    published: video?.release_time || video?.created_time || null,
+    image: pickVimeoThumbnail(video?.pictures),
+    tags: Array.isArray(video?.tags) ? video.tags.map((tag) => tag?.name).filter(Boolean) : [],
+    guest: video?.user?.name || "The Unscripted Room",
+    coinCost: 3,
+  };
+};
+
+const vimeoRequest = async (path, params = {}) => {
+  if (!VIMEO_PAT) {
+    throw new Error("Vimeo PAT not configured.");
+  }
+  const url = path.startsWith("http") ? new URL(path) : new URL(`${VIMEO_BASE_URL}${path}`);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${VIMEO_PAT}`,
+      Accept: "application/vnd.vimeo.*+json;version=3.4",
+    },
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Vimeo request failed: ${response.status} ${text}`);
+  }
+  return response.json();
+};
+
+const VIMEO_FIELDS = [
+  "uri",
+  "name",
+  "description",
+  "duration",
+  "release_time",
+  "created_time",
+  "pictures.sizes",
+  "tags.name",
+  "user.name",
+].join(",");
+
+const fetchVimeoEpisodes = async () => {
+  const items = [];
+  const path = buildVimeoListPath();
+  let page = 1;
+  const perPage = 50;
+  while (page <= 5) {
+    const data = await vimeoRequest(path, {
+      per_page: perPage,
+      page,
+      sort: "date",
+      direction: "desc",
+      fields: VIMEO_FIELDS,
+    });
+    const videos = Array.isArray(data?.data) ? data.data : [];
+    videos.forEach((video) => {
+      const normalized = normalizeVimeoVideo(video);
+      if (normalized) items.push(normalized);
+    });
+    if (!data?.paging?.next || videos.length < perPage) break;
+    page += 1;
+  }
+  return items;
+};
+
+const getVimeoEpisodes = async ({ refresh = false, ensureTags = false } = {}) => {
+  const now = Date.now();
+  if (!refresh && vimeoCache.items.length && now - vimeoCache.fetchedAt < vimeoCache.ttlMs) {
+    return vimeoCache.items;
+  }
+  let items = await fetchVimeoEpisodes();
+  if (ensureTags) {
+    const missingTags = items.filter((item) => !item.tags || item.tags.length === 0);
+    for (const item of missingTags.slice(0, 25)) {
+      try {
+        const data = await vimeoRequest(`/videos/${item.id}`, { fields: "tags.name" });
+        const tags = Array.isArray(data?.tags) ? data.tags.map((tag) => tag?.name).filter(Boolean) : [];
+        item.tags = tags;
+      } catch (error) {
+        console.error("Tag enrich failed", item.id, error?.message || error);
+      }
+    }
+  }
+  vimeoCache.items = items;
+  vimeoCache.fetchedAt = now;
+  return items;
+};
+
 const buildCustomFields = (entries) => {
   const fields = {};
   entries.forEach(({ id, value }) => {
@@ -1356,6 +1687,249 @@ const buildContactSubjectTag = (subject) => {
 };
 
 const requiredFields = ["name", "email", "ageConfirmed", "days", "times", "curiosityLevel", "heardFrom"];
+
+const getAuthEmail = (req) => {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const payload = verifyAuthToken(token);
+  return payload?.email ? normalizeEmail(payload.email) : null;
+};
+
+app.get("/api/episodes", async (req, res) => {
+  try {
+    const refresh = req.query.refresh === "1";
+    const ensureTags = req.query.tags === "1";
+    const items = await getVimeoEpisodes({ refresh, ensureTags });
+    return res.json({ items });
+  } catch (error) {
+    console.error("Vimeo episodes fetch failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load episodes." });
+  }
+});
+
+app.get("/api/episodes/:id", async (req, res) => {
+  try {
+    const episodeId = String(req.params.id || "").trim();
+    if (!episodeId) {
+      return res.status(400).json({ error: "Episode id is required." });
+    }
+    const cached = await getVimeoEpisodes();
+    const found = cached.find((item) => item.id === episodeId);
+    if (found) {
+      return res.json({ item: found });
+    }
+    const data = await vimeoRequest(`/videos/${episodeId}`, { fields: VIMEO_FIELDS });
+    const normalized = normalizeVimeoVideo(data);
+    if (!normalized) {
+      return res.status(404).json({ error: "Episode not found." });
+    }
+    return res.json({ item: normalized });
+  } catch (error) {
+    console.error("Vimeo episode fetch failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load episode." });
+  }
+});
+
+app.post("/api/episodes/:id/session", async (req, res) => {
+  try {
+    const episodeId = String(req.params.id || "").trim();
+    if (!episodeId) {
+      return res.status(400).json({ error: "Episode id is required." });
+    }
+    const email = getAuthEmail(req);
+    const sessionId = crypto.randomUUID();
+    watchSessions.set(sessionId, {
+      sessionId,
+      episodeId,
+      email,
+      createdAt: Date.now(),
+      duration: 0,
+      lastSeconds: null,
+      maxPercent: 0,
+      watchedSeconds: 0,
+      skipDetected: false,
+      awards: { oneThird: false, twoThird: false, completed: false },
+      coinsAwarded: 0,
+    });
+    return res.json({ ok: true, sessionId });
+  } catch (error) {
+    console.error("Session create failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to start session." });
+  }
+});
+
+app.post("/api/episodes/:id/progress", async (req, res) => {
+  try {
+    const episodeId = String(req.params.id || "").trim();
+    const payload = req.body || {};
+    const sessionId = String(payload.sessionId || "").trim();
+    if (!episodeId || !sessionId) {
+      return res.status(400).json({ error: "Episode id and session id are required." });
+    }
+    const session = watchSessions.get(sessionId);
+    if (!session || session.episodeId !== episodeId) {
+      return res.status(404).json({ error: "Session not found." });
+    }
+    const event = String(payload.event || "").toLowerCase();
+    const seconds = Number(payload.seconds ?? 0);
+    const percent = Number(payload.percent ?? 0);
+    const duration = Number(payload.duration ?? 0);
+    if (Number.isFinite(duration) && duration > 0) {
+      session.duration = duration;
+    }
+
+    if (event === "seeking" || event === "seeked") {
+      session.skipDetected = true;
+    }
+
+    if (event === "timeupdate" && Number.isFinite(seconds)) {
+      if (session.lastSeconds !== null) {
+        const delta = seconds - session.lastSeconds;
+        if (delta < -0.5 || delta > 5) {
+          session.skipDetected = true;
+        } else if (delta > 0) {
+          session.watchedSeconds += delta;
+        }
+      }
+      session.lastSeconds = seconds;
+    }
+
+    if (Number.isFinite(percent)) {
+      session.maxPercent = Math.max(session.maxPercent, percent);
+    }
+
+    let awardedNow = 0;
+    if (!session.skipDetected) {
+      if (!session.awards.oneThird && session.maxPercent >= 0.333) {
+        session.awards.oneThird = true;
+        session.coinsAwarded += 1;
+        awardedNow += 1;
+      }
+      if (!session.awards.twoThird && session.maxPercent >= 0.666) {
+        session.awards.twoThird = true;
+        session.coinsAwarded += 3;
+        awardedNow += 3;
+      }
+      if (!session.awards.completed && session.maxPercent >= 0.98) {
+        session.awards.completed = true;
+        session.coinsAwarded += 5;
+        awardedNow += 5;
+      }
+    }
+
+    return res.json({
+      ok: true,
+      awardedNow,
+      totalAwarded: session.coinsAwarded,
+      skipDetected: session.skipDetected,
+      maxPercent: session.maxPercent,
+    });
+  } catch (error) {
+    console.error("Progress update failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to update progress." });
+  }
+});
+
+app.get("/api/coins/balance", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const balance = await getCoinBalance(result.contact.id);
+    return res.json({ ok: true, balance });
+  } catch (error) {
+    console.error("Coin balance lookup failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load coin balance." });
+  }
+});
+
+app.post("/api/coins/spend", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const body = req.body || {};
+    const amount = Math.abs(Number(body.amount || 3));
+    const episodeId = body.episodeId ? String(body.episodeId) : "unknown";
+    const eventId = body.eventId ? String(body.eventId) : null;
+    const balance = await getCoinBalance(result.contact.id);
+    if (balance < amount) {
+      return res.status(402).json({ error: "Insufficient coins.", balance });
+    }
+    await createCoinTransaction({
+      contactId: result.contact.id,
+      name: `episode:${episodeId}:spend`,
+      amount: -amount,
+      timestamp: new Date().toISOString(),
+      isSpend: true,
+      externalId: eventId || `coin-spend-${result.contact.id}-${Date.now()}`,
+    });
+    const nextBalance = balance - amount;
+    return res.json({ ok: true, balance: nextBalance });
+  } catch (error) {
+    console.error("Coin spend failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to spend coins." });
+  }
+});
+
+app.post("/api/coins/reward", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const body = req.body || {};
+    const amount = Math.max(0, Number(body.amount || 0));
+    const episodeId = body.episodeId ? String(body.episodeId) : "unknown";
+    const milestone = body.milestone ? String(body.milestone) : "reward";
+    const eventId = body.eventId ? String(body.eventId) : null;
+    if (!amount) {
+      return res.status(400).json({ error: "Amount required." });
+    }
+    await createCoinTransaction({
+      contactId: result.contact.id,
+      name: `episode:${episodeId}:${milestone}`,
+      amount,
+      timestamp: new Date().toISOString(),
+      isSpend: false,
+      externalId: eventId || `coin-reward-${result.contact.id}-${Date.now()}`,
+    });
+    const nextBalance = await getCoinBalance(result.contact.id);
+    return res.json({ ok: true, balance: nextBalance });
+  } catch (error) {
+    console.error("Coin reward failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to reward coins." });
+  }
+});
+
+app.get("/api/coins/schema-debug", async (req, res) => {
+  try {
+    const schemaId = normalizeSchemaId(AC_COIN_SCHEMA_ID);
+    if (!schemaId) {
+      return res.status(400).json({ error: "AC_COIN_SCHEMA_ID not configured." });
+    }
+    const response = await acV3Request("GET", `/api/3/customObjects/schemas/${schemaId}`);
+    const fields =
+      response?.schema?.fields ||
+      response?.schema?.data?.fields ||
+      response?.fields ||
+      response?.data?.fields ||
+      [];
+    return res.json({
+      schemaId,
+      fields: fields.map((field) => ({
+        id: field.id,
+        label: field.label,
+        perstag: field.perstag,
+      })),
+    });
+  } catch (error) {
+    console.error("Coin schema debug failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load schema." });
+  }
+});
 
 app.post("/auth/register", rateLimit, async (req, res) => {
   try {
