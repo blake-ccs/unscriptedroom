@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useHoverIntent } from "../hooks/useHoverIntent";
 import Dropdown from "./Dropdown";
 import { clearAuth, isAuthed } from "../lib/auth";
-import { openCalendlyPopup } from "../lib/calendly";
 import API_BASE from "../lib/apiBase";
 
 export default function Navbar() {
@@ -128,9 +127,9 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {authed ? (
             <>
-              <button type="button" className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
+              <Link to="/contact-us" className="btn btn-ghost">
                 Reserve a Seat
-              </button>
+              </Link>
               <button
                 type="button"
                 onClick={handleAccountClick}
@@ -147,9 +146,9 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <button type="button" className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
+              <Link to="/contact-us" className="btn btn-ghost">
                 Reserve a Seat
-              </button>
+              </Link>
               <Link
                 to="/login"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"

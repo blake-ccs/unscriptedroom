@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import PodcastLanding from "./pages/PodcastLanding";
+import About from "./pages/About";
 import Why from "./pages/Why";
 import Episodes from "./pages/Episodes";
 import Player from "./pages/Player";
@@ -50,8 +51,21 @@ function Protected({ children }: { children: JSX.Element }) {
 function ScrollToTop() {
   const location = useLocation();
   useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.slice(1);
+      const frame = window.requestAnimationFrame(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ block: "start", inline: "nearest" });
+        } else {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+        }
+      });
+      return () => window.cancelAnimationFrame(frame);
+    }
+
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
   return null;
 }
 
@@ -62,6 +76,7 @@ export default function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/podcast" element={<PodcastLanding />} />
           <Route path="/episodes" element={<Episodes />} />
           <Route path="/player" element={<Player />} />
@@ -74,6 +89,7 @@ export default function App() {
           <Route path="/services/live-training" element={<ServicesLiveTraining />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/company/community" element={<CompanyCommunity />} />
+          <Route path="/community" element={<CompanyCommunity />} />
           <Route path="/company/podcast" element={<CompanyPodcast />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/register-interest" element={<RegisterInterest />} />

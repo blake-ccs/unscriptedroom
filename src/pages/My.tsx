@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import API_BASE from "../lib/apiBase";
-import { openCalendlyPopup } from "../lib/calendly";
 import ContactUsModal from "../components/ContactUsModal";
 import { getAuthEmail, clearAuth } from "../lib/auth";
 
@@ -90,7 +89,6 @@ export default function My() {
   const eventName = status?.eventName || booking.eventName || null;
   const bookingLocation = status?.location || booking.location || null;
   const timezone = status?.timezone || booking.timezone || null;
-  const rescheduleUrl = status?.rescheduleUrl || booking.rescheduleUrl || null;
   const calendlyStatus = status?.calendlyStatus || booking.status || null;
 
   const formattedStart = useMemo(() => (startTime ? new Date(startTime).toLocaleString() : null), [startTime]);
@@ -113,7 +111,6 @@ export default function My() {
       zipPostalCode: general.zipPostalCode || "",
       jobTitle: general.jobTitle || "",
       companyName: general.companyName || "",
-      bioAboutMe: general.bioAboutMe || "",
       interestsHobbies: general.interestsHobbies || "",
       preferredCommunicationMethod: general.preferredCommunicationMethod || "",
       linkedInProfile: general.linkedInProfile || "",
@@ -166,29 +163,6 @@ export default function My() {
     }
   };
 
-  const generalRows = [
-    { label: "Lead Source", key: "leadSource" },
-    { label: "Preferred Language", key: "preferredLanguage" },
-    { label: "Date of Birth", key: "dateOfBirth" },
-    { label: "Gender", key: "gender" },
-    { label: "Street Address", key: "streetAddress" },
-    { label: "City", key: "city" },
-    { label: "State/Province", key: "stateProvince" },
-    { label: "ZIP/Postal Code", key: "zipPostalCode" },
-    { label: "Job Title", key: "jobTitle" },
-    { label: "Company Name", key: "companyName" },
-    { label: "Bio/About Me", key: "bioAboutMe" },
-    { label: "Interests/Hobbies", key: "interestsHobbies" },
-    { label: "Preferred Communication", key: "preferredCommunicationMethod" },
-    { label: "LinkedIn", key: "linkedInProfile" },
-    { label: "Twitter/X", key: "twitterXHandle" },
-    { label: "Instagram", key: "instagramHandle" },
-    { label: "Preferred Day", key: "preferredDay" },
-    { label: "Preferred Time", key: "preferredTime" },
-    { label: "Reasons for Signup", key: "reasonsForSignup" },
-    { label: "Reasons for Joining", key: "reasonsForJoining" },
-  ];
-
   return (
     <section className="mx-auto max-w-7xl px-6 py-12">
         <div className="flex flex-col gap-6">
@@ -213,9 +187,6 @@ export default function My() {
               </Link>
             </div>
             <div className="flex items-center gap-3">
-              <button className="btn btn-ghost" onClick={() => openCalendlyPopup()}>
-                Reserve a Seat
-              </button>
               <button className="btn btn-ghost" onClick={() => setIsContactOpen(true)}>
                 Contact Us
               </button>
@@ -240,18 +211,6 @@ export default function My() {
                   Edit profile
                 </button>
               )}
-              <button
-                className="btn btn-ghost"
-                onClick={() => {
-                  if (rescheduleUrl) {
-                    openCalendlyPopup(rescheduleUrl);
-                  } else {
-                    openCalendlyPopup();
-                  }
-                }}
-              >
-                Reschedule
-              </button>
               <button
                 className="btn btn-ghost"
                 onClick={() => {
@@ -325,26 +284,6 @@ export default function My() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white/80 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
-              <div className="text-sm font-semibold text-black">General details</div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {generalRows.map((row) => (
-                  <div key={row.label} className="rounded-xl border border-gray-100 bg-white px-4 py-3">
-                    <div className="text-xs uppercase tracking-wide text-mute">{row.label}</div>
-                    {isEditing ? (
-                      <input
-                        className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                        placeholder={row.label}
-                        value={form[row.key] || ""}
-                        onChange={(e) => updateField(row.key, e.target.value)}
-                      />
-                    ) : (
-                      <div className="mt-1 text-sm font-medium">{form[row.key] || "—"}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="space-y-6">
@@ -413,7 +352,7 @@ export default function My() {
           animation: logoDance 0.8s ease-in-out;
         }
       `}</style>
-      <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <ContactUsModal isOpen={isContactOpen} initialMode="contact" onClose={() => setIsContactOpen(false)} />
     </section>
   );
 }

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import RegisterInterestModal from "../components/RegisterInterestModal";
-import ContactUsModal from "../components/ContactUsModal";
-import { openCalendlyPopup } from "../lib/calendly";
+import ContactUsModal, { type ContactFormMode } from "../components/ContactUsModal";
 import { clearAuth, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
@@ -18,6 +17,7 @@ const logoImageUrl = new URL(
 export default function PodcastLanding() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactMode, setContactMode] = useState<ContactFormMode>("contact");
   const [logoDance, setLogoDance] = useState(false);
   const authed = isAuthed();
   const navigate = useNavigate();
@@ -128,9 +128,16 @@ export default function PodcastLanding() {
             />
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              to="/episodes"
+              className="rounded-full border border-[#3B2C57] bg-[#3B2C57] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#7A3168]"
+            >
+              Episodes
+            </Link>
             <button
               type="button"
               onClick={() => {
+                setContactMode("contact");
                 setIsContactOpen(true);
               }}
               className="rounded-full bg-[#f4ece1] px-5 py-2 text-sm font-medium text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
@@ -193,7 +200,10 @@ export default function PodcastLanding() {
                 <div className="shrink-0">
                   <button
                     type="button"
-                    onClick={() => setIsContactOpen(true)}
+                    onClick={() => {
+                      setContactMode("podcast-guest");
+                      setIsContactOpen(true);
+                    }}
                     className="inline-flex items-center justify-center rounded-full border border-[#d9c2a8] bg-white px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     aria-label="Apply to contribute to The Unscripted Room"
                   >
@@ -256,7 +266,10 @@ export default function PodcastLanding() {
             <div className="flex lg:justify-end">
               <button
                 type="button"
-                onClick={() => setIsContactOpen(true)}
+                onClick={() => {
+                  setContactMode("podcast-guest");
+                  setIsContactOpen(true);
+                }}
                 className="inline-flex items-center justify-center rounded-full border border-[#d9c2a8] bg-white px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 Apply
@@ -267,7 +280,14 @@ export default function PodcastLanding() {
       </section>
 
       <RegisterInterestModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-      <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <ContactUsModal
+        isOpen={isContactOpen}
+        initialMode={contactMode}
+        onClose={() => {
+          setIsContactOpen(false);
+          setContactMode("contact");
+        }}
+      />
     </div>
   );
 }

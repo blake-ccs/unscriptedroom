@@ -10,7 +10,7 @@ export default function ContactUs() {
 
   return (
     <div className="min-h-screen bg-white">
-      <ContactUsModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ContactUsModal isOpen={isOpen} initialMode="contact" onClose={() => setIsOpen(false)} />
       {!isOpen && (
         <div className="mx-auto max-w-3xl px-6 py-24 text-center">
           <h1 className="text-3xl font-semibold">Contact Us</h1>

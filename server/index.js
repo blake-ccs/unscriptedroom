@@ -1686,6 +1686,15 @@ const buildContactSubjectTag = (subject) => {
   return compact ? `contact us: ${compact}` : null;
 };
 
+const buildGuestPreferenceTag = (prefix, kind, value) => {
+  const compact = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return compact && prefix ? `${prefix}:${kind}:${compact}` : null;
+};
+
 const requiredFields = ["name", "email", "ageConfirmed", "days", "times", "curiosityLevel", "heardFrom"];
 
 const getAuthEmail = (req) => {
@@ -2444,12 +2453,27 @@ app.post("/api/lead", rateLimit, async (req, res) => {
     }
 
     const warnings = [];
+    const tagPrefix = String(payload.offer || "").startsWith("community") ? "community" : "podcast";
+    const experiencePreferenceTag = buildGuestPreferenceTag(
+      tagPrefix,
+      "experience-preference",
+      payload.experiencePreference
+    );
+    const conversationInterestTag = buildGuestPreferenceTag(
+      tagPrefix,
+      "conversation-interest",
+      payload.reasonsForJoining
+    );
     const tasks = [
       upsertFieldValues(contact.id, buildLeadFields(payload)).catch((error) => {
         warnings.push("field_update_failed");
         console.error("Lead field update failed", error?.message || error);
       }),
-      ensureContactTags({ contactId: contact.id, stage: "captured", extraTags: [`offer:${payload.offer}`] }).catch((error) => {
+      ensureContactTags({
+        contactId: contact.id,
+        stage: "captured",
+        extraTags: [`offer:${payload.offer}`, experiencePreferenceTag, conversationInterestTag].filter(Boolean),
+      }).catch((error) => {
         warnings.push("tag_update_failed");
         console.error("Lead stage update failed", error?.message || error);
       }),

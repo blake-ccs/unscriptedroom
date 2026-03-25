@@ -612,8 +612,18 @@ export default function Episodes() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-black">
+    <div className="relative min-h-screen bg-[#ECF1F4] text-[#231F20]">
       <style>{`
+        :root {
+          --usr-primary: #3B2C57;
+          --usr-secondary: #7A3168;
+          --usr-accent: #D5C7E2;
+          --usr-ink: #231F20;
+          --usr-muted: #5B6064;
+          --usr-cloud: #ECF1F4;
+          --usr-white: #FFFFFF;
+          --usr-line: rgba(59, 44, 87, 0.12);
+        }
         @keyframes logoDance {
           0% { transform: rotate(0deg) translateY(0); }
           25% { transform: rotate(-8deg) translateY(-2px); }
@@ -629,13 +639,13 @@ export default function Episodes() {
         }
         .episode-card:hover {
           transform: translateY(-6px);
-          border-color: rgba(0, 0, 0, 0.25);
-          box-shadow: 0 18px 45px rgba(30, 18, 5, 0.15);
+          border-color: rgba(59, 44, 87, 0.28);
+          box-shadow: 0 18px 45px rgba(59, 44, 87, 0.14);
         }
         .transition-overlay {
           position: fixed;
           inset: 0;
-          background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9), rgba(244,236,225,0.98) 45%, rgba(240,228,210,0.98));
+          background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.92), rgba(236,241,244,0.98) 45%, rgba(213,199,226,0.95));
           display: grid;
           place-items: center;
           z-index: 50;
@@ -657,8 +667,8 @@ export default function Episodes() {
           width: 140px;
           height: 140px;
           border-radius: 999px;
-          background: radial-gradient(circle at 35% 35%, #9be8ff, #6bb8ff 50%, rgba(54, 98, 255, 0.1));
-          box-shadow: 0 0 30px rgba(79, 163, 255, 0.4), 0 0 90px rgba(79, 163, 255, 0.25);
+          background: radial-gradient(circle at 35% 35%, #d5c7e2, #9bb0c1 50%, rgba(59, 44, 87, 0.12));
+          box-shadow: 0 0 30px rgba(122, 49, 104, 0.24), 0 0 90px rgba(59, 44, 87, 0.18);
           animation: orbPulse 1.6s ease-in-out infinite;
         }
         @keyframes orbPulse {
@@ -666,10 +676,10 @@ export default function Episodes() {
           50% { transform: scale(1.06); opacity: 1; }
         }
         .holo-line {
-          background: linear-gradient(90deg, transparent, rgba(150, 120, 80, 0.6), transparent);
+          background: linear-gradient(90deg, transparent, rgba(122, 49, 104, 0.45), transparent);
         }
         .loading-shimmer {
-          background: linear-gradient(90deg, rgba(241, 229, 212, 0.0), rgba(196, 170, 132, 0.6), rgba(241, 229, 212, 0.0));
+          background: linear-gradient(90deg, rgba(213, 199, 226, 0), rgba(122, 49, 104, 0.35), rgba(213, 199, 226, 0));
           animation: shimmer 1.3s ease-in-out infinite;
         }
         @keyframes shimmer {
@@ -695,10 +705,10 @@ export default function Episodes() {
 
       {showEmailGate ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
-          <div className="w-full max-w-md rounded-3xl border border-black/10 bg-white p-6 shadow-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/50">Enter Email</p>
+          <div className="w-full max-w-md rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-6 shadow-xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Enter Email</p>
             <h2 className="mt-3 text-2xl font-semibold text-black">Continue to Episodes</h2>
-            <p className="mt-2 text-sm text-black/60">
+            <p className="mt-2 text-sm text-[var(--usr-muted)]">
               Enter your email to track your coins and episode progress.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -707,12 +717,12 @@ export default function Episodes() {
                 value={emailDraft}
                 onChange={(event) => setEmailDraft(event.target.value)}
                 placeholder="you@email.com"
-                className="w-full rounded-full border border-black/10 bg-[#f9f4ee] px-4 py-2 text-sm text-black"
+                className="w-full rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-4 py-2 text-sm text-[var(--usr-ink)]"
               />
               <button
                 type="button"
                 onClick={handleEmailSubmit}
-                className="rounded-full border border-black/10 bg-[#f4ece1] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/70"
+                className="rounded-full border border-[var(--usr-primary)] bg-[var(--usr-primary)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white"
               >
                 Continue
               </button>
@@ -723,17 +733,17 @@ export default function Episodes() {
 
       {showRedeemGate ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
-          <div className="w-full max-w-md rounded-3xl border border-black/10 bg-white p-6 shadow-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/50">Out of Coins</p>
+          <div className="w-full max-w-md rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-6 shadow-xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Out of Coins</p>
             <h2 className="mt-3 text-2xl font-semibold text-black">Oh no, you’re out of coins.</h2>
-            <p className="mt-2 text-sm text-black/60">
+            <p className="mt-2 text-sm text-[var(--usr-muted)]">
               Redeem 3 coins now to keep exploring the episode library.
             </p>
             <div className="mt-5 flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleRedeem}
-                className="rounded-full border border-black/10 bg-[#f4ece1] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/70"
+                className="rounded-full border border-[var(--usr-primary)] bg-[var(--usr-primary)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white"
                 disabled={isRedeeming}
               >
                 {isRedeeming ? "Redeeming..." : "Redeem 3 Coins"}
@@ -743,9 +753,9 @@ export default function Episodes() {
         </div>
       ) : null}
 
-      <div className="relative overflow-hidden border-b border-black/10 bg-[#f4ece1]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.65),_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,_rgba(214,188,150,0.4),_transparent_55%)]" />
+      <div className="relative overflow-hidden border-b border-[var(--usr-line)] bg-[var(--usr-white)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.72),_transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,_rgba(213,199,226,0.42),_transparent_55%)]" />
         <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10">
           <div className="flex items-center justify-between">
             <Link
@@ -766,8 +776,8 @@ export default function Episodes() {
               />
             </Link>
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/70 ${coinPulse ? "animate-[coinPulse_0.6s_ease]" : ""}`}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#caa66a]" aria-hidden="true">
+              <div className={`flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--usr-muted)] ${coinPulse ? "animate-[coinPulse_0.6s_ease]" : ""}`}>
+                <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
                   <path
                     d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                     fill="currentColor"
@@ -779,7 +789,7 @@ export default function Episodes() {
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -792,7 +802,7 @@ export default function Episodes() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -805,12 +815,12 @@ export default function Episodes() {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.4em] text-black/60">
+          <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.4em] text-[var(--usr-muted)]">
             <span className="holo-line h-[1px] w-16" />
             Unscripted Room Episodes
           </div>
           {coinNotice ? (
-            <div className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.3em] text-black/60">
+            <div className="rounded-full border border-[var(--usr-line)] bg-[var(--usr-white)] px-4 py-2 text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
               {coinNotice}
             </div>
           ) : null}
@@ -819,28 +829,28 @@ export default function Episodes() {
               <h1 className="text-balance text-4xl font-semibold text-black md:text-5xl">
                 The Episode Library
               </h1>
-              <p className="mt-4 text-base text-black/70 md:text-lg">
+              <p className="mt-4 text-base text-[var(--usr-muted)] md:text-lg">
                 Scroll to keep moving. Each page expands into another layer of the conversation. Tap any episode to
                 open the player and enter the room.
               </p>
             </div>
-            <div className="w-full max-w-sm rounded-2xl border border-black/10 bg-white/70 px-5 py-4 text-sm text-black/70 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.32em] text-black/40">Library</p>
-              <p className="mt-2 text-base font-semibold text-black">{episodes.length} episodes · 3 coins each</p>
-              <p className="text-xs text-black/50">Scroll down to load more.</p>
+            <div className="w-full max-w-sm rounded-2xl border border-[var(--usr-line)] bg-[rgba(255,255,255,0.75)] px-5 py-4 text-sm text-[var(--usr-muted)] shadow-sm">
+              <p className="text-xs uppercase tracking-[0.32em] text-[var(--usr-primary)]">Library</p>
+              <p className="mt-2 text-base font-semibold text-[var(--usr-ink)]">{episodes.length} episodes · 3 coins each</p>
+              <p className="text-xs text-[var(--usr-muted)]">Scroll down to load more.</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12">
-        <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-black/40">
+        <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
             <span>Episode Feed</span>
             <span>{visibleEpisodes.length} / {episodes.length}</span>
           </div>
         <div className="flex flex-col gap-6">
           {hasLoaded && episodes.length === 0 ? (
-            <div className="rounded-3xl border border-black/10 bg-white px-6 py-10 text-center text-sm text-black/60">
+            <div className="rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] px-6 py-10 text-center text-sm text-[var(--usr-muted)]">
               No Vimeo episodes found. Double-check that your Vimeo account has uploaded videos and that the API
               credentials are valid.
             </div>
@@ -850,9 +860,9 @@ export default function Episodes() {
               key={episode.id}
               type="button"
               onClick={() => handleEpisodeSelect(episode.id)}
-              className="episode-card group flex w-full flex-col gap-5 rounded-3xl border border-black/10 bg-white p-5 text-left shadow-sm md:flex-row md:items-center md:gap-8 md:px-7 md:py-6"
+              className="episode-card group flex w-full flex-col gap-5 rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-5 text-left shadow-sm md:flex-row md:items-center md:gap-8 md:px-7 md:py-6"
             >
-              <div className="relative w-full overflow-hidden rounded-2xl bg-[#f4ece1] md:w-[260px]">
+              <div className="relative w-full overflow-hidden rounded-2xl bg-[var(--usr-cloud)] md:w-[260px]">
                 {episode.image ? (
                   <img
                     src={episode.image}
@@ -861,12 +871,12 @@ export default function Episodes() {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex h-44 w-full items-center justify-center text-xs uppercase tracking-[0.3em] text-black/40 md:h-40">
+                  <div className="flex h-44 w-full items-center justify-center text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)] md:h-40">
                     Vimeo
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-black/60">
+                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-[rgba(255,255,255,0.92)] px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-[var(--usr-muted)]">
                   Episode
                 </div>
               </div>
@@ -874,28 +884,28 @@ export default function Episodes() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="text-xl font-semibold text-black">{episode.title}</h3>
-                    <p className="mt-1 text-sm text-black/60">with {episode.guest}</p>
+                    <p className="mt-1 text-sm text-[var(--usr-muted)]">with {episode.guest}</p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-black/50">
+                  <div className="flex items-center gap-3 text-xs text-[var(--usr-muted)]">
                     <span>{episode.length}</span>
                     <span>•</span>
                     <span>{episode.published}</span>
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed text-black/70">{episode.summary}</p>
+                <p className="text-sm leading-relaxed text-[var(--usr-muted)]">{episode.summary}</p>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap gap-2">
                     {episode.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-black/10 bg-[#f9f4ee] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-black/50"
+                        className="rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-[var(--usr-muted)]"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 rounded-full border border-black/10 bg-[#f4ece1] px-3 py-1 text-xs font-semibold text-black">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#caa66a]" aria-hidden="true">
+                  <div className="flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-xs font-semibold text-[var(--usr-ink)]">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
                       <path
                         d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                         fill="currentColor"
@@ -904,7 +914,7 @@ export default function Episodes() {
                     {(episode.coinCost ?? 3)} coins
                   </div>
                 </div>
-                <div className="text-xs uppercase tracking-[0.3em] text-black/40">
+                <div className="text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
                   Tap to open player →
                 </div>
               </div>
@@ -915,14 +925,14 @@ export default function Episodes() {
           <div ref={sentinelRef} className="h-10 w-full" />
           {isLoading ? (
             <div className="absolute flex w-full items-center justify-center">
-              <div className="relative flex h-9 w-40 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-[#f4ece1]">
+              <div className="relative flex h-9 w-40 items-center justify-center overflow-hidden rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)]">
                 <div className="absolute inset-0 loading-shimmer" />
-                <span className="relative text-xs uppercase tracking-[0.35em] text-black/60">Loading</span>
+                <span className="relative text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Loading</span>
               </div>
             </div>
           ) : null}
             {visibleCount >= episodes.length ? (
-              <p className="absolute text-xs uppercase tracking-[0.3em] text-black/40">End of the library</p>
+              <p className="absolute text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">End of the library</p>
           ) : null}
         </div>
       </div>
