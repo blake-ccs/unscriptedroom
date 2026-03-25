@@ -22,6 +22,7 @@ const formatDuration = (seconds?: number) => {
 };
 
 export default function Player() {
+  const showTalkToY = false;
   const [params] = useSearchParams();
   const episodeId = params.get("episode") ?? EPISODES[0].id;
   const navigate = useNavigate();
@@ -132,8 +133,14 @@ export default function Player() {
     const storedEmail = localStorage.getItem("viewer_email");
     if (!token && !storedEmail) return;
     const reward = async (milestone, amount) => {
+      const rewardStorageKey = `coin_reward_${episodeId}_${milestone}`;
       if (rewardedRef.current[milestone]) return;
+      if (localStorage.getItem(rewardStorageKey)) {
+        rewardedRef.current[milestone] = true;
+        return;
+      }
       rewardedRef.current[milestone] = true;
+      localStorage.setItem(rewardStorageKey, "1");
       const id = rewardIdRef.current++;
       setFloatingRewards((prev) => [...prev, { id, amount }]);
       window.setTimeout(() => {
@@ -151,7 +158,7 @@ export default function Player() {
             episodeId,
             amount,
             milestone,
-            eventId: `reward-${episodeId}-${milestone}-${Date.now()}`,
+            eventId: `reward-${episodeId}-${milestone}`,
             ...(storedEmail ? { email: storedEmail } : {}),
           }),
         });
@@ -161,33 +168,14 @@ export default function Player() {
           setCoinBalance(data.balance);
         }
       } catch (error) {
+        localStorage.removeItem(rewardStorageKey);
+        rewardedRef.current[milestone] = false;
         console.error("Coin reward failed", error);
       }
     };
     if (milestones.oneThird) reward("oneThird", 1);
     if (milestones.twoThird) reward("twoThird", 3);
     if (milestones.completed) reward("completed", 5);
-  }, [milestones, episodeId]);
-
-  useEffect(() => {
-    const rewardFor = (key: string, amount: number) => {
-      if (localStorage.getItem(key)) return;
-      localStorage.setItem(key, "1");
-      setCoinBalance((prev) => {
-        const next = prev + amount;
-        localStorage.setItem(COIN_STORAGE_KEY, String(next));
-        return next;
-      });
-      const id = rewardIdRef.current++;
-      setFloatingRewards((prev) => [...prev, { id, amount }]);
-      window.setTimeout(() => {
-        setFloatingRewards((prev) => prev.filter((item) => item.id !== id));
-      }, 1400);
-    };
-
-    if (milestones.oneThird) rewardFor(`coin_reward_${episodeId}_1`, 1);
-    if (milestones.twoThird) rewardFor(`coin_reward_${episodeId}_2`, 3);
-    if (milestones.completed) rewardFor(`coin_reward_${episodeId}_3`, 5);
   }, [milestones, episodeId]);
 
   useEffect(() => {
@@ -444,8 +432,20 @@ export default function Player() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-[#ECF1F4] text-[#231F20]">
       <style>{`
+        :root {
+          --usr-primary: #3B2C57;
+          --usr-secondary: #7A3168;
+          --usr-accent: #D5C7E2;
+          --usr-ink: #231F20;
+          --usr-muted: #5B6064;
+          --usr-blue-gray: #9BB0C1;
+          --usr-light-gray: #D3D7DE;
+          --usr-cloud: #ECF1F4;
+          --usr-white: #FFFFFF;
+          --usr-line: rgba(59, 44, 87, 0.12);
+        }
         @keyframes logoDance {
           0% { transform: rotate(0deg) translateY(0); }
           25% { transform: rotate(-8deg) translateY(-2px); }
@@ -468,7 +468,7 @@ export default function Player() {
           position: absolute;
           inset: -35% 20% auto;
           height: 260px;
-          background: radial-gradient(circle, rgba(214, 188, 150, 0.35), transparent 70%);
+          background: radial-gradient(circle, rgba(213, 199, 226, 0.45), transparent 70%);
           opacity: 0.8;
           pointer-events: none;
         }
@@ -477,7 +477,7 @@ export default function Player() {
           position: absolute;
           inset: auto 10% -35%;
           height: 260px;
-          background: radial-gradient(circle, rgba(220, 200, 170, 0.3), transparent 70%);
+          background: radial-gradient(circle, rgba(155, 176, 193, 0.34), transparent 70%);
           opacity: 0.7;
           pointer-events: none;
         }
@@ -485,7 +485,7 @@ export default function Player() {
           background: linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0.12));
         }
         .progress-fill {
-          background: linear-gradient(90deg, #7ef4ff, #55a8ff 60%, #2e6bff);
+          background: linear-gradient(90deg, #d5c7e2, #9bb0c1 60%, #7a3168);
           transition: width 220ms ease;
         }
         .progress-marker {
@@ -500,9 +500,9 @@ export default function Player() {
           box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
         .progress-marker.active {
-          background: #7ef4ff;
-          border-color: rgba(73, 209, 255, 0.6);
-          box-shadow: 0 0 18px rgba(73, 209, 255, 0.55);
+          background: var(--usr-secondary);
+          border-color: rgba(122, 49, 104, 0.55);
+          box-shadow: 0 0 18px rgba(122, 49, 104, 0.35);
         }
         .progress-coin {
           position: absolute;
@@ -522,15 +522,22 @@ export default function Player() {
           gap: 6px;
           padding: 4px 10px;
           border-radius: 999px;
-          background: #f4ece1;
-          border: 1px solid rgba(0,0,0,0.08);
-          color: rgba(0,0,0,0.55);
+          background: var(--usr-cloud);
+          border: 1px solid rgba(59,44,87,0.12);
+          color: var(--usr-muted);
           font-size: 9px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
           white-space: nowrap;
           min-width: 86px;
           justify-content: center;
+          transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+        }
+        .coin-badge.active {
+          background: rgba(122, 49, 104, 0.14);
+          border-color: rgba(122, 49, 104, 0.34);
+          color: var(--usr-secondary);
+          box-shadow: 0 0 0 1px rgba(122, 49, 104, 0.05), 0 10px 22px rgba(59, 44, 87, 0.12);
         }
         .coin-reward {
           position: absolute;
@@ -541,14 +548,14 @@ export default function Player() {
           gap: 6px;
           padding: 4px 10px;
           border-radius: 999px;
-          background: #ffffff;
-          border: 1px solid rgba(73, 209, 255, 0.3);
-          color: rgba(0,0,0,0.75);
+          background: #3B2C57;
+          border: 1px solid rgba(213, 199, 226, 0.5);
+          color: #ffffff;
           font-size: 10px;
           letter-spacing: 0.15em;
           text-transform: uppercase;
           animation: rewardPop 1.4s ease forwards;
-          box-shadow: 0 12px 30px rgba(73, 209, 255, 0.18);
+          box-shadow: 0 12px 30px rgba(122, 49, 104, 0.16);
         }
         @keyframes rewardPop {
           0% { transform: translate(-50%, 8px) scale(0.9); opacity: 0; }
@@ -564,13 +571,13 @@ export default function Player() {
           gap: 6px;
           padding: 6px 12px;
           border-radius: 999px;
-          background: #ffffff;
-          border: 1px solid rgba(73, 209, 255, 0.3);
-          color: rgba(0,0,0,0.75);
+          background: #3B2C57;
+          border: 1px solid rgba(213, 199, 226, 0.5);
+          color: #ffffff;
           font-size: 11px;
           letter-spacing: 0.15em;
           text-transform: uppercase;
-          box-shadow: 0 12px 30px rgba(73, 209, 255, 0.18);
+          box-shadow: 0 12px 30px rgba(122, 49, 104, 0.16);
           animation: coinFloat 1.4s ease forwards;
           z-index: 50;
         }
@@ -588,7 +595,7 @@ export default function Player() {
           position: absolute;
           inset: -30px;
           border-radius: 999px;
-          background: radial-gradient(circle at 35% 35%, rgba(155,232,255,0.9), rgba(107,184,255,0.6) 50%, rgba(54,98,255,0.08) 70%);
+          background: radial-gradient(circle at 35% 35%, rgba(213,199,226,0.95), rgba(155,176,193,0.68) 50%, rgba(59,44,87,0.1) 70%);
           filter: blur(10px);
           animation: orbPulse 1.6s ease-in-out infinite;
           z-index: -1;
@@ -598,7 +605,7 @@ export default function Player() {
           position: absolute;
           inset: -55px;
           border-radius: 999px;
-          border: 1px solid rgba(126, 244, 255, 0.35);
+          border: 1px solid rgba(122, 49, 104, 0.22);
           filter: blur(12px);
           animation: auraDrift 7s ease-in-out infinite;
           z-index: -2;
@@ -608,20 +615,20 @@ export default function Player() {
           width: 120px;
           height: 120px;
           border-radius: 999px;
-          background: radial-gradient(circle at 35% 35%, #9be8ff, #6bb8ff 50%, rgba(54, 98, 255, 0.12));
-          box-shadow: 0 0 30px rgba(79, 163, 255, 0.45), 0 0 90px rgba(79, 163, 255, 0.3);
+          background: radial-gradient(circle at 35% 35%, #d5c7e2, #9bb0c1 50%, rgba(59, 44, 87, 0.16));
+          box-shadow: 0 0 30px rgba(122, 49, 104, 0.24), 0 0 90px rgba(59, 44, 87, 0.18);
           transition: transform 220ms ease, box-shadow 220ms ease;
         }
         .ai-button.listening {
           transform: scale(1.06);
-          box-shadow: 0 0 40px rgba(79, 163, 255, 0.65), 0 0 120px rgba(79, 163, 255, 0.45);
+          box-shadow: 0 0 40px rgba(122, 49, 104, 0.42), 0 0 120px rgba(59, 44, 87, 0.28);
         }
         .ai-button::after {
           content: "";
           position: absolute;
           inset: -12px;
           border-radius: 999px;
-          border: 1px solid rgba(126, 244, 255, 0.45);
+          border: 1px solid rgba(122, 49, 104, 0.32);
           filter: blur(4px);
         }
         .ai-button::before {
@@ -629,7 +636,7 @@ export default function Player() {
           position: absolute;
           inset: -20px;
           border-radius: 999px;
-          border: 1px solid rgba(73, 209, 255, 0.28);
+          border: 1px solid rgba(59, 44, 87, 0.24);
           filter: blur(12px);
         }
         .listening-bars {
@@ -675,7 +682,7 @@ export default function Player() {
         }
       `}</style>
 
-      <div className="border-b border-black/10 bg-[#f4ece1]">
+      <div className="border-b border-[var(--usr-line)] bg-[var(--usr-white)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-6">
             <Link
@@ -696,14 +703,14 @@ export default function Player() {
               />
             </Link>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.35em] text-black/50">Episode Player</p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--usr-muted)]">Episode Player</p>
               <h1 className="mt-1 text-lg font-semibold text-black sm:text-xl">{episode.title}</h1>
-              <p className="mt-1 text-xs text-black/60">with {episode.guest}</p>
+              <p className="mt-1 text-xs text-[var(--usr-muted)]">with {episode.guest}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/70">
-              <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#caa66a]" aria-hidden="true">
+            <div className="flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--usr-muted)]">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
                 <path
                   d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                   fill="currentColor"
@@ -715,7 +722,7 @@ export default function Player() {
               <button
                 type="button"
                 onClick={handleAccountClick}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Account"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -728,7 +735,7 @@ export default function Player() {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Register or login"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -741,7 +748,7 @@ export default function Player() {
             )}
             <Link
               to="/episodes"
-              className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-black/70"
+              className="rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--usr-muted)]"
             >
               Back
             </Link>
@@ -751,10 +758,10 @@ export default function Player() {
 
       {showEmailGate ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
-          <div className="w-full max-w-md rounded-3xl border border-black/10 bg-white p-6 shadow-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/50">Enter Email</p>
+          <div className="w-full max-w-md rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-6 shadow-xl">
+            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Enter Email</p>
             <h2 className="mt-3 text-2xl font-semibold text-black">Continue to Player</h2>
-            <p className="mt-2 text-sm text-black/60">
+            <p className="mt-2 text-sm text-[var(--usr-muted)]">
               Enter your email to track your coins and episode progress.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -763,12 +770,12 @@ export default function Player() {
                 value={emailDraft}
                 onChange={(event) => setEmailDraft(event.target.value)}
                 placeholder="you@email.com"
-                className="w-full rounded-full border border-black/10 bg-[#f9f4ee] px-4 py-2 text-sm text-black"
+                className="w-full rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-4 py-2 text-sm text-[var(--usr-ink)]"
               />
               <button
                 type="button"
                 onClick={handleEmailSubmit}
-                className="rounded-full border border-black/10 bg-[#f4ece1] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/70"
+                className="rounded-full border border-[var(--usr-primary)] bg-[var(--usr-primary)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white"
               >
                 Continue
               </button>
@@ -778,23 +785,23 @@ export default function Player() {
       ) : null}
 
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
-        <div className="player-shell rounded-3xl border border-black/10 bg-white p-4 shadow-sm sm:p-6">
-          <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-[#f4ece1]">
+        <div className="player-shell rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-4 shadow-sm sm:p-6">
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--usr-line)] bg-[var(--usr-cloud)]">
             <div className="player-fit w-full">
               <div ref={playerMountRef} className="h-full w-full" />
               {!vimeoId ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#f4ece1] text-xs uppercase tracking-[0.4em] text-black/50">
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--usr-cloud)] text-xs uppercase tracking-[0.4em] text-[var(--usr-muted)]">
                   Vimeo Player Unavailable
                 </div>
               ) : null}
             </div>
           </div>
-          <div className="mt-5 rounded-2xl border border-black/10 bg-white px-3 py-4 sm:px-4">
+          <div className="mt-5 rounded-2xl border border-[var(--usr-line)] bg-[var(--usr-white)] px-3 py-4 sm:px-4">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={handlePlayPause}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-[#f4ece1] text-black"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)]"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? (
@@ -818,8 +825,8 @@ export default function Player() {
                   <span className={`progress-marker ${milestones.twoThird ? "active" : ""}`} style={{ left: "66.66%" }} />
                   <span className={`progress-marker ${milestones.completed ? "active" : ""}`} style={{ left: "100%" }} />
                   <span className="progress-coin" style={{ left: "33.33%" }}>
-                    <span className="coin-badge">
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                    <span className={`coin-badge ${milestones.oneThird ? "active" : ""}`}>
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -829,8 +836,8 @@ export default function Player() {
                     </span>
                   </span>
                   <span className="progress-coin" style={{ left: "66.66%" }}>
-                    <span className="coin-badge">
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                    <span className={`coin-badge ${milestones.twoThird ? "active" : ""}`}>
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -840,8 +847,8 @@ export default function Player() {
                     </span>
                   </span>
                   <span className="progress-coin" style={{ left: "100%" }}>
-                    <span className="coin-badge">
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                    <span className={`coin-badge ${milestones.completed ? "active" : ""}`}>
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -852,7 +859,7 @@ export default function Player() {
                   </span>
                   {milestones.oneThird ? (
                     <span key={`r1-${rewardPulse.oneThird}`} className="coin-reward" style={{ left: "33.33%" }}>
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -863,7 +870,7 @@ export default function Player() {
                   ) : null}
                   {milestones.twoThird ? (
                     <span key={`r2-${rewardPulse.twoThird}`} className="coin-reward" style={{ left: "66.66%" }}>
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -874,7 +881,7 @@ export default function Player() {
                   ) : null}
                   {milestones.completed ? (
                     <span key={`r3-${rewardPulse.completed}`} className="coin-reward" style={{ left: "100%" }}>
-                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[#caa66a]" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" className="h-3 w-3 text-[var(--usr-secondary)]" aria-hidden="true">
                         <path
                           d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
                           fill="currentColor"
@@ -885,25 +892,25 @@ export default function Player() {
                   ) : null}
                 </div>
               </div>
-              <div className="text-[11px] uppercase tracking-[0.3em] text-black/60">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-[var(--usr-muted)]">
                 -{formatTime(remaining)}
               </div>
             </div>
-            <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-black/40">
+            <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-[var(--usr-muted)]">
               <span>Coins Earned</span>
               <span>{coinBalance} / 9</span>
             </div>
           </div>
           <div className="mt-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/40">Now Playing</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Now Playing</p>
             <h2 className="mt-1 text-lg font-semibold text-black sm:text-xl">{episode.title}</h2>
-            <p className="mt-1 text-xs text-black/60">with {episode.guest} · {episode.length}</p>
-            <p className="mt-2 text-xs leading-relaxed text-black/70 line-clamp-2">{episode.summary}</p>
+            <p className="mt-1 text-xs text-[var(--usr-muted)]">with {episode.guest} · {episode.length}</p>
+            <p className="mt-2 text-xs leading-relaxed text-[var(--usr-muted)] line-clamp-2">{episode.summary}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {episode.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-black/10 bg-[#f9f4ee] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-black/50"
+                  className="rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-[var(--usr-muted)]"
                 >
                   {tag}
                 </span>
@@ -913,30 +920,32 @@ export default function Player() {
         </div>
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center">
-        <div className="ai-aura pointer-events-auto">
-          <button
-            type="button"
-            onClick={() => setIsListening((prev) => !prev)}
-            className={`ai-button text-[10px] font-semibold uppercase tracking-[0.32em] text-[#04101f] ${isListening ? "listening" : ""}`}
-            aria-pressed={isListening}
-          >
-            <span className={isListening ? "opacity-0" : "opacity-100"}>
-              Talk to Y.
-            </span>
-            <span className={`listening-bars ${isListening ? "active" : ""}`} aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-            </span>
-          </button>
+      {showTalkToY ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center">
+          <div className="ai-aura pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => setIsListening((prev) => !prev)}
+              className={`ai-button text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--usr-ink)] ${isListening ? "listening" : ""}`}
+              aria-pressed={isListening}
+            >
+              <span className={isListening ? "opacity-0" : "opacity-100"}>
+                Talk to Y.
+              </span>
+              <span className={`listening-bars ${isListening ? "active" : ""}`} aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {floatingRewards.map((reward) => (
         <div key={reward.id} className="coin-float">
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#caa66a]" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
             <path
               d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
               fill="currentColor"

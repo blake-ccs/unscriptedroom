@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import API_BASE from "../lib/apiBase";
-import { openCalendlyPopup } from "../lib/calendly";
 
 const logoUrl = new URL("../assets/LogoUSR.png", import.meta.url).href;
 
@@ -60,13 +60,12 @@ export default function QuickLanding() {
 
           {step === "choice" ? (
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
-              <button
-                type="button"
-                onClick={() => openCalendlyPopup()}
+              <Link
+                to="/contact-us"
                 className="rounded-full bg-[#6b2a5e] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 Reserve a Seat
-              </button>
+              </Link>
               <button
                 type="button"
                 onClick={() => setStep("form")}

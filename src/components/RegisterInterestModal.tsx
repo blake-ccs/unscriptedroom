@@ -1,6 +1,5 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import API_BASE from "../lib/apiBase";
-import { openCalendlyPopup } from "../lib/calendly";
 
 type RegisterInterestModalProps = {
   isOpen: boolean;
@@ -190,13 +189,6 @@ export default function RegisterInterestModal({ isOpen, onClose }: RegisterInter
               next steps and an invitation.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => openCalendlyPopup()}
-                className="rounded-full bg-[#f4ece1] px-6 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                Reserve a Seat
-              </button>
               <button
                 type="button"
                 onClick={() => {

@@ -1,102 +1,73 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import RegisterInterestModal from "../components/RegisterInterestModal";
-import ContactUsModal from "../components/ContactUsModal";
-import { openCalendlyPopup } from "../lib/calendly";
+import ContactUsModal, { type ContactFormMode } from "../components/ContactUsModal";
 import { clearAuth, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
-const heroImageUrl = new URL(
-  "../assets/hero.png",
+const heroVideoUrl = new URL("../../Landing page hero video.mov", import.meta.url).href;
+const logoImageUrl = new URL("../../OneDrive_1_12-19-2025/UR LOGO white 1.png", import.meta.url).href;
+const challengeImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/are you up for the challenge.png",
   import.meta.url
 ).href;
-const logoImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR LOGO white 1.png",
+const communityHeroImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/not ready for the podcast image.png",
   import.meta.url
 ).href;
-const heroLogoUrl = new URL(
-  "../assets/Unscripted Room Logo-white 2.png",
+const hostHeroImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/meet your host image.png",
   import.meta.url
 ).href;
-const nineQuestionsImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/9 question frame.png",
+const timeFrontImageUrl = new URL("../../OneDrive_2026-03-20/Visual assest for podcast page/time front.png", import.meta.url).href;
+const timeBackImageUrl = new URL("../../OneDrive_2026-03-20/Visual assest for podcast page/time back.png", import.meta.url).href;
+const questionsFrontImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/9 questions front.png",
   import.meta.url
 ).href;
-const communityImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/community frame.png",
+const questionsBackImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/9 questions back.png",
   import.meta.url
 ).href;
-const principlesImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/conversation principle frame 1.png",
+const conversationFrontImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/conversation front.png",
   import.meta.url
 ).href;
-const chairImageUrl = new URL(
-  "../assets/Unscripted Room-seating.home-2400.jpg",
+const conversationBackImageUrl = new URL(
+  "../../OneDrive_2026-03-20/Visual assest for podcast page/conversation back.png",
   import.meta.url
 ).href;
-const podcastImageUrl = new URL(
-  "../assets/Unscripted Room-mic.home-2400.jpg",
-  import.meta.url
-).href;
-type TileOverlayKind = "nineQuestions" | "community" | "principles";
 
-type TileOverlay = {
-  kind: TileOverlayKind;
-};
+const hostStatements = [
+  "Everyone knows something and deserves a dignified conversation to share it.",
+  "That feeling disappears the moment an honest conversation begins.",
+  "The Unscripted Room is the first step in a larger effort to help people build a curiosity mindset.",
+];
 
-type TileOverlayCopy = {
-  title: string;
-  paragraphs?: string[];
-  intro?: string;
-  principles?: Array<{
-    heading: string;
-    body: string;
-  }>;
-};
-
-const TILE_OVERLAY_COPY: Record<TileOverlayKind, TileOverlayCopy> = {
-  nineQuestions: {
+const insidePodcastCards = [
+  {
+    title: "Time",
+    frontImageUrl: timeFrontImageUrl,
+    backImageUrl: timeBackImageUrl,
+  },
+  {
     title: "9 Questions",
-    paragraphs: [
-      "They aren't random. They're intentionally sequenced to move the room from personal insight to shared understanding.",
-      "Each question invites reflection rooted in lived experience, not opinion, so something deeper can surface.",
-      "The design creates the conditions. What people choose to share shapes what unfolds.",
-    ],
+    frontImageUrl: questionsFrontImageUrl,
+    backImageUrl: questionsBackImageUrl,
   },
-  community: {
-    title: "Community",
-    paragraphs: [
-      "This is a group experience where people come together in shared conversation.",
-      "You're reminded that you're not alone in how you think, or what you wrestle with. When someone speaks from lived experience and you recognize yourself in their words, that's where community begins.",
-      "Curiosity isn't just welcomed here. It's practiced. Listening becomes a form of leadership, and we build connection through clarity, not control.",
-      "Community forms when curiosity is practiced long enough to understand one another.",
-    ],
-  },
-  principles: {
+  {
     title: "Conversation Principles",
-    intro: "Three principles shape how the room is held.",
-    principles: [
-      {
-        heading: "We strive to understand the difference between perspective and truth.",
-        body: "We listen and speak from lived experience. Our focus is understanding truth through the richness of differing perspectives.",
-      },
-      {
-        heading: "We are all equals.",
-        body: "Equality is expressed through how we listen and how we learn from the wisdom in the room.",
-      },
-      {
-        heading: "We choose curiosity over authority.",
-        body: "Our goal isn't to win. It's to understand. When we drift, we pause and return to curiosity.",
-      },
-    ],
+    frontImageUrl: conversationFrontImageUrl,
+    backImageUrl: conversationBackImageUrl,
   },
-};
+] as const;
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactTopic, setContactTopic] = useState("");
+  const [contactMode, setContactMode] = useState<ContactFormMode>("contact");
   const [logoDance, setLogoDance] = useState(false);
-  const [activeTileOverlay, setActiveTileOverlay] = useState<TileOverlay | null>(null);
   const authed = isAuthed();
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,6 +83,8 @@ export default function Home() {
     }
     if (params.get("contact") === "1" && !hasOpenedContactFromQuery.current) {
       hasOpenedContactFromQuery.current = true;
+      setContactMode("contact");
+      setContactTopic("");
       setIsContactOpen(true);
     }
   }, [location.search]);
@@ -137,139 +110,44 @@ export default function Home() {
     navigate("/register");
   };
 
-  useEffect(() => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(".scroll-pop"));
-    if (!elements.length) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const vh = window.innerHeight || 1;
-      elements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const start = vh * 0.85;
-        const end = -rect.height * 0.15;
-        const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
-        el.style.setProperty("--scroll-progress", progress.toFixed(3));
-      });
-    };
-    const onScroll = () => {
-      if (!raf) raf = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, []);
-
   const handleLogoClick = () => {
     setLogoDance(true);
     window.setTimeout(() => setLogoDance(false), 900);
   };
 
   useEffect(() => {
-    if (!activeTileOverlay) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveTileOverlay(null);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [activeTileOverlay]);
+    const sections = Array.from(document.querySelectorAll<HTMLElement>(".reveal-band"));
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#ECF1F4] text-[#231F20]">
       <style>{`
-        .custom-check,
-        .custom-radio {
-          -webkit-appearance: none;
-          appearance: none;
-          background-color: #ffffff;
-          border: 1px solid rgba(0, 0, 0, 0.5);
-          box-sizing: border-box;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          width: 16px;
-          height: 16px;
-          min-width: 16px;
-          min-height: 16px;
-          max-width: 16px;
-          max-height: 16px;
-          padding: 0;
-          margin: 0;
-          line-height: 0;
-        }
-        .custom-check {
-          border-radius: 2px;
-        }
-        .custom-check:checked::after {
-          content: "";
-          position: absolute;
-          left: 4px;
-          top: 1px;
-          width: 6px;
-          height: 10px;
-          border: 2px solid #000000;
-          border-top: 0;
-          border-left: 0;
-          transform: rotate(45deg);
-        }
-        .custom-radio {
-          border-radius: 9999px;
-        }
-        .custom-radio:checked::after {
-          content: "";
-          position: absolute;
-          inset: 3px;
-          background: #000000;
-          border-radius: 9999px;
-        }
-        .range-track {
-          -webkit-appearance: none;
-          appearance: none;
-          background: transparent;
-        }
-        .range-track::-webkit-slider-runnable-track {
-          height: 4px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 9999px;
-        }
-        .range-track::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          height: 18px;
-          width: 18px;
-          background: #000000;
-          border-radius: 9999px;
-          margin-top: -7px;
-        }
-        .range-track::-moz-range-track {
-          height: 4px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 9999px;
-        }
-        .range-track::-moz-range-thumb {
-          height: 18px;
-          width: 18px;
-          background: #000000;
-          border: none;
-          border-radius: 9999px;
-        }
-        @keyframes flipHint {
-          0%, 100% { transform: rotate(0deg) translateY(0); opacity: 0.7; }
-          50% { transform: rotate(12deg) translateY(-2px); opacity: 1; }
-        }
-        .flip-hint {
-          animation: flipHint 1.6s ease-in-out infinite;
+        :root {
+          --usr-primary: #3B2C57;
+          --usr-secondary: #7A3168;
+          --usr-accent: #D5C7E2;
+          --usr-ink: #231F20;
+          --usr-muted: #5B6064;
+          --usr-blue-gray: #9BB0C1;
+          --usr-light-gray: #D3D7DE;
+          --usr-cloud: #ECF1F4;
+          --usr-white: #FFFFFF;
+          --usr-line: rgba(59, 44, 87, 0.12);
         }
         @keyframes logoDance {
           0%, 100% { transform: rotate(0deg) translateY(0); }
@@ -277,71 +155,74 @@ export default function Home() {
           50% { transform: rotate(8deg) translateY(2px); }
           75% { transform: rotate(-4deg) translateY(-1px); }
         }
+        @keyframes floatCard {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
         .logo-dance {
           animation: logoDance 0.8s ease-in-out;
         }
-        .scroll-pop {
-          --scroll-progress: 0;
+        .hero-grid {
+          background:
+            linear-gradient(180deg, rgba(35, 31, 32, 0.08), rgba(35, 31, 32, 0.5)),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+          background-size: auto, 32px 32px, 32px 32px;
         }
-        .scroll-pop-glow {
-          transform: translateY(calc((1 - var(--scroll-progress)) * 16px))
-            scale(calc(0.88 + var(--scroll-progress) * 0.26));
-          opacity: calc(0.2 + var(--scroll-progress) * 0.65);
-          transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-          will-change: transform, opacity;
-          background: radial-gradient(60% 60% at 30% 30%, rgba(255, 238, 214, 0.9), rgba(255, 255, 255, 0));
-          background-size: 140% 140%;
-          animation: auraPulse 7s ease-in-out infinite, auraDrift 10s ease-in-out infinite;
+        .feature-card {
+          animation: floatCard 7s ease-in-out infinite;
         }
-        .scroll-pop-media {
-          transform: translateY(calc((1 - var(--scroll-progress)) * 18px))
-            scale(calc(0.96 + var(--scroll-progress) * 0.06));
-          transition: transform 0.2s ease-out;
-          will-change: transform;
-          animation: breatheFloat 6s ease-in-out infinite;
+        .podcast-card {
+          perspective: 1600px;
         }
-        @keyframes breatheFloat {
-          0%, 100% {
-            transform: translateY(calc((1 - var(--scroll-progress)) * 18px))
-              scale(calc(0.96 + var(--scroll-progress) * 0.06))
-              rotate(-0.4deg);
-          }
-          50% {
-            transform: translateY(calc((1 - var(--scroll-progress)) * 10px))
-              scale(calc(0.98 + var(--scroll-progress) * 0.08))
-              rotate(0.6deg);
-          }
+        .podcast-card-inner {
+          position: relative;
+          transform-style: preserve-3d;
+          transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
         }
-        @keyframes auraPulse {
-          0%, 100% { opacity: calc(0.2 + var(--scroll-progress) * 0.55); filter: blur(28px); }
-          50% { opacity: calc(0.35 + var(--scroll-progress) * 0.7); filter: blur(36px); }
+        .podcast-card:hover .podcast-card-inner,
+        .podcast-card:focus-visible .podcast-card-inner {
+          transform: rotateY(180deg);
         }
-        @keyframes auraDrift {
-          0%, 100% { background-position: 20% 20%; }
-          50% { background-position: 80% 60%; }
+        .podcast-card-face {
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         }
-        @keyframes overlayFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        .podcast-card-back {
+          transform: rotateY(180deg);
         }
-        @keyframes overlayScaleIn {
-          from { opacity: 0; transform: translateY(8px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        .reveal-band {
+          opacity: 0;
+          transform: translateY(36px);
+          transition: opacity 700ms ease, transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .tile-overlay-backdrop {
-          animation: overlayFadeIn 180ms ease-out;
-        }
-        .tile-overlay-panel {
-          animation: overlayScaleIn 220ms ease-out;
+        .reveal-band.is-visible {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
-      <section
-        className="relative isolate min-h-[88vh] bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImageUrl})` }}
-      >
-        <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
-        <div className="relative mx-auto flex w-full max-w-none flex-col gap-10 px-6 py-8 sm:py-12">
-          <header className="flex items-center justify-between">
+
+      <section className="hero-grid relative isolate overflow-hidden">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src={heroVideoUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(12, 10, 14, 0.88) 22%, rgba(24, 20, 22, 0.82) 42%, rgba(35, 31, 32, 0.62) 62%, rgba(59, 44, 87, 0.28) 82%, rgba(59, 44, 87, 0.12) 100%)",
+          }}
+        />
+
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-12 px-6 py-8 sm:py-10 lg:py-12">
+          <header className="flex items-center justify-between gap-4">
             <button
               type="button"
               onClick={handleLogoClick}
@@ -351,33 +232,29 @@ export default function Home() {
               <img
                 src={logoImageUrl}
                 alt="The Unscripted Room logo"
-                className={`h-10 w-auto transition duration-300 group-hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.7)] sm:h-12 ${
+                className={`h-10 w-auto transition duration-300 group-hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.5)] sm:h-12 ${
                   logoDance ? "logo-dance" : ""
                 }`}
               />
             </button>
+
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => openCalendlyPopup()}
-                className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-medium text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md font-nunito"
+                onClick={() => {
+                  setContactTopic("");
+                  setContactMode("contact");
+                  setIsContactOpen(true);
+                }}
+                className="border border-white/25 bg-[#ECF1F4] px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
               >
-                Reserve a Seat
-              </button>
-              <button
-              type="button"
-              onClick={() => {
-                setIsContactOpen(true);
-              }}
-              className="rounded-full bg-[#f4ece1] px-5 py-2 text-sm font-medium text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md font-nunito"
-            >
-              Contact Us
+                Contact Us
               </button>
               {authed ? (
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#d9c2a8] bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -390,7 +267,7 @@ export default function Home() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#d9c2a8] bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -404,207 +281,257 @@ export default function Home() {
             </div>
           </header>
 
-          <div className="mt-2 flex flex-col items-center text-center sm:mt-4 lg:mt-6">
-            <img
-              src={heroLogoUrl}
-              alt="The Unscripted Room"
-              className="w-[260px] drop-shadow-lg sm:w-[360px] lg:w-[440px]"
-            />
-            <h2 className="mt-6 text-2xl font-medium text-white/90 drop-shadow-lg sm:text-3xl">
-              Questions. Conversation. Community.
-            </h2>
+          <div className="pb-20 pt-2 lg:pb-24">
+            <div className="max-w-4xl">
+              <h1 className="max-w-3xl text-balance text-[2.65rem] font-medium leading-[1.06] tracking-[-0.03em] text-white sm:text-[3.2rem] lg:text-[3.75rem]">
+                A challenge of curiosity, <span className="text-[#D5C7E2]">attention</span>, and{" "}
+                <span className="text-[#D5C7E2]">real</span> conversation.
+              </h1>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setContactMode("podcast-guest");
+                    setContactTopic("Be a Podcast Guest");
+                    setIsContactOpen(true);
+                  }}
+                  className="inline-flex min-h-14 items-center justify-center bg-[var(--usr-secondary)] px-8 py-4 text-xl font-medium text-white transition hover:bg-[var(--usr-primary)]"
+                >
+                  Be a Podcast Guest
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10">
-        <section className="py-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="flex w-full flex-col items-center">
-              <p className="text-center text-lg font-medium text-black/80 sm:text-xl lg:text-2xl tracking-wide lg:tracking-wider lg:whitespace-nowrap">
-                A guided, small-group conversation experience. Unscripted, but never unintentional.
-              </p>
-              <div className="mt-6 h-px w-full bg-black/30" />
-            </div>
-            <div className="mt-12 text-3xl font-bold font-montserrat tracking-[0.3em] text-black/60 sm:text-4xl lg:text-5xl">
-              INSIDE THE ROOM
-            </div>
-            <div className="mt-4 text-lg font-semibold text-black/60 sm:text-xl">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-10 sm:pt-14">
+        <section className="border-b border-[var(--usr-line)] bg-[var(--usr-cloud)] py-14 sm:py-16">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-center text-4xl font-bold tracking-[0.04em] text-[var(--usr-ink)] sm:text-5xl lg:text-6xl">
+              INSIDE THE PODCAST
+            </h2>
+            <p className="mt-5 text-center text-xl text-[var(--usr-muted)] sm:text-2xl">
               What Shapes the Experience
-            </div>
+            </p>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            <FlipCard
-              title="9 Questions"
-              imageUrl={nineQuestionsImageUrl}
-              overlayKind="nineQuestions"
-              onOpenOverlay={setActiveTileOverlay}
-            />
-            <FlipCard
-              title="Community"
-              imageUrl={communityImageUrl}
-              overlayKind="community"
-              onOpenOverlay={setActiveTileOverlay}
-            />
-            <FlipCard
-              title="Conversation Principles"
-              imageUrl={principlesImageUrl}
-              objectPosition="54% 50%"
-              overlayKind="principles"
-              onOpenOverlay={setActiveTileOverlay}
-            />
+          <div className="mx-auto mt-12 grid max-w-[1240px] gap-8 xl:gap-[4.5rem] md:grid-cols-3">
+            {insidePodcastCards.map((card) => (
+              <FlipImageCard
+                key={card.title}
+                title={card.title}
+                frontImageUrl={card.frontImageUrl}
+                backImageUrl={card.backImageUrl}
+                href={
+                  card.title === "Time"
+                    ? "/about#time"
+                    : card.title === "9 Questions"
+                      ? "/about#questions"
+                      : "/about#principles"
+                }
+              />
+            ))}
           </div>
         </section>
 
-        <section className="grid items-center gap-8 pb-12 pt-4 lg:grid-cols-[1.05fr_.95fr]">
-          <div className="max-w-xl">
-            <h3 className="text-2xl font-semibold text-black sm:text-3xl">Join the Room!</h3>
-            <p className="mt-4 text-base leading-relaxed text-black/70">
-              When was the last time you sat in a conversation without needing to perform, persuade, or resolve?
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-black/70">
-              The Unscripted Room brings together a small group of people willing to hold different perspectives long
-              enough for something deeper to emerge.
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-black/70">
-              Each room is intentionally small and guided to support presence, reflection, and shared understanding.
-            </p>
-            <div className="mt-6">
+      </div>
+
+      <section className="reveal-band bg-[#231F20]">
+        <div className="grid items-stretch lg:grid-cols-[1.08fr_.92fr]">
+          <div className="relative min-h-[260px] lg:min-h-[520px]">
+            <img
+              src={challengeImageUrl}
+              alt="Microphone and Unscripted Room sign"
+              className="h-full w-full object-cover"
+            />
+            <div
+              className="absolute inset-0 hidden lg:block"
+              aria-hidden="true"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(35,31,32,0) 68%, rgba(35,31,32,0.38) 82%, rgba(35,31,32,0.88) 100%)",
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col justify-center px-8 py-8 text-white sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+            <h2 className="max-w-xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-[3.4rem]">
+              Are You Up for the <span className="text-[var(--usr-accent)]">Challenge?</span>
+            </h2>
+            <div className="mt-6 max-w-xl space-y-5 text-[0.98rem] leading-relaxed text-white/88 sm:text-base">
+              <p>
+                Each episode of The Unscripted Room Podcast brings together a host and up to three guests for three
+                uninterrupted hours of conversation.
+              </p>
+              <p>The challenge is simple: stay curious, listen generously, speak honestly from lived experience.</p>
+              <p>
+                In a world that rewards quick opinions and confident answers, this experience asks something different,
+                the willingness to slow down and explore ideas together.
+              </p>
+              <p>
+                If you’re ready to be curious for three hours and share that experience openly with others, you may be
+                exactly the kind of guest this room was designed for.
+              </p>
+              <p>If this opportunity calls to you, please answer.</p>
+            </div>
+            <div className="mt-8">
               <button
                 type="button"
-                onClick={() => openCalendlyPopup()}
-                className="inline-flex items-center justify-center rounded-full border border-[#d9c2a8] bg-[#f4ece1] px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md font-nunito"
+                onClick={() => {
+                  setContactTopic("I’d like to be a podcast guest");
+                  setContactMode("podcast-guest");
+                  setIsContactOpen(true);
+                }}
+                className="inline-flex min-h-14 items-center justify-center bg-[var(--usr-secondary)] px-8 py-4 text-base font-medium text-white transition hover:bg-[var(--usr-primary)]"
               >
-                Reserve a Seat
+                Be a Podcast Guest
               </button>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="relative scroll-pop">
-            <div className="scroll-pop-glow absolute -inset-4 rounded-[32px] bg-white/40 blur-2xl" aria-hidden="true" />
-            <img
-              src={chairImageUrl}
-              alt="Unscripted Room chair"
-              className="scroll-pop-media relative h-[360px] w-full rounded-[28px] object-cover shadow-2xl sm:h-[440px]"
-            />
-          </div>
-        </section>
-
-        <section id="podcast" className="grid items-center gap-8 pb-16 pt-2 lg:grid-cols-[.95fr_1.05fr]">
-          <div className="relative order-2 scroll-pop lg:order-1">
-            <div className="scroll-pop-glow absolute -inset-4 rounded-[32px] bg-white/40 blur-2xl" aria-hidden="true" />
-            <img
-              src={podcastImageUrl}
-              alt="Unscripted Room podcast"
-              className="scroll-pop-media relative h-[360px] w-full rounded-[28px] object-cover shadow-2xl sm:h-[440px]"
-            />
-          </div>
-
-          <div className="order-1 max-w-xl lg:order-2">
-            <h3 className="text-2xl font-semibold text-black sm:text-3xl">The Conversation Continues</h3>
-            <p className="mt-4 text-base leading-relaxed text-black/70">
-              The conversation doesn&apos;t have to end when the room does. The Unscripted Room Podcast offers a
-              separate space for curiosity-led conversations, featuring voices from The Unscripted Room community and
-              more.
-            </p>
-            <div className="mt-6">
+      <section className="reveal-band bg-[var(--usr-cloud)]">
+        <div className="grid items-stretch lg:grid-cols-[.95fr_1.05fr]">
+          <div className="relative flex flex-col justify-center px-8 py-8 text-[var(--usr-ink)] sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+            <h2 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-[3.4rem]">
+              Not ready for the podcast?
+              <br />
+              There&apos;s still a seat for <span className="text-[var(--usr-secondary)]">you.</span>
+            </h2>
+            <div className="mt-6 max-w-3xl space-y-5 text-[0.98rem] leading-relaxed text-[var(--usr-ink)] sm:text-base">
+              <p>Curiosity doesn’t require an audience.</p>
+              <p>
+                If the idea of the room speaks to you but you’d rather explore it without microphones or cameras,
+                there is another way to participate.
+              </p>
+              <p>Community Unscripted Rooms follow the same format as the podcast.</p>
+              <p>
+                A host guides a small group of up to twelve people through the same sequence of nine questions and
+                conversation principles that shape the podcast.
+              </p>
+              <p>The goal is simple: to create a conversation where curiosity can do its best work.</p>
+              <p>
+                These gatherings offer a chance to practice curiosity in its most natural form, listening generously,
+                sharing honestly, and discovering what can happen when people give their full attention to the moment.
+              </p>
+            </div>
+            <div className="mt-8">
               <Link
-                to="/podcast"
-                className="inline-flex items-center justify-center rounded-full border border-[#d9c2a8] bg-[#f4ece1] px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md font-nunito"
+                to="/community"
+                className="inline-flex min-h-14 items-center justify-center border border-[var(--usr-secondary)] bg-[var(--usr-white)] px-8 py-4 text-base font-medium text-[var(--usr-secondary)] transition hover:bg-[var(--usr-light-gray)]"
               >
-                Learn More
+                Explore Community Rooms
               </Link>
             </div>
           </div>
-        </section>
-      </div>
 
-      <RegisterInterestModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-      <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
-      <TileOverlayModal overlay={activeTileOverlay} onClose={() => setActiveTileOverlay(null)} />
-    </div>
-  );
-}
-
-function FlipCard({
-  title,
-  imageUrl,
-  overlayKind,
-  onOpenOverlay,
-  objectPosition,
-}: {
-  title: string;
-  imageUrl: string;
-  overlayKind: TileOverlayKind;
-  onOpenOverlay: (overlay: TileOverlay) => void;
-  objectPosition?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onOpenOverlay({ kind: overlayKind })}
-      className="group relative h-[180px] w-full rounded-[24px] transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 sm:h-[200px] lg:h-[220px]"
-      aria-label={`Open ${title} details`}
-    >
-      <div className="relative h-full w-full overflow-hidden rounded-[24px] bg-white shadow-xl transition-transform duration-300 group-hover:rotate-1 group-hover:scale-[1.01]">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="h-full w-full object-cover"
-          style={{ objectPosition: objectPosition || "50% 50%" }}
-        />
-      </div>
-    </button>
-  );
-}
-
-function TileOverlayModal({
-  overlay,
-  onClose,
-}: {
-  overlay: TileOverlay | null;
-  onClose: () => void;
-}) {
-  if (!overlay) return null;
-  const copy = TILE_OVERLAY_COPY[overlay.kind];
-
-  return (
-    <div
-      className="tile-overlay-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${copy.title} overlay`}
-      onClick={onClose}
-    >
-      <div className="tile-overlay-panel relative w-full max-w-[920px]" onClick={(e) => e.stopPropagation()}>
-        <div className="relative mx-auto max-h-[78vh] w-full overflow-y-auto rounded-[26px] bg-[#e8e2d9] px-6 py-7 shadow-2xl sm:px-10 sm:py-9">
-          <h3 className="text-center font-montserrat text-[2rem] font-bold tracking-tight text-[#1f1c22] sm:text-[3rem]">
-            {copy.title}
-          </h3>
-          <div className="mx-auto mt-6 max-w-[760px] space-y-4 text-[1rem] leading-[1.5] text-[#5f6670] sm:text-[1.125rem]">
-            {copy.intro ? <p>{copy.intro}</p> : null}
-            {copy.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            {copy.principles?.map((principle, index) => (
-              <div key={principle.heading} className="space-y-1.5">
-                <p className="font-semibold text-[#59616b]">
-                  {index + 1}. {principle.heading}
-                </p>
-                <p>{principle.body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center justify-center rounded-full bg-[#1f1c22] px-9 py-3 text-xl font-medium text-white transition hover:opacity-90"
-            >
-              Back to the Room
-            </button>
+          <div className="relative min-h-[260px] lg:min-h-[520px]">
+            <img
+              src={communityHeroImageUrl}
+              alt="Conversation principles room"
+              className="block h-full w-full object-cover"
+            />
+            <div
+              className="absolute inset-0 hidden lg:block"
+              aria-hidden="true"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(236,241,244,1) 0%, rgba(236,241,244,0.92) 16%, rgba(236,241,244,0.62) 30%, rgba(236,241,244,0.22) 44%, rgba(236,241,244,0) 58%)",
+              }}
+            />
           </div>
         </div>
-      </div>
+      </section>
+
+      <section className="reveal-band relative overflow-hidden bg-[#231F20]">
+        <div className="absolute inset-0">
+          <img
+            src={hostHeroImageUrl}
+            alt="Meet your host"
+            className="h-full w-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            aria-hidden="true"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(35,31,32,0.08) 0%, rgba(35,31,32,0.22) 42%, rgba(35,31,32,0.78) 66%, rgba(24,20,22,0.96) 100%)",
+              }}
+          />
+        </div>
+
+        <div className="relative mx-auto grid min-h-[540px] max-w-7xl lg:min-h-[660px] lg:grid-cols-[1fr_.95fr]">
+          <div />
+          <div className="flex flex-col justify-center px-8 py-14 text-white sm:px-10 sm:py-16 lg:px-12 lg:py-20">
+            <p
+              className="text-[1.9rem] uppercase tracking-[0.04em] text-white sm:text-[2.35rem] lg:text-[2.9rem]"
+              style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600 }}
+            >
+              MEET YOUR HOST
+            </p>
+            <div className="mt-8 space-y-5 text-[0.98rem] leading-relaxed text-white/90 sm:text-base lg:max-w-[42rem]">
+              {hostStatements.map((statement) => (
+                <div key={statement} className="flex items-start gap-4">
+                  <span className="mt-1 h-9 w-px bg-white/85" aria-hidden="true" />
+                  <p>{statement}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-12">
+              <Link
+                to="/about#brett-story"
+                className="inline-flex items-center gap-3 text-[1.05rem] font-medium text-[var(--usr-accent)] transition hover:text-white"
+              >
+                <span>Read Brett&apos;s Full Story</span>
+                <span aria-hidden="true" className="text-[1.5rem] leading-none">›</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <RegisterInterestModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      <ContactUsModal
+        isOpen={isContactOpen}
+        initialMode={contactMode}
+        initialTopic={contactTopic}
+        onClose={() => {
+          setIsContactOpen(false);
+          setContactMode("contact");
+          setContactTopic("");
+        }}
+      />
     </div>
+  );
+}
+
+function FlipImageCard({
+  title,
+  frontImageUrl,
+  backImageUrl,
+  href,
+}: {
+  title: string;
+  frontImageUrl: string;
+  backImageUrl: string;
+  href: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="podcast-card group block w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--usr-primary)]/40"
+      aria-label={`Open ${title} section`}
+    >
+      <div className="podcast-card-inner aspect-square h-full w-full">
+        <div className="podcast-card-face absolute inset-0 overflow-hidden border border-[var(--usr-line)] bg-[var(--usr-white)] shadow-[0_24px_60px_rgba(59,44,87,0.12)]">
+          <img src={frontImageUrl} alt={`${title} card front`} className="h-full w-full object-cover" />
+        </div>
+        <div className="podcast-card-face podcast-card-back absolute inset-0 overflow-hidden border border-[var(--usr-line)] bg-[var(--usr-white)] shadow-[0_24px_60px_rgba(59,44,87,0.16)]">
+          <img src={backImageUrl} alt={`${title} card back`} className="h-full w-full object-cover" />
+        </div>
+      </div>
+    </a>
   );
 }

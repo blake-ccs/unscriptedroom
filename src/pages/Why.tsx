@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import RegisterInterestModal from "../components/RegisterInterestModal";
 import ContactUsModal from "../components/ContactUsModal";
-import { openCalendlyPopup } from "../lib/calendly";
 import { clearAuth, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
@@ -135,13 +134,6 @@ export default function Why() {
             />
           </Link>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => openCalendlyPopup()}
-              className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-medium text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              Reserve a Seat
-            </button>
             <button
               type="button"
               onClick={() => setIsContactOpen(true)}
@@ -278,7 +270,7 @@ export default function Why() {
         <div className="mt-4 flex justify-center">
           <button
             type="button"
-            onClick={() => openCalendlyPopup()}
+            onClick={() => setIsContactOpen(true)}
             className="rounded-full border border-[#d9c2a8] bg-[#f4ece1] px-5 py-2 text-sm font-semibold text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             Reserve a Seat
@@ -287,7 +279,7 @@ export default function Why() {
       </section>
 
       <RegisterInterestModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-      <ContactUsModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      <ContactUsModal isOpen={isContactOpen} initialMode="contact" onClose={() => setIsContactOpen(false)} />
     </div>
   );
 }

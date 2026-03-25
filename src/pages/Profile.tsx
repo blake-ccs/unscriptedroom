@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import API_BASE from "../lib/apiBase";
+import ContactUsModal from "../components/ContactUsModal";
 
 type LeadStatus = {
   contact?: {
@@ -30,6 +31,7 @@ export default function Profile() {
   const [status, setStatus] = useState<LeadStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   const fullName = useMemo(() => {
     const first = status?.contact?.firstName || "";
@@ -79,15 +81,15 @@ export default function Profile() {
           <p className="text-xs uppercase tracking-wide text-mute">Profile</p>
           <h1 className="text-3xl font-semibold">Your booking details</h1>
           <p className="mt-2 text-sm text-mute">
-            This page pulls your contact + Calendly status from ActiveCampaign.
+            This page pulls your contact and booking status from ActiveCampaign.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="btn btn-ghost" onClick={() => loadStatus()}>
             {isLoading ? "Refreshing..." : "Refresh"}
           </button>
-          <button className="btn btn-primary" disabled={!status}>
-            Book a time
+          <button className="btn btn-primary" onClick={() => setIsContactOpen(true)}>
+            Contact Us
           </button>
         </div>
       </div>
@@ -137,22 +139,14 @@ export default function Profile() {
                 <div className="mt-1 text-sm font-medium">{status?.offer || "—"}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wide text-mute">Lead Source</div>
-                <div className="mt-1 text-sm font-medium">{general.leadSource || "web"}</div>
-              </div>
-              <div>
                 <div className="text-xs uppercase tracking-wide text-mute">Phone</div>
                 <div className="mt-1 text-sm font-medium">{contact.phone || "—"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">Job Title</div>
-                <div className="mt-1 text-sm font-medium">{general.jobTitle || "—"}</div>
               </div>
             </div>
           </div>
 
           <div className="card p-6">
-            <div className="text-sm font-semibold">Calendly status</div>
+            <div className="text-sm font-semibold">Booking status</div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <div className="text-xs uppercase tracking-wide text-mute">Status</div>
@@ -180,55 +174,20 @@ export default function Profile() {
               </div>
             </div>
           </div>
-
-          <div className="card p-6">
-            <div className="text-sm font-semibold">Tracking</div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">UTM Source</div>
-                <div className="mt-1 text-sm font-medium">{status?.generalDetails?.utmSource || "—"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">UTM Medium</div>
-                <div className="mt-1 text-sm font-medium">{status?.generalDetails?.utmMedium || "—"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">UTM Campaign</div>
-                <div className="mt-1 text-sm font-medium">{status?.generalDetails?.utmCampaign || "—"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">UTM Content</div>
-                <div className="mt-1 text-sm font-medium">{status?.generalDetails?.utmContent || "—"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wide text-mute">UTM Term</div>
-                <div className="mt-1 text-sm font-medium">{status?.generalDetails?.utmTerm || "—"}</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <aside className="space-y-6">
           <div className="card p-6">
             <div className="text-sm font-semibold">Next steps</div>
             <ul className="mt-3 space-y-2 text-sm text-mute">
-              <li>Book your time with the correct Calendly link.</li>
-              <li>Reschedule or cancel with the link from your invitee.</li>
+              <li>Review your latest booking details here.</li>
+              <li>Use the contact form if you need help with scheduling or updates.</li>
               <li>We’ll sync any updates back into ActiveCampaign.</li>
             </ul>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button className="btn btn-primary" disabled={!status}>
-                Book now
+              <button className="btn btn-primary" onClick={() => setIsContactOpen(true)}>
+                Contact Us
               </button>
-              {status?.rescheduleUrl ? (
-                <a className="btn btn-ghost" href={status.rescheduleUrl} target="_blank" rel="noreferrer">
-                  Reschedule
-                </a>
-              ) : (
-                <button className="btn btn-ghost" disabled>
-                  Reschedule
-                </button>
-              )}
             </div>
           </div>
 
@@ -247,6 +206,7 @@ export default function Profile() {
           </div>
         </aside>
       </div>
+      <ContactUsModal isOpen={isContactOpen} initialMode="contact" onClose={() => setIsContactOpen(false)} />
     </section>
   );
 }
