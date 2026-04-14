@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import API_BASE from "../lib/apiBase";
 import ContactUsModal from "../components/ContactUsModal";
+
+const SMS_OPT_IN_COPY =
+  "By providing your phone number, you agree to receive text messages from The Unscripted Room. We will only message you regarding your expressed interest. Message and data rates may apply.";
+const SMS_OPT_OUT_LINK = "mailto:info@curiositystrategy.com?subject=SMS%20Opt%20Out";
+
+function parseCommunicationPreferences(value: string | null | undefined) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 type LeadStatus = {
   contact?: {
@@ -73,6 +84,7 @@ export default function Profile() {
   const contact = status?.contact || {};
   const general = status?.generalDetails || {};
   const booking = status?.bookingDetails || {};
+  const smsOptIn = parseCommunicationPreferences(general.preferredCommunicationMethod).includes("Text");
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
@@ -141,6 +153,33 @@ export default function Profile() {
               <div>
                 <div className="text-xs uppercase tracking-wide text-mute">Phone</div>
                 <div className="mt-1 text-sm font-medium">{contact.phone || "—"}</div>
+                <label className="mt-3 flex items-start gap-3 rounded-xl border border-[#D5C7E2] bg-[#F8F3FB] px-3 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={smsOptIn}
+                    readOnly
+                    disabled
+                    className="mt-1 h-4 w-4 rounded border-[#7A3168] text-[#7A3168] opacity-100"
+                  />
+                  <span className="text-xs leading-relaxed text-gray-700">{SMS_OPT_IN_COPY}</span>
+                </label>
+                <div className="mt-2 text-xs text-mute">
+                  <Link className="link" to="/privacy">
+                    Privacy Policy
+                  </Link>{" "}
+                  and{" "}
+                  <Link className="link" to="/terms">
+                    Terms of Service
+                  </Link>
+                  .
+                </div>
+                <div className="mt-1 text-xs font-medium text-[#7A3168]">
+                  To opt out click{" "}
+                  <a className="underline" href={SMS_OPT_OUT_LINK}>
+                    HERE
+                  </a>
+                  .
+                </div>
               </div>
             </div>
           </div>

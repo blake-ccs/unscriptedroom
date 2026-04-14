@@ -2338,6 +2338,8 @@ app.post("/api/contact", async (req, res) => {
     console.log("Incoming contact payload:", {
       name: payload.name,
       email: payload.email,
+      phone: payload.phone,
+      smsOptIn: payload.smsOptIn,
       subject: payload.subject,
       messageLength: payload.message ? payload.message.length : 0,
     });
@@ -2374,6 +2376,7 @@ app.post("/api/contact", async (req, res) => {
           email: normalizeEmail(payload.email),
           firstName,
           lastName,
+          phone: payload.phone || "",
         });
         if (contact?.id) {
           await upsertFieldValues(contact.id, {
@@ -2418,6 +2421,8 @@ app.post("/api/contact", async (req, res) => {
         "Type: Contact Us",
         `Name: ${payload.name}`,
         `Email: ${payload.email}`,
+        `Phone: ${payload.phone || "N/A"}`,
+        `SMS Opt-In: ${payload.phone ? (payload.smsOptIn ? "Yes" : "No") : "Not provided"}`,
         `Subject: ${payload.subject}`,
         "Message:",
         payload.message,

@@ -5,6 +5,16 @@ import ContactUsModal from "../components/ContactUsModal";
 import { getAuthEmail, clearAuth } from "../lib/auth";
 
 const logoImageUrl = new URL("../assets/UR LOGO dark.png", import.meta.url).href;
+const SMS_OPT_IN_COPY =
+  "By providing your phone number, you agree to receive text messages from The Unscripted Room. We will only message you regarding your expressed interest. Message and data rates may apply.";
+const SMS_OPT_OUT_LINK = "mailto:info@curiositystrategy.com?subject=SMS%20Opt%20Out";
+
+function parseCommunicationPreferences(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 export default function My() {
   const [status, setStatus] = useState<any>(null);
@@ -17,6 +27,7 @@ export default function My() {
   const navigate = useNavigate();
   const location = useLocation();
   const [logoDance, setLogoDance] = useState(false);
+  const [smsOptIn, setSmsOptIn] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -124,6 +135,7 @@ export default function My() {
       trevorExample: general.trevorExample || "",
       eventDay: general.eventDay || "",
     });
+    setSmsOptIn(parseCommunicationPreferences(general.preferredCommunicationMethod || "").includes("Text"));
   }, [status]);
 
   const updateField = (key: string, value: string) => {
@@ -139,13 +151,23 @@ export default function My() {
     setIsSaving(true);
     setSaveNotice("");
     try {
+      if (smsOptIn && !(form.phone || "").trim()) {
+        throw new Error("Add a phone number before opting in to text messages.");
+      }
+      const communicationPreferences = parseCommunicationPreferences(form.preferredCommunicationMethod || "");
+      const nextCommunicationPreferences = smsOptIn
+        ? Array.from(new Set([...communicationPreferences.filter((item) => item !== "Text"), "Text"]))
+        : communicationPreferences.filter((item) => item !== "Text");
       const res = await fetch(`${API_BASE}/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          preferredCommunicationMethod: nextCommunicationPreferences.join(", "),
+        }),
         cache: "no-store",
       });
       if (!res.ok) {
@@ -155,8 +177,8 @@ export default function My() {
       setStatus(data);
       setSaveNotice("Saved!");
       setIsEditing(false);
-    } catch (err) {
-      setSaveNotice("Save failed. Try again.");
+    } catch (err: any) {
+      setSaveNotice(err?.message || "Save failed. Try again.");
     } finally {
       setIsSaving(false);
       window.setTimeout(() => setSaveNotice(""), 2000);
@@ -271,14 +293,65 @@ export default function My() {
                 <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
                   <div className="text-xs uppercase tracking-wide text-mute">Phone</div>
                   {isEditing ? (
-                    <input
-                      className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                      placeholder="Phone"
-                      value={form.phone || ""}
-                      onChange={(e) => updateField("phone", e.target.value)}
-                    />
+                    <div className="mt-2 space-y-3">
+                      <input
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        placeholder="Phone"
+                        value={form.phone || ""}
+                        onChange={(e) => updateField("phone", e.target.value)}
+                      />
+                      <label className="flex items-start gap-3 rounded-xl border border-[#D5C7E2] bg-[#F8F3FB] px-3 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={smsOptIn}
+                          onChange={(e) => setSmsOptIn(e.target.checked)}
+                          className="mt-1 h-4 w-4 rounded border-[#7A3168] text-[#7A3168] focus:ring-[#7A3168]"
+                        />
+                        <span className="text-xs leading-relaxed text-gray-700">{SMS_OPT_IN_COPY}</span>
+                      </label>
+                      <div className="text-xs text-mute">
+                        <Link className="link" to="/privacy">
+                          Privacy Policy
+                        </Link>{" "}
+                        and{" "}
+                        <Link className="link" to="/terms">
+                          Terms of Service
+                        </Link>
+                        .
+                      </div>
+                      <div className="text-xs font-medium text-[#7A3168]">
+                        To opt out click{" "}
+                        <a className="underline" href={SMS_OPT_OUT_LINK}>
+                          HERE
+                        </a>
+                        .
+                      </div>
+                    </div>
                   ) : (
-                    <div className="mt-1 text-sm font-medium">{contact.phone || "—"}</div>
+                    <div className="mt-2 space-y-2">
+                      <div className="text-sm font-medium">{contact.phone || "—"}</div>
+                      <div className="text-xs text-mute">
+                        SMS status: {parseCommunicationPreferences(general.preferredCommunicationMethod || "").includes("Text") ? "Opted in" : "Opted out"}
+                      </div>
+                      <div className="text-xs text-mute">{SMS_OPT_IN_COPY}</div>
+                      <div className="text-xs text-mute">
+                        <Link className="link" to="/privacy">
+                          Privacy Policy
+                        </Link>{" "}
+                        and{" "}
+                        <Link className="link" to="/terms">
+                          Terms of Service
+                        </Link>
+                        .
+                      </div>
+                      <div className="text-xs font-medium text-[#7A3168]">
+                        To opt out click{" "}
+                        <a className="underline" href={SMS_OPT_OUT_LINK}>
+                          HERE
+                        </a>
+                        .
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

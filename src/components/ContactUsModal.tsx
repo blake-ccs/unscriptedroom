@@ -43,6 +43,8 @@ const INTEREST_OPTIONS = [
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 const TIMES_OF_DAY = ["Morning", "Afternoon", "Evening"] as const;
 const COMMUNICATION_OPTIONS = ["Email", "Text", "Phone - call"] as const;
+const SMS_OPT_IN_COPY =
+  "By providing your phone number, you agree to receive text messages from The Unscripted Room. We will only message you regarding your expressed interest. Message and data rates may apply.";
 
 export default function ContactUsModal({
   isOpen,
@@ -55,6 +57,7 @@ export default function ContactUsModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [smsOptIn, setSmsOptIn] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [guestStep, setGuestStep] = useState(0);
@@ -130,6 +133,7 @@ export default function ContactUsModal({
     setName("");
     setEmail("");
     setPhone("");
+    setSmsOptIn(false);
     setSubject(initialTopic || "");
     setMessage("");
     setGuestStep(0);
@@ -151,6 +155,7 @@ export default function ContactUsModal({
 
   const guestValidationError = () => {
     if (!isGuestMode) return "";
+    if (phone.trim() && !smsOptIn) return "Please confirm SMS consent to provide your phone number.";
     if (guestStep === 0) {
       if (!name.trim() || !email.trim()) return "Please complete your contact details.";
       if (!experiencePreference) return "Please choose your experience preference.";
@@ -184,6 +189,7 @@ export default function ContactUsModal({
     [
       `Application Type: ${guestConfig?.subject || ""}`,
       `Phone Number: ${phone}`,
+      `SMS Opt-In: ${phone.trim() ? (smsOptIn ? "Yes" : "No") : "Not provided"}`,
       `Experience Preference: ${experiencePreference}`,
       `Primary Conversation Interest: ${conversationInterest}`,
       `Preferred Days: ${preferredDays.join(", ")}`,
@@ -198,6 +204,10 @@ export default function ContactUsModal({
     if (!isGuestMode) {
       if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
         setError("Please complete all fields.");
+        return;
+      }
+      if (phone.trim() && !smsOptIn) {
+        setError("Please confirm SMS consent to provide your phone number.");
         return;
       }
     } else {
@@ -226,8 +236,12 @@ export default function ContactUsModal({
               ? {
                   name,
                   email,
+                  phone,
+                  smsOptIn,
                   subject,
-                  message,
+                  message: phone.trim()
+                    ? `${message}\n\nPhone Number: ${phone}\nSMS Opt-In: ${smsOptIn ? "Yes" : "No"}`
+                    : message,
                 }
               : {
                   email,
@@ -238,6 +252,7 @@ export default function ContactUsModal({
                   source: "web",
                   experiencePreference,
                   preferredCommunicationMethod: communicationPreferences.join(", "),
+                  smsOptIn,
                   preferredDay: preferredDays.join(", "),
                   preferredTime: preferredTimes.join(", "),
                   reasonsForSignup: experiencePreference,
@@ -332,6 +347,28 @@ export default function ContactUsModal({
                 </div>
 
                 <div className="mt-3">
+                  <Field label="Phone Number">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      placeholder="(555) 555 - 5555"
+                      className={inputClassName}
+                    />
+                  </Field>
+                </div>
+
+                <label className="mt-3 flex items-start gap-3 rounded-[14px] border border-[#D5C7E2] bg-[#F8F3FB] px-3 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={smsOptIn}
+                    onChange={(event) => setSmsOptIn(event.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-[#7A3168] text-[#7A3168] focus:ring-[#7A3168]"
+                  />
+                  <span className="text-xs leading-relaxed text-[#4B5563]">{SMS_OPT_IN_COPY}</span>
+                </label>
+
+                <div className="mt-3">
                   <Field label="Choose a topic">
                     <select
                       value={subject}
@@ -400,6 +437,16 @@ export default function ContactUsModal({
                     />
                   </Field>
                 </div>
+
+                <label className="mt-3 flex items-start gap-3 rounded-[14px] border border-[#D5C7E2] bg-[#F8F3FB] px-3 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={smsOptIn}
+                    onChange={(event) => setSmsOptIn(event.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-[#7A3168] text-[#7A3168] focus:ring-[#7A3168]"
+                  />
+                  <span className="text-xs leading-relaxed text-[#4B5563]">{SMS_OPT_IN_COPY}</span>
+                </label>
 
                 <StepHeading className="mt-3">Experience Preference</StepHeading>
                 <InfoPanel>{guestConfig?.experienceBody || ""}</InfoPanel>
