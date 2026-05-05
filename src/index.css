@@ -15,6 +15,18 @@ body {
   font-family: "Nunito", "Segoe UI", Tahoma, sans-serif;
 }
 
+button {
+  @apply border-[0.75px] border-gray-300;
+}
+
+form button {
+  @apply border-0;
+}
+
+button[aria-label="The Unscripted Room logo"] {
+  @apply border-0;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: "Montserrat", "Segoe UI", Tahoma, sans-serif;
 }
@@ -28,13 +40,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl2 border border-transparent px-4 py-2 text-sm font-semibold transition;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl2 border-[0.75px] px-4 py-2 text-sm font-semibold transition;
 }
 .btn-primary {
-  @apply bg-brand-600 text-white hover:bg-brand-700 shadow-soft;
+  @apply border-brand-700 bg-brand-600 text-white hover:bg-brand-700 shadow-soft;
 }
 .btn-ghost {
-  @apply bg-transparent text-ink hover:bg-gray-100;
+  @apply border-gray-300 bg-transparent text-ink hover:bg-gray-100;
 }
 .card {
   @apply rounded-xl3 border border-gray-200 bg-white shadow-soft;

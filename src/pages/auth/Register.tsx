@@ -52,7 +52,7 @@ export default function Register() {
       <div className="mb-6 flex items-center gap-3">
         <Link
           to="/"
-          className="inline-flex items-center justify-center rounded-full border border-black/10 bg-white p-2 text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          className="inline-flex items-center justify-center rounded-full border-[0.75px] border-black/10 bg-white p-2 text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           aria-label="Back to home"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">

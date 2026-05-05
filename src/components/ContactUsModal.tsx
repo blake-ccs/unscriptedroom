@@ -45,6 +45,133 @@ const TIMES_OF_DAY = ["Morning", "Afternoon", "Evening"] as const;
 const COMMUNICATION_OPTIONS = ["Email", "Text", "Phone - call"] as const;
 const SMS_OPT_IN_COPY =
   "By providing your phone number, you agree to receive text messages from The Unscripted Room. We will only message you regarding your expressed interest. Message and data rates may apply.";
+const agreementLogoUrl = new URL("../assets/UR LOGO dark.png", import.meta.url).href;
+const PODCAST_GUEST_CONTRACT_URL = (import.meta.env.VITE_PODCAST_GUEST_CONTRACT_URL as string | undefined)?.trim() || "";
+const PODCAST_GUEST_CONTRACT_TEXT = `
+Guest Participation Agreement
+The Unscripted Room Podcast
+
+The conversations that take place in The Unscripted Room are meant to be real, thoughtful, and
+unfiltered. Each conversation is an opportunity to explore ideas, perspectives, and lived experiences
+with curiosity and openness.
+
+By participating, you are helping create a space where honest conversation can unfold and where
+others listening may discover perspectives they might not otherwise encounter.
+
+Because this is a podcast, the conversation will be recorded and later shared publicly as part of the
+show and related content. Before we begin, we want to make sure everyone participating understands
+how the recording may be used and feels comfortable moving forward.
+
+The intention of The Unscripted Room is to create space for thoughtful conversation, curiosity, and
+shared perspective. This agreement simply helps ensure those conversations can be shared
+responsibly while respecting the people who take part in them.
+
+What Participation Involves
+This conversation will be recorded in audio and/or video format. The recording may include your voice,
+image, likeness, name, and statements made during the discussion.
+
+Content from the recording may appear in places such as:
+• The Unscripted Room Podcast episode
+• Video recordings of the conversation
+• Short clips or excerpts from the discussion
+• The Unscripted Room website
+• Social media platforms
+• Promotional or marketing materials connected to the podcast
+• Educational or editorial content related to the show
+• Podcast platforms such as Apple Podcasts, Spotify, YouTube, and similar services
+
+The goal of sharing these recordings is to extend the conversation beyond the room so others can
+listen, reflect, and engage with the ideas explored during the discussion.
+
+Editing and Production
+The Unscripted Room is designed to capture conversation as it happens.
+
+Our goal is to share conversations in a way that reflects how they actually unfolded in the room. We do
+not edit conversations to reshape, reinterpret, or change the meaning of what was shared.
+
+Our role is to create the environment for the conversation and record it with care. In post-production, we
+may align audio for clarity, address technical issues, and integrate the opening sequence, while
+keeping the conversation itself intact.
+
+This approach is intentional.
+
+We believe that trust with our audience, and with the people who choose to participate, comes from
+sharing conversations as they naturally unfold.
+
+Authenticity in conversation matters more to us than producing something polished or performative.
+That includes moments of clarity, uncertainty, reflection, and even discomfort.
+
+At times, something said in the moment may feel different when reflected on later. We recognize that as
+part of the nature of real conversation and personal growth, not something that should automatically be
+edited away.
+
+Because of this, we provide a reflection window after the recording so participants have time to
+consider their experience before anything is shared publicly.
+
+48-Hour Reflection Window
+After the conversation is recorded, we provide a 48-hour reflection window before anything is publicly
+shared. This time is intended to give participants space to reflect on the experience and feel confident
+about what was shared during the conversation.
+
+If within that window you decide that you would prefer not to have your participation included in publicly
+shared content, you can simply let us know and we will honor that request. Your portion of the
+conversation will not be published.
+
+We offer this reflection period because conversations in The Unscripted Room are designed to be
+open, thoughtful, and sometimes deeply personal. Providing this space allows participants to revisit the
+experience with clarity and comfort before the conversation is shared with a wider audience.
+
+After the 48-hour reflection window has passed, the recording may be released and distributed as part
+of the podcast and related materials.
+
+Sharing the Conversation
+By participating, you grant The Unscripted Room Podcast permission to record and share your voice,
+image, likeness, name, and statements captured during the conversation.
+
+This allows the conversation to be published as part of podcast episodes, video recordings, short clips,
+and related materials across podcast platforms, websites, social media, and other spaces where the
+show is shared.
+
+All recordings, transcripts, and related materials created from the conversation become part of The
+Unscripted Room Podcast archive and may be used to support the podcast and its mission of sharing
+thoughtful conversations with a wider audience.
+
+Voluntary Participation
+Participation in The Unscripted Room Podcast is entirely voluntary.
+
+Guests do not receive financial compensation, royalties, or other payment for participating or for the
+use of recorded content. Most participants choose to take part because they value the opportunity to
+share ideas, perspectives, and experiences with a broader audience.
+
+Responsibility for Statements
+While we take care to present conversations honestly and respectfully, each participant remains
+responsible for the statements and perspectives they choose to share during the discussion.
+
+By participating in this agreement, you acknowledge that The Unscripted Room Podcast and its
+owners, employees, partners, and collaborators are not responsible for claims that may arise from
+statements made during the recording or from the publication of the conversation as described in this
+document.
+
+Additional Acknowledgements
+By participating, you confirm that you have read and understand the terms described in this agreement
+and feel comfortable participating in the conversation under those conditions.
+
+To ensure clarity for everyone involved, we also ask guests to confirm the following:
+• You are at least eighteen (18) years of age
+• You have the authority to participate in this recording and grant the permissions described above
+• Your participation in this conversation does not violate any agreements or obligations you may
+have with another individual, employer, or organization
+
+Because The Unscripted Room is built around real conversation and honest perspective, participants
+remain responsible for the views and statements they choose to share.
+
+Participation in the podcast is voluntary, and guests are always welcome to ask questions about this
+agreement before participating.
+
+Thank you for being willing to take part in this conversation. The Unscripted Room exists because
+people are open to sharing their perspectives, listening to others, and exploring ideas with curiosity and
+respect. We’re grateful for your willingness to be part of that experience.
+`.trim();
 
 export default function ContactUsModal({
   isOpen,
@@ -66,6 +193,10 @@ export default function ContactUsModal({
   const [preferredDays, setPreferredDays] = useState<string[]>([]);
   const [preferredTimes, setPreferredTimes] = useState<string[]>([]);
   const [communicationPreferences, setCommunicationPreferences] = useState<string[]>([]);
+  const [hasOpenedGuestAgreement, setHasOpenedGuestAgreement] = useState(false);
+  const [hasAcceptedGuestAgreement, setHasAcceptedGuestAgreement] = useState(false);
+  const [isGuestAgreementOpen, setIsGuestAgreementOpen] = useState(false);
+  const [isAgreementScrolledToEnd, setIsAgreementScrolledToEnd] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -142,6 +273,10 @@ export default function ContactUsModal({
     setPreferredDays([]);
     setPreferredTimes([]);
     setCommunicationPreferences([]);
+    setHasOpenedGuestAgreement(false);
+    setHasAcceptedGuestAgreement(false);
+    setIsGuestAgreementOpen(false);
+    setIsAgreementScrolledToEnd(false);
     setIsSubmitted(false);
     setIsSubmitting(false);
     setError("");
@@ -163,6 +298,9 @@ export default function ContactUsModal({
     }
     if (guestStep === 1) {
       return conversationInterest ? "" : "Please choose the conversation that feels most interesting to you.";
+    }
+    if (mode === "podcast-guest" && !hasAcceptedGuestAgreement) {
+      return "Please review and accept the podcast guest agreement before submitting.";
     }
     if (!preferredDays.length || !preferredTimes.length || !communicationPreferences.length) {
       return "Please choose at least one option in each availability section.";
@@ -258,7 +396,7 @@ export default function ContactUsModal({
                   reasonsForSignup: experiencePreference,
                   reasonsForJoining:
                     conversationInterest || (experiencePreference === "Experience this as a company event" ? experiencePreference : ""),
-                  bioAboutMe: buildGuestMessage(),
+                  bioAboutMe: `${buildGuestMessage()}\nGuest Agreement Accepted: ${mode === "podcast-guest" ? (hasAcceptedGuestAgreement ? "Yes" : "No") : "Not required"}`,
                 }
           ),
         }
@@ -270,6 +408,28 @@ export default function ContactUsModal({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenGuestAgreement = () => {
+    setHasOpenedGuestAgreement(true);
+    setIsAgreementScrolledToEnd(false);
+    setIsGuestAgreementOpen(true);
+    setError("");
+  };
+
+  const handleAgreementScroll = (event: { currentTarget: HTMLDivElement }) => {
+    const target = event.currentTarget;
+    const reachedBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 8;
+    if (reachedBottom) {
+      setIsAgreementScrolledToEnd(true);
+    }
+  };
+
+  const handleAcceptGuestAgreement = (checked: boolean) => {
+    if (!checked || !isAgreementScrolledToEnd) return;
+    setHasAcceptedGuestAgreement(true);
+    setIsGuestAgreementOpen(false);
+    setError("");
   };
 
   return (
@@ -286,7 +446,7 @@ export default function ContactUsModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#D5C7E2] bg-white text-[10px] font-semibold text-[#7A3168] transition hover:bg-[#F8F3FB]"
+          className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border-[0.75px] border-[#D5C7E2] bg-white text-[10px] font-semibold text-[#7A3168] transition hover:bg-[#F8F3FB]"
           aria-label="Close contact form"
         >
           X
@@ -309,7 +469,7 @@ export default function ContactUsModal({
               <button
                 type="button"
                 onClick={onClose}
-                  className="inline-flex min-w-28 items-center justify-center rounded-[10px] border border-[#7A3168] bg-white px-4 py-2 text-sm font-medium text-[#7A3168] transition hover:bg-[#F8F3FB]"
+                  className="inline-flex min-w-28 items-center justify-center rounded-[10px] border-[0.75px] border-[#7A3168] bg-white px-4 py-2 text-sm font-medium text-[#7A3168] transition hover:bg-[#F8F3FB]"
               >
                 Close
               </button>
@@ -548,6 +708,39 @@ export default function ContactUsModal({
                     <p className="mt-1.5 text-[10px] font-medium text-[#7A3168]">*Please select all that apply</p>
                   </div>
                 </div>
+
+                {mode === "podcast-guest" ? (
+                  <div className="mt-4 rounded-[14px] border border-[#D5C7E2] bg-[#F8F3FB] px-4 py-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-[0.9rem] font-semibold text-[#231F20]">Required guest agreement</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[#4B5563]">
+                          Open the agreement, scroll to the bottom, and accept it before submitting this form.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleOpenGuestAgreement}
+                        className="inline-flex items-center justify-center rounded-[10px] border-[0.75px] border-[#7A3168] bg-white px-4 py-2 text-sm font-medium text-[#7A3168] transition hover:bg-[#F8F3FB]"
+                      >
+                        {hasAcceptedGuestAgreement ? "Review agreement" : "Open agreement"}
+                      </button>
+                    </div>
+
+                    <label className="mt-3 flex items-start gap-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={hasAcceptedGuestAgreement}
+                        readOnly
+                        disabled={!hasOpenedGuestAgreement}
+                        className="mt-1 h-4 w-4 rounded border border-black bg-white text-black accent-black focus:ring-black disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                      <span className="text-xs leading-relaxed text-[#4B5563]">
+                        I have reviewed and accepted the podcast guest agreement.
+                      </span>
+                    </label>
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -617,6 +810,74 @@ export default function ContactUsModal({
           </form>
         )}
       </div>
+
+      {isGuestAgreementOpen ? (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 px-4 py-4 backdrop-blur-[2px]">
+          <div
+            className="relative w-full max-w-2xl overflow-hidden rounded-[18px] border border-[#D5C7E2] bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="border-b border-[#E8DCE8] px-5 py-4">
+              <div className="flex justify-center pb-3">
+                <img src={agreementLogoUrl} alt="The Unscripted Room logo" className="h-14 w-auto" />
+              </div>
+              <h4 className="text-lg font-semibold text-[#231F20]">Podcast guest agreement</h4>
+              <p className="mt-1 text-sm text-[#5B6064]">
+                Scroll to the bottom of the agreement to enable acceptance.
+              </p>
+            </div>
+
+            <div className="px-5 py-4">
+              {PODCAST_GUEST_CONTRACT_URL ? (
+                <div
+                  className="max-h-[52vh] overflow-y-auto rounded-[12px] border border-[#D5C7E2] bg-[#FCFAFD]"
+                  onScroll={handleAgreementScroll}
+                >
+                  <iframe
+                    title="Podcast guest agreement"
+                    src={PODCAST_GUEST_CONTRACT_URL}
+                    className="h-[70vh] min-h-[640px] w-full border-0 bg-white"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="max-h-[52vh] overflow-y-auto rounded-[12px] border border-[#D5C7E2] bg-[#FCFAFD] px-4 py-4"
+                  onScroll={handleAgreementScroll}
+                >
+                  <div className="whitespace-pre-line text-sm leading-relaxed text-[#231F20]">
+                    {PODCAST_GUEST_CONTRACT_TEXT}
+                  </div>
+                </div>
+              )}
+
+              <label className="mt-4 flex items-start gap-3 rounded-[14px] border border-[#D5C7E2] bg-[#F8F3FB] px-4 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={hasAcceptedGuestAgreement}
+                  disabled={!isAgreementScrolledToEnd}
+                  onChange={(event) => handleAcceptGuestAgreement(event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border border-black bg-white text-black accent-black focus:ring-black disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <span className="text-xs leading-relaxed text-[#4B5563]">
+                  {isAgreementScrolledToEnd
+                    ? "I have reviewed this agreement and agree to these terms."
+                    : "Scroll to the bottom of the agreement to enable this confirmation."}
+                </span>
+              </label>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsGuestAgreementOpen(false)}
+                  className={secondaryButtonClassName}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -719,4 +980,4 @@ const primaryButtonClassName =
   "inline-flex min-w-32 items-center justify-center rounded-[10px] bg-[#7A3168] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#3B2C57] disabled:cursor-not-allowed disabled:opacity-70";
 
 const secondaryButtonClassName =
-  "inline-flex min-w-32 items-center justify-center rounded-[10px] border border-[#C8A7C7] bg-white px-5 py-2.5 text-sm font-medium text-[#7A3168] transition hover:bg-[#F8F3FB]";
+  "inline-flex min-w-32 items-center justify-center rounded-[10px] border-[0.75px] border-[#C8A7C7] bg-white px-5 py-2.5 text-sm font-medium text-[#7A3168] transition hover:bg-[#F8F3FB]";

@@ -145,7 +145,7 @@ export default function Why() {
               <button
                 type="button"
                 onClick={handleAccountClick}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] border-black/10 bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Account"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -158,7 +158,7 @@ export default function Why() {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] border-black/10 bg-[#f4ece1] text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Register or login"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -207,7 +207,7 @@ export default function Why() {
             <button
               type="button"
               onClick={() => setSlideIndex((index) => Math.max(0, index - 1))}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border ${
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] ${
                 slideIndex === 0
                   ? "border-black/10 text-black/20"
                   : "border-black/20 text-black hover:-translate-y-0.5 hover:shadow-md"
@@ -238,7 +238,7 @@ export default function Why() {
             <button
               type="button"
               onClick={() => setSlideIndex((index) => Math.min(slides.length - 1, index + 1))}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border ${
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] ${
                 slideIndex === slides.length - 1
                   ? "border-black/10 text-black/20"
                   : "border-black/20 text-black hover:-translate-y-0.5 hover:shadow-md"

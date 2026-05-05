@@ -87,6 +87,7 @@ const AC_FIELD_UPDATES_OPTIN = normalizeFieldId(process.env.ACTIVE_CAMPAIGN_FIEL
 const AC_FIELD_AGE_CONFIRMED = normalizeFieldId(process.env.ACTIVE_CAMPAIGN_FIELD_AGE_CONFIRMED);
 const AC_FIELD_CONTACT_SUBJECT = normalizeFieldId(process.env.ACTIVE_CAMPAIGN_FIELD_CONTACT_SUBJECT);
 const AC_FIELD_CONTACT_MESSAGE = normalizeFieldId(process.env.ACTIVE_CAMPAIGN_FIELD_CONTACT_MESSAGE);
+const AC_FIELD_SMS_OPT_IN = normalizeFieldId(process.env.AC_FIELD_SMS_OPT_IN);
 const AC_FIELD_PASSWORD = normalizeFieldId(process.env.AC_FIELD_PASSWORD);
 console.log("SendGrid disabled. Using ActiveCampaign only.");
 
@@ -123,6 +124,21 @@ const AC_FIELD_CALENDLY_REBOOK_URI = normalizeFieldId(process.env.AC_FIELD_CALEN
 const AC_SURVEY_SCHEMA_ID = process.env.AC_SURVEY_SCHEMA_ID;
 const AC_CONTACT_MESSAGE_SCHEMA_ID = process.env.AC_CONTACT_MESSAGE_SCHEMA_ID;
 const AC_COIN_SCHEMA_ID = process.env.AC_COIN_SCHEMA_ID;
+const AC_FIRST_TIMER_SCHEMA_ID = process.env.AC_FIRST_TIMER_SCHEMA_ID;
+const AC_FIRST_TIMER_FIELD_NAME = process.env.AC_FIRST_TIMER_FIELD_NAME || "%CO:first-timer:name%";
+const AC_FIRST_TIMER_FIELD_FIRST_TIME = process.env.AC_FIRST_TIMER_FIELD_FIRST_TIME || "%CO:first-timer:first-time%";
+const AC_EPISODE_PURCHASED_SCHEMA_ID = process.env.AC_EPISODE_PURCHASED_SCHEMA_ID;
+const AC_EPISODE_PURCHASED_FIELD_NAME = process.env.AC_EPISODE_PURCHASED_FIELD_NAME || "%CO:episode-purchased:name%";
+const AC_EPISODE_PURCHASED_FIELD_EPISODE1 =
+  process.env.AC_EPISODE_PURCHASED_FIELD_EPISODE1 || "%CO:episode-purchased:episode1%";
+const AC_EPISODE_PURCHASED_FIELD_EPISODE2 =
+  process.env.AC_EPISODE_PURCHASED_FIELD_EPISODE2 || "%CO:episode-purchased:episode2%";
+const AC_EPISODE_PURCHASED_FIELD_EPISODE3 =
+  process.env.AC_EPISODE_PURCHASED_FIELD_EPISODE3 || "%CO:episode-purchased:episode3%";
+const AC_EPISODE_PURCHASED_FIELD_EPISODE4 =
+  process.env.AC_EPISODE_PURCHASED_FIELD_EPISODE4 || "%CO:episode-purchased:episode4%";
+const AC_EPISODE_PURCHASED_FIELD_EPISODE5 =
+  process.env.AC_EPISODE_PURCHASED_FIELD_EPISODE5 || "%CO:episode-purchased:episode5%";
 const AC_COIN_FIELD_NAME = process.env.AC_COIN_FIELD_NAME || "%CO:transaction:name%";
 const AC_COIN_FIELD_AMOUNT = process.env.AC_COIN_FIELD_AMOUNT || "%CO:transaction:amount%";
 const AC_COIN_FIELD_TIMESTAMP = process.env.AC_COIN_FIELD_TIMESTAMP || "%CO:transaction:timestamp%";
@@ -153,7 +169,17 @@ const contactMessageSchemaCache = {
   fields: null,
   expiresAt: 0,
 };
+const firstTimerSchemaCache = {
+  schemaId: null,
+  fields: null,
+  expiresAt: 0,
+};
 const coinSchemaCache = {
+  schemaId: null,
+  fields: null,
+  expiresAt: 0,
+};
+const episodePurchasedSchemaCache = {
   schemaId: null,
   fields: null,
   expiresAt: 0,
@@ -161,43 +187,44 @@ const coinSchemaCache = {
 
 const normalizePerstag = (value) => String(value || "").replace(/%/g, "").toLowerCase();
 const normalizeSchemaId = (value) => String(value || "").replace(/^schemas\//, "");
+const isNumericId = (value) => value && /^[0-9]+$/.test(String(value));
 
-const getCoinFieldIds = async () => {
-  const schemaId = normalizeSchemaId(AC_COIN_SCHEMA_ID);
+const extractSchemaFields = (response) =>
+  response?.schema?.fields ||
+  response?.schema?.data?.fields ||
+  response?.fields ||
+  response?.data?.fields ||
+  [];
+
+const resolveCustomObjectFieldIds = async ({
+  schemaId: rawSchemaId,
+  cache,
+  targets,
+  logLabel,
+}) => {
+  const schemaId = normalizeSchemaId(rawSchemaId);
   if (!schemaId) return null;
-  const directAmount = String(AC_COIN_FIELD_AMOUNT || "").trim();
-  const directTimestamp = String(AC_COIN_FIELD_TIMESTAMP || "").trim();
-  const directName = String(AC_COIN_FIELD_NAME || "").trim();
-  const isNumericId = (value) => value && /^[0-9]+$/.test(value);
-  if (isNumericId(directAmount) && isNumericId(directTimestamp)) {
-    return {
-      schemaId,
-      name: isNumericId(directName) ? directName : null,
-      amount: directAmount,
-      timestamp: directTimestamp,
-    };
+  const directResolved = {};
+  let allDirect = true;
+  Object.entries(targets).forEach(([key, config]) => {
+    const direct = String(config.perstag || "").trim();
+    directResolved[key] = isNumericId(direct) ? direct : null;
+    if (!directResolved[key]) allDirect = false;
+  });
+  if (allDirect) {
+    return { schemaId, ...directResolved };
   }
+
   const now = Date.now();
-  if (
-    coinSchemaCache.schemaId === schemaId &&
-    coinSchemaCache.fields &&
-    coinSchemaCache.expiresAt > now
-  ) {
-    return coinSchemaCache.fields;
+  if (cache.schemaId === schemaId && cache.fields && cache.expiresAt > now) {
+    return cache.fields;
   }
+
   try {
-    const response = await acV3Request(
-      "GET",
-      `/api/3/customObjects/schemas/${schemaId}`
-    );
-    const fields =
-      response?.schema?.fields ||
-      response?.schema?.data?.fields ||
-      response?.fields ||
-      response?.data?.fields ||
-      [];
+    const response = await acV3Request("GET", `/api/3/customObjects/schemas/${schemaId}`);
+    const fields = extractSchemaFields(response);
     const byPerstag = (target) =>
-      fields.find((field) => normalizePerstag(field.perstag) === normalizePerstag(target));
+      fields.find((field) => normalizePerstag(field?.perstag) === normalizePerstag(target));
     const byLabel = (target) =>
       fields.find((field) => normalizePerstag(field?.label) === normalizePerstag(target));
     const byId = (target) =>
@@ -208,17 +235,20 @@ const getCoinFieldIds = async () => {
         const label = normalizePerstag(field?.label);
         return perstag.includes(needle) || label.includes(needle);
       });
-    const resolve = (target, fallbackId, containsNeedle) =>
-      byPerstag(target) || byLabel(target) || byId(fallbackId) || (containsNeedle ? byContains(containsNeedle) : null);
-    const resolved = {
-      schemaId,
-      name: resolve(AC_COIN_FIELD_NAME, "name", "name")?.id || null,
-      amount: resolve(AC_COIN_FIELD_AMOUNT, "amount", "amount")?.id || null,
-      timestamp: resolve(AC_COIN_FIELD_TIMESTAMP, "timestamp", "timestamp")?.id || null,
-      isSpend: resolve(AC_COIN_FIELD_IS_SPEND, "isSpend", "isspend")?.id || null,
-    };
-    if (!resolved.amount || !resolved.timestamp) {
-      console.error("Coin schema fields unresolved", {
+    const resolved = { schemaId };
+    Object.entries(targets).forEach(([key, config]) => {
+      resolved[key] =
+        byPerstag(config.perstag)?.id ||
+        byLabel(config.label || config.perstag)?.id ||
+        byId(config.fallbackId)?.id ||
+        (config.contains ? byContains(config.contains)?.id : null) ||
+        null;
+    });
+    cache.schemaId = schemaId;
+    cache.fields = resolved;
+    cache.expiresAt = now + 10 * 60 * 1000;
+    if (Object.values(resolved).some((value, index) => index > 0 && !value)) {
+      console.error(`${logLabel} fields unresolved`, {
         schemaId,
         fields: fields.map((field) => ({
           id: field.id,
@@ -228,14 +258,25 @@ const getCoinFieldIds = async () => {
         resolved,
       });
     }
-    coinSchemaCache.schemaId = schemaId;
-    coinSchemaCache.fields = resolved;
-    coinSchemaCache.expiresAt = now + 10 * 60 * 1000;
     return resolved;
   } catch (error) {
-    console.error("Coin schema lookup failed", error?.message || error);
+    console.error(`${logLabel} schema lookup failed`, error?.message || error);
     return null;
   }
+};
+
+const getCoinFieldIds = async () => {
+  return resolveCustomObjectFieldIds({
+    schemaId: AC_COIN_SCHEMA_ID,
+    cache: coinSchemaCache,
+    logLabel: "Coin schema",
+    targets: {
+      name: { perstag: AC_COIN_FIELD_NAME, fallbackId: "name", contains: "name" },
+      amount: { perstag: AC_COIN_FIELD_AMOUNT, fallbackId: "amount", contains: "amount" },
+      timestamp: { perstag: AC_COIN_FIELD_TIMESTAMP, fallbackId: "timestamp", contains: "timestamp" },
+      isSpend: { perstag: AC_COIN_FIELD_IS_SPEND, fallbackId: "isSpend", contains: "isspend" },
+    },
+  });
 };
 
 const createCoinTransaction = async ({ contactId, name, amount, timestamp, isSpend, externalId }) => {
@@ -261,10 +302,9 @@ const createCoinTransaction = async ({ contactId, name, amount, timestamp, isSpe
   return acV3Request("POST", `/api/3/customObjects/records/${ids.schemaId}`, record);
 };
 
-const listCoinTransactions = async (contactId) => {
-  const ids = await getCoinFieldIds();
+const listCustomObjectRecords = async (contactId, ids, errorMessage) => {
   if (!ids?.schemaId) {
-    throw new Error("Coin schema not configured.");
+    throw new Error(errorMessage);
   }
   const records = [];
   let page = 1;
@@ -302,6 +342,206 @@ const listCoinTransactions = async (contactId) => {
   return { records: filtered, fieldIds: ids };
 };
 
+const listCoinTransactions = async (contactId) => {
+  const ids = await getCoinFieldIds();
+  return listCustomObjectRecords(contactId, ids, "Coin schema not configured.");
+};
+
+const getEpisodeCoinSummary = async (contactId, episodeId) => {
+  const normalizedEpisodeId = String(episodeId || "").trim().toLowerCase();
+  const { records, fieldIds } = await listCoinTransactions(contactId);
+  const purchasedState = await getEpisodePurchasedState(contactId).catch(() => null);
+  const episodeFieldKey = await getEpisodeFieldKey(episodeId).catch(() => null);
+  const rewardedMilestones = {
+    oneThird: false,
+    twoThird: false,
+    completed: false,
+  };
+  let unlocked =
+    Boolean(episodeFieldKey) &&
+    Boolean(purchasedState?.fields?.[episodeFieldKey]) &&
+    String(purchasedState.fields[episodeFieldKey]).trim() !== "";
+
+  records.forEach((record) => {
+    const fields = record?.fields || [];
+    const nameField = fields.find((field) => String(field.field) === String(fieldIds.name));
+    const name = String(nameField?.value || "").trim().toLowerCase();
+    if (!name.startsWith(`episode:${normalizedEpisodeId}:`)) return;
+    if (name.includes(":spend")) unlocked = true;
+    if (name.endsWith(":onethird")) rewardedMilestones.oneThird = true;
+    if (name.endsWith(":twothird")) rewardedMilestones.twoThird = true;
+    if (name.endsWith(":completed")) rewardedMilestones.completed = true;
+  });
+
+  return { unlocked, rewardedMilestones };
+};
+
+const getFirstTimerFieldIds = async () =>
+  resolveCustomObjectFieldIds({
+    schemaId: AC_FIRST_TIMER_SCHEMA_ID,
+    cache: firstTimerSchemaCache,
+    logLabel: "First timer schema",
+    targets: {
+      name: { perstag: AC_FIRST_TIMER_FIELD_NAME, fallbackId: "name", contains: "name" },
+      firstTime: { perstag: AC_FIRST_TIMER_FIELD_FIRST_TIME, fallbackId: "first_time", contains: "first-time" },
+    },
+  });
+
+const getEpisodePurchasedFieldIds = async () =>
+  resolveCustomObjectFieldIds({
+    schemaId: AC_EPISODE_PURCHASED_SCHEMA_ID,
+    cache: episodePurchasedSchemaCache,
+    logLabel: "Episode purchased schema",
+    targets: {
+      name: { perstag: AC_EPISODE_PURCHASED_FIELD_NAME, fallbackId: "name", contains: "name" },
+      episode1: { perstag: AC_EPISODE_PURCHASED_FIELD_EPISODE1, fallbackId: "episode1", contains: "episode1" },
+      episode2: { perstag: AC_EPISODE_PURCHASED_FIELD_EPISODE2, fallbackId: "episode2", contains: "episode2" },
+      episode3: { perstag: AC_EPISODE_PURCHASED_FIELD_EPISODE3, fallbackId: "episode3", contains: "episode3" },
+      episode4: { perstag: AC_EPISODE_PURCHASED_FIELD_EPISODE4, fallbackId: "episode4", contains: "episode4" },
+      episode5: { perstag: AC_EPISODE_PURCHASED_FIELD_EPISODE5, fallbackId: "episode5", contains: "episode5" },
+    },
+  });
+
+const listFirstTimerRecords = async (contactId) => {
+  const ids = await getFirstTimerFieldIds();
+  return listCustomObjectRecords(contactId, ids, "First timer schema not configured.");
+};
+
+const listEpisodePurchasedRecords = async (contactId) => {
+  const ids = await getEpisodePurchasedFieldIds();
+  return listCustomObjectRecords(contactId, ids, "Episode purchased schema not configured.");
+};
+
+const getRecordFieldValue = (record, fieldId) => {
+  if (!record || !fieldId) return null;
+  const fields = Array.isArray(record.fields) ? record.fields : [];
+  return fields.find((field) => String(field.field) === String(fieldId))?.value ?? null;
+};
+
+const updateCustomObjectRecord = async ({ schemaId, recordId, fields }) => {
+  return acV3Request("PUT", `/api/3/customObjects/records/${schemaId}/${recordId}`, {
+    record: {
+      fields,
+    },
+  });
+};
+
+const getFirstTimerState = async (contactId) => {
+  const ids = await getFirstTimerFieldIds();
+  if (!ids?.schemaId) return { record: null, firstTime: false, fieldIds: ids };
+  const { records } = await listFirstTimerRecords(contactId);
+  const record = records[0] || null;
+  const firstTimeValue = record ? getRecordFieldValue(record, ids.firstTime) : null;
+  const firstTime = record ? isTruthyFlag(firstTimeValue) : true;
+  return { record, firstTime, fieldIds: ids };
+};
+
+const upsertFirstTimerState = async ({ contactId, email, firstTime }) => {
+  const ids = await getFirstTimerFieldIds();
+  if (!ids?.schemaId || !ids?.firstTime) return null;
+  const { records } = await listFirstTimerRecords(contactId);
+  const fields = [
+    ...(ids.name ? [{ id: ids.name, value: email || "" }] : []),
+    { id: ids.firstTime, value: firstTime ? "true" : "false" },
+  ];
+  if (records[0]?.id) {
+    return updateCustomObjectRecord({
+      schemaId: ids.schemaId,
+      recordId: records[0].id,
+      fields,
+    });
+  }
+  return acV3Request("POST", `/api/3/customObjects/records/${ids.schemaId}`, {
+    record: {
+      externalId: `first-timer-${contactId}`,
+      fields,
+      relationships: {
+        "primary-contact": [Number(contactId)],
+      },
+    },
+  });
+};
+
+const getEpisodeFieldKey = async (episodeId) => {
+  const items = await getVimeoEpisodes();
+  const index = items.findIndex((item) => String(item.id) === String(episodeId));
+  if (index < 0 || index > 4) return null;
+  return `episode${index + 1}`;
+};
+
+const getEpisodePurchasedState = async (contactId) => {
+  const ids = await getEpisodePurchasedFieldIds();
+  if (!ids?.schemaId) return { record: null, fields: {}, fieldIds: ids };
+  const { records } = await listEpisodePurchasedRecords(contactId);
+  const record = records[0] || null;
+  const fields = {
+    episode1: record ? getRecordFieldValue(record, ids.episode1) : null,
+    episode2: record ? getRecordFieldValue(record, ids.episode2) : null,
+    episode3: record ? getRecordFieldValue(record, ids.episode3) : null,
+    episode4: record ? getRecordFieldValue(record, ids.episode4) : null,
+    episode5: record ? getRecordFieldValue(record, ids.episode5) : null,
+  };
+  return { record, fields, fieldIds: ids };
+};
+
+const markEpisodePurchased = async ({ contactId, email, episodeId }) => {
+  const ids = await getEpisodePurchasedFieldIds();
+  if (!ids?.schemaId) return null;
+  const episodeFieldKey = await getEpisodeFieldKey(episodeId);
+  if (!episodeFieldKey || !ids[episodeFieldKey]) return null;
+  const { record, fields: currentFields } = await getEpisodePurchasedState(contactId);
+  const nextFields = [
+    ...(ids.name ? [{ id: ids.name, value: email || "" }] : []),
+    ...(ids.episode1 ? [{ id: ids.episode1, value: currentFields.episode1 || "" }] : []),
+    ...(ids.episode2 ? [{ id: ids.episode2, value: currentFields.episode2 || "" }] : []),
+    ...(ids.episode3 ? [{ id: ids.episode3, value: currentFields.episode3 || "" }] : []),
+    ...(ids.episode4 ? [{ id: ids.episode4, value: currentFields.episode4 || "" }] : []),
+    ...(ids.episode5 ? [{ id: ids.episode5, value: currentFields.episode5 || "" }] : []),
+  ].map((field) =>
+    field.id === ids[episodeFieldKey] ? { ...field, value: String(episodeId) } : field
+  );
+  if (record?.id) {
+    return updateCustomObjectRecord({
+      schemaId: ids.schemaId,
+      recordId: record.id,
+      fields: nextFields,
+    });
+  }
+  return acV3Request("POST", `/api/3/customObjects/records/${ids.schemaId}`, {
+    record: {
+      externalId: `episode-purchased-${contactId}`,
+      fields: nextFields,
+      relationships: {
+        "primary-contact": [Number(contactId)],
+      },
+    },
+  });
+};
+
+const ensureEpisodePurchasedState = async ({ contactId, email }) => {
+  const ids = await getEpisodePurchasedFieldIds();
+  if (!ids?.schemaId) return null;
+  const { record, fields: currentFields } = await getEpisodePurchasedState(contactId);
+  if (record?.id) return record;
+  const fields = [
+    ...(ids.name ? [{ id: ids.name, value: email || "" }] : []),
+    ...(ids.episode1 ? [{ id: ids.episode1, value: currentFields.episode1 || "" }] : []),
+    ...(ids.episode2 ? [{ id: ids.episode2, value: currentFields.episode2 || "" }] : []),
+    ...(ids.episode3 ? [{ id: ids.episode3, value: currentFields.episode3 || "" }] : []),
+    ...(ids.episode4 ? [{ id: ids.episode4, value: currentFields.episode4 || "" }] : []),
+    ...(ids.episode5 ? [{ id: ids.episode5, value: currentFields.episode5 || "" }] : []),
+  ];
+  return acV3Request("POST", `/api/3/customObjects/records/${ids.schemaId}`, {
+    record: {
+      externalId: `episode-purchased-${contactId}`,
+      fields,
+      relationships: {
+        "primary-contact": [Number(contactId)],
+      },
+    },
+  });
+};
+
 const getCoinBalance = async (contactId) => {
   const { records, fieldIds } = await listCoinTransactions(contactId);
   let total = 0;
@@ -334,6 +574,61 @@ const getCoinBalance = async (contactId) => {
     }
   });
   return total;
+};
+
+const hasCoinTransactionName = async (contactId, targetName) => {
+  const normalizedTarget = String(targetName || "").trim().toLowerCase();
+  if (!normalizedTarget) return false;
+  const { records, fieldIds } = await listCoinTransactions(contactId);
+  return records.some((record) => {
+    const fields = record?.fields || [];
+    const nameField = fields.find((field) => String(field.field) === String(fieldIds.name));
+    const name = String(nameField?.value || "").trim().toLowerCase();
+    return name === normalizedTarget;
+  });
+};
+
+const ensureWelcomeCoins = async (contactId) => {
+  if (!contactId) return null;
+  const transactionName = "system:welcome-bonus";
+  const alreadyAwarded = await hasCoinTransactionName(contactId, transactionName);
+  if (alreadyAwarded) {
+    return getCoinBalance(contactId);
+  }
+  await createCoinTransaction({
+    contactId,
+    name: transactionName,
+    amount: 9,
+    timestamp: new Date().toISOString(),
+    isSpend: false,
+    externalId: `coin-welcome-${contactId}`,
+  });
+  return getCoinBalance(contactId);
+};
+
+const redeemStarterCoins = async (contactId) => {
+  if (!contactId) {
+    throw new Error("Contact id required.");
+  }
+  const balance = await getCoinBalance(contactId);
+  if (balance > 0) {
+    return { balance, redeemed: false, reason: "balance-positive" };
+  }
+  const transactionName = "system:starter-redeem";
+  const alreadyRedeemed = await hasCoinTransactionName(contactId, transactionName);
+  if (alreadyRedeemed) {
+    return { balance, redeemed: false, reason: "already-redeemed" };
+  }
+  await createCoinTransaction({
+    contactId,
+    name: transactionName,
+    amount: 3,
+    timestamp: new Date().toISOString(),
+    isSpend: false,
+    externalId: `coin-starter-${contactId}`,
+  });
+  const nextBalance = await getCoinBalance(contactId);
+  return { balance: nextBalance, redeemed: true, reason: "ok" };
 };
 
 const getContactFromRequest = async (req) => {
@@ -537,6 +832,11 @@ const acV3Request = async (method, endpoint, body) => {
 };
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const isTruthyFlag = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return ["1", "true", "yes", "y", "on"].includes(normalized);
+};
 
 const base64UrlEncode = (value) =>
   Buffer.from(value)
@@ -602,7 +902,6 @@ const resolveFieldIdByPerstag = async (perstag) => {
 };
 
 const resolvePasswordFieldId = async () => AC_FIELD_PASSWORD || (await resolveFieldIdByPerstag("PASSWORD"));
-
 const getContactByEmail = async (email) => {
   const query = encodeURIComponent(email);
   const response = await acV3Request("GET", `/api/3/contacts?email=${query}&forceQuery=1`);
@@ -1161,6 +1460,9 @@ const buildLeadFields = (payload) => ({
   ...(AC_FIELD_UR_EVENT_DATE_TIME ? { [AC_FIELD_UR_EVENT_DATE_TIME]: payload.urEventDateTime } : {}),
   ...(AC_FIELD_TREVOR_EXAMPLE ? { [AC_FIELD_TREVOR_EXAMPLE]: payload.trevorExample } : {}),
   ...(AC_FIELD_EVENT_DAY ? { [AC_FIELD_EVENT_DAY]: payload.eventDay } : {}),
+  ...(AC_FIELD_SMS_OPT_IN && typeof payload.smsOptIn === "boolean"
+    ? { [AC_FIELD_SMS_OPT_IN]: payload.smsOptIn ? "Yes" : "No" }
+    : {}),
 });
 
 const buildCalendlyFields = (payload) => ({
@@ -1277,6 +1579,28 @@ const buildStatusResponse = (contact, fieldMap) => ({
     eventUri: getFieldValue(fieldMap, "CALENDLYEVENTURI", AC_FIELD_CALENDLY_EVENT_URI),
   },
 });
+
+const appendCustomObjectStatus = async (contactId, response) => {
+  const [firstTimerState, episodePurchasedState] = await Promise.all([
+    getFirstTimerState(contactId).catch(() => null),
+    getEpisodePurchasedState(contactId).catch(() => null),
+  ]);
+  response.customObjects = {
+    firstTimer: firstTimerState
+      ? {
+          recordId: firstTimerState.record?.id || null,
+          firstTime: Boolean(firstTimerState.firstTime),
+        }
+      : null,
+    episodePurchased: episodePurchasedState
+      ? {
+          recordId: episodePurchasedState.record?.id || null,
+          fields: episodePurchasedState.fields,
+        }
+      : null,
+  };
+  return response;
+};
 
 const createLeadStatusToken = (email) => {
   if (!LEAD_STATUS_TOKEN_SECRET) return null;
@@ -1570,13 +1894,32 @@ const pickVimeoThumbnail = (pictures) => {
   return preferred?.link || sizes[sizes.length - 1]?.link || null;
 };
 
+const resolveEpisodeAudioUrl = (id) => {
+  if (!id) return null;
+  if (process.env.EPISODE_AUDIO_URLS) {
+    try {
+      const urls = JSON.parse(process.env.EPISODE_AUDIO_URLS);
+      if (urls?.[id]) return urls[id];
+    } catch (error) {
+      console.error("Invalid EPISODE_AUDIO_URLS JSON", error?.message || error);
+    }
+  }
+  if (process.env.EPISODE_AUDIO_BASE_URL) {
+    return `${process.env.EPISODE_AUDIO_BASE_URL.replace(/\/$/, "")}/${id}.mp3`;
+  }
+  const localAudioPath = path.join(process.cwd(), "public", "audio", `${id}.mp3`);
+  return fs.existsSync(localAudioPath) ? `/audio/${id}.mp3` : null;
+};
+
 const normalizeVimeoVideo = (video) => {
   const uri = String(video?.uri || "");
   const id = uri.split("/").filter(Boolean).pop();
   if (!id) return null;
+  const audioUrl = resolveEpisodeAudioUrl(id);
   return {
     id,
     vimeoId: id,
+    ...(audioUrl ? { audioUrl } : {}),
     title: video?.name || "Untitled Episode",
     summary: video?.description || "",
     duration: Number(video?.duration || 0),
@@ -1739,18 +2082,180 @@ app.get("/api/episodes/:id", async (req, res) => {
   }
 });
 
+app.post("/api/episodes/onboarding/start", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const initialFirstTimerState = await getFirstTimerState(result.contact.id);
+    if (!initialFirstTimerState.record?.id) {
+      await upsertFirstTimerState({
+        contactId: result.contact.id,
+        email: result.email || result.contact.email || "",
+        firstTime: true,
+      }).catch((error) => {
+        console.error("First timer record bootstrap failed", error?.message || error);
+      });
+    }
+    const firstTimerState = await getFirstTimerState(result.contact.id);
+    return res.json({
+      ok: true,
+      showOnboarding: Boolean(firstTimerState.firstTime),
+      firstTimer: {
+        recordId: firstTimerState.record?.id || null,
+        firstTime: Boolean(firstTimerState.firstTime),
+      },
+    });
+  } catch (error) {
+    console.error("Episode onboarding start failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load onboarding state." });
+  }
+});
+
+app.post("/api/episodes/onboarding/complete", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    await upsertFirstTimerState({
+      contactId: result.contact.id,
+      email: result.email || result.contact.email || "",
+      firstTime: false,
+    }).catch((error) => {
+      console.error("Episode onboarding complete failed", error?.message || error);
+      throw error;
+    });
+    let firstTimerState = await getFirstTimerState(result.contact.id);
+    for (let attempt = 0; attempt < 3 && firstTimerState.firstTime; attempt += 1) {
+      await sleep(350);
+      firstTimerState = await getFirstTimerState(result.contact.id);
+    }
+    if (firstTimerState.firstTime) {
+      return res.status(500).json({ error: "Failed to persist onboarding state." });
+    }
+    return res.json({
+      ok: true,
+      firstTimer: {
+        recordId: firstTimerState.record?.id || null,
+        firstTime: false,
+      },
+    });
+  } catch (error) {
+    console.error("Episode onboarding completion failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to complete onboarding." });
+  }
+});
+
+app.get("/api/episodes/:id/access", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    await ensureEpisodePurchasedState({
+      contactId: result.contact.id,
+      email: result.email || result.contact.email || "",
+    }).catch((error) => {
+      console.error("Episode purchased record bootstrap failed", error?.message || error);
+    });
+    const episodeId = String(req.params.id || "").trim();
+    if (!episodeId) {
+      return res.status(400).json({ error: "Episode id is required." });
+    }
+    const balance = await getCoinBalance(result.contact.id);
+    const summary = await getEpisodeCoinSummary(result.contact.id, episodeId);
+    const purchasedState = await getEpisodePurchasedState(result.contact.id).catch(() => null);
+    const episodeFieldKey = await getEpisodeFieldKey(episodeId).catch(() => null);
+    return res.json({
+      ok: true,
+      balance,
+      unlocked: summary.unlocked,
+      spendRequired: summary.unlocked ? 0 : 3,
+      rewardedMilestones: summary.rewardedMilestones,
+      purchasedState: purchasedState?.fields || null,
+      purchasedField: episodeFieldKey,
+    });
+  } catch (error) {
+    console.error("Episode access lookup failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to load episode access." });
+  }
+});
+
+app.post("/api/episodes/:id/unlock", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const episodeId = String(req.params.id || "").trim();
+    if (!episodeId) {
+      return res.status(400).json({ error: "Episode id is required." });
+    }
+    const summary = await getEpisodeCoinSummary(result.contact.id, episodeId);
+    if (summary.unlocked) {
+      const balance = await getCoinBalance(result.contact.id);
+      return res.json({ ok: true, unlocked: true, alreadyUnlocked: true, balance });
+    }
+    const balance = await getCoinBalance(result.contact.id);
+    const amount = 3;
+    if (balance < amount) {
+      return res.status(402).json({ error: "Insufficient coins.", balance });
+    }
+    await createCoinTransaction({
+      contactId: result.contact.id,
+      name: `episode:${episodeId}:spend`,
+      amount: -amount,
+      timestamp: new Date().toISOString(),
+      isSpend: true,
+      externalId: `coin-spend-${result.contact.id}-${episodeId}`,
+    });
+    await markEpisodePurchased({
+      contactId: result.contact.id,
+      email: result.email || result.contact.email || "",
+      episodeId,
+    }).catch((error) => {
+      console.error("Episode purchased object update failed", error?.message || error);
+    });
+    const firstTimerState = await getFirstTimerState(result.contact.id).catch(() => null);
+    if (firstTimerState?.firstTime) {
+      await upsertFirstTimerState({
+        contactId: result.contact.id,
+        email: result.email || result.contact.email || "",
+        firstTime: false,
+      }).catch((error) => {
+        console.error("First timer object update failed", error?.message || error);
+      });
+    }
+    const purchasedState = await getEpisodePurchasedState(result.contact.id).catch(() => null);
+    return res.json({
+      ok: true,
+      unlocked: true,
+      balance: balance - amount,
+      purchasedState: purchasedState?.fields || null,
+      firstTimer: firstTimerState ? { firstTime: false } : null,
+    });
+  } catch (error) {
+    console.error("Episode unlock failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to unlock episode." });
+  }
+});
+
 app.post("/api/episodes/:id/session", async (req, res) => {
   try {
     const episodeId = String(req.params.id || "").trim();
     if (!episodeId) {
       return res.status(400).json({ error: "Episode id is required." });
     }
-    const email = getAuthEmail(req);
+    const contactResult = await getContactFromRequest(req).catch(() => null);
+    const email = contactResult?.email || getAuthEmail(req);
     const sessionId = crypto.randomUUID();
     watchSessions.set(sessionId, {
       sessionId,
       episodeId,
       email,
+      contactId: contactResult?.contact?.id ? String(contactResult.contact.id) : null,
       createdAt: Date.now(),
       duration: 0,
       lastSeconds: null,
@@ -1775,9 +2280,25 @@ app.post("/api/episodes/:id/progress", async (req, res) => {
     if (!episodeId || !sessionId) {
       return res.status(400).json({ error: "Episode id and session id are required." });
     }
-    const session = watchSessions.get(sessionId);
+    let session = watchSessions.get(sessionId);
     if (!session || session.episodeId !== episodeId) {
-      return res.status(404).json({ error: "Session not found." });
+      const contactResult = await getContactFromRequest(req).catch(() => null);
+      const email = contactResult?.email || getAuthEmail(req);
+      session = {
+        sessionId,
+        episodeId,
+        email,
+        contactId: contactResult?.contact?.id ? String(contactResult.contact.id) : null,
+        createdAt: Date.now(),
+        duration: 0,
+        lastSeconds: null,
+        maxPercent: 0,
+        watchedSeconds: 0,
+        skipDetected: false,
+        awards: { oneThird: false, twoThird: false, completed: false },
+        coinsAwarded: 0,
+      };
+      watchSessions.set(sessionId, session);
     }
     const event = String(payload.event || "").toLowerCase();
     const seconds = Number(payload.seconds ?? 0);
@@ -1808,23 +2329,40 @@ app.post("/api/episodes/:id/progress", async (req, res) => {
     }
 
     let awardedNow = 0;
+    const milestoneAwards = [
+      { key: "oneThird", threshold: 0.333, amount: 1, label: "onethird" },
+      { key: "twoThird", threshold: 0.666, amount: 3, label: "twothird" },
+      { key: "completed", threshold: 0.98, amount: 5, label: "completed" },
+    ];
     if (!session.skipDetected) {
-      if (!session.awards.oneThird && session.maxPercent >= 0.333) {
-        session.awards.oneThird = true;
-        session.coinsAwarded += 1;
-        awardedNow += 1;
-      }
-      if (!session.awards.twoThird && session.maxPercent >= 0.666) {
-        session.awards.twoThird = true;
-        session.coinsAwarded += 3;
-        awardedNow += 3;
-      }
-      if (!session.awards.completed && session.maxPercent >= 0.98) {
-        session.awards.completed = true;
-        session.coinsAwarded += 5;
-        awardedNow += 5;
+      const persistedSummary = session.contactId
+        ? await getEpisodeCoinSummary(session.contactId, episodeId).catch(() => null)
+        : null;
+      for (const award of milestoneAwards) {
+        if (session.awards[award.key] || session.maxPercent < award.threshold) continue;
+        if (persistedSummary?.rewardedMilestones?.[award.key]) {
+          session.awards[award.key] = true;
+          continue;
+        }
+        session.awards[award.key] = true;
+        session.coinsAwarded += award.amount;
+        awardedNow += award.amount;
+        if (session.contactId) {
+          await createCoinTransaction({
+            contactId: session.contactId,
+            name: `episode:${episodeId}:${award.label}`,
+            amount: award.amount,
+            timestamp: new Date().toISOString(),
+            isSpend: false,
+            externalId: `coin-reward-${session.contactId}-${episodeId}-${award.label}`,
+          }).catch((error) => {
+            console.error("Episode reward create failed", error?.message || error);
+          });
+        }
       }
     }
+
+    const balance = session.contactId ? await getCoinBalance(session.contactId).catch(() => null) : null;
 
     return res.json({
       ok: true,
@@ -1832,6 +2370,7 @@ app.post("/api/episodes/:id/progress", async (req, res) => {
       totalAwarded: session.coinsAwarded,
       skipDetected: session.skipDetected,
       maxPercent: session.maxPercent,
+      balance,
     });
   } catch (error) {
     console.error("Progress update failed", error?.message || error);
@@ -1913,6 +2452,26 @@ app.post("/api/coins/reward", async (req, res) => {
   }
 });
 
+app.post("/api/coins/redeem-starter", async (req, res) => {
+  try {
+    const result = await getContactFromRequest(req);
+    if (!result?.contact?.id) {
+      return res.status(404).json({ error: "Contact not found." });
+    }
+    const outcome = await redeemStarterCoins(result.contact.id);
+    if (outcome.reason === "balance-positive") {
+      return res.status(400).json({ error: "Starter redeem only applies when your balance is zero.", balance: outcome.balance });
+    }
+    if (outcome.reason === "already-redeemed") {
+      return res.status(409).json({ error: "Starter coins have already been redeemed.", balance: outcome.balance });
+    }
+    return res.json({ ok: true, balance: outcome.balance, redeemed: true });
+  } catch (error) {
+    console.error("Starter coin redeem failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to redeem starter coins." });
+  }
+});
+
 app.get("/api/coins/schema-debug", async (req, res) => {
   try {
     const schemaId = normalizeSchemaId(AC_COIN_SCHEMA_ID);
@@ -1967,6 +2526,22 @@ app.post("/auth/register", rateLimit, async (req, res) => {
 
     const passwordHash = hashPassword(password);
     await upsertFieldValues(contact.id, { [passwordFieldId]: passwordHash });
+    await upsertFirstTimerState({
+      contactId: contact.id,
+      email,
+      firstTime: true,
+    }).catch((error) => {
+      console.error("First timer record create failed", error?.message || error);
+    });
+    await ensureEpisodePurchasedState({
+      contactId: contact.id,
+      email,
+    }).catch((error) => {
+      console.error("Episode purchased record create failed", error?.message || error);
+    });
+    await ensureWelcomeCoins(contact.id).catch((error) => {
+      console.error("Welcome coin award failed", error?.message || error);
+    });
 
     await ensureContactTags({ contactId: contact.id, stage: "nurturing" });
 
@@ -2050,7 +2625,7 @@ app.get("/auth/me", rateLimit, async (req, res) => {
       })),
     });
     const debug = req.query.debug === "1";
-    const response = { ok: true, ...buildStatusResponse(contact, fieldMap) };
+    const response = await appendCustomObjectStatus(contact.id, { ok: true, ...buildStatusResponse(contact, fieldMap) });
     if (debug) {
       const perstags = [
         "PREFERRED_LANGUAGE",
@@ -2191,7 +2766,9 @@ app.put("/auth/profile", rateLimit, async (req, res) => {
 
     const updated = await getContactByEmail(payload.email);
     const fieldMap = await getFieldValuesForContact(contact.id);
-    return res.json({ ok: true, ...buildStatusResponse(updated || contact, fieldMap) });
+    return res.json(
+      await appendCustomObjectStatus((updated || contact).id, { ok: true, ...buildStatusResponse(updated || contact, fieldMap) })
+    );
   } catch (error) {
     console.error("Auth profile update failed", error?.message || error);
     return res.status(500).json({ error: "Failed to update profile." });
@@ -2369,6 +2946,7 @@ app.post("/api/contact", async (req, res) => {
         fields: buildCustomFields([
           { id: AC_FIELD_CONTACT_SUBJECT, value: payload.subject ?? "" },
           { id: AC_FIELD_CONTACT_MESSAGE, value: payload.message ?? "" },
+          { id: AC_FIELD_SMS_OPT_IN, value: typeof payload.smsOptIn === "boolean" ? (payload.smsOptIn ? "Yes" : "No") : "" },
         ]),
       });
       if (ACTIVECAMPAIGN_BASE_URL && ACTIVECAMPAIGN_API_TOKEN) {
@@ -2382,6 +2960,9 @@ app.post("/api/contact", async (req, res) => {
           await upsertFieldValues(contact.id, {
             ...(AC_FIELD_CONTACT_SUBJECT ? { [AC_FIELD_CONTACT_SUBJECT]: payload.subject ?? "" } : {}),
             ...(AC_FIELD_CONTACT_MESSAGE ? { [AC_FIELD_CONTACT_MESSAGE]: payload.message ?? "" } : {}),
+            ...(AC_FIELD_SMS_OPT_IN && typeof payload.smsOptIn === "boolean"
+              ? { [AC_FIELD_SMS_OPT_IN]: payload.smsOptIn ? "Yes" : "No" }
+              : {}),
           });
           await ensureContactTags({
             contactId: contact.id,
@@ -2522,7 +3103,7 @@ app.get("/api/lead/status", rateLimit, async (req, res) => {
     }
 
     const fieldMap = await getFieldValuesForContact(contact.id);
-    return res.json({ ok: true, ...buildStatusResponse(contact, fieldMap) });
+    return res.json(await appendCustomObjectStatus(contact.id, { ok: true, ...buildStatusResponse(contact, fieldMap) }));
   } catch (error) {
     console.error("Lead status lookup failed", error?.message || error);
     return res.status(500).json({ error: "Failed to load status." });

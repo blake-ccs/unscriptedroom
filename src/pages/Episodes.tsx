@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { clearAuth, isAuthed } from "../lib/auth";
+import { clearAuth, getAuthEmail, isAuthed } from "../lib/auth";
 import API_BASE from "../lib/apiBase";
 
 const logoImageUrl = new URL(
-  "../../OneDrive_1_12-19-2025/UR LOGO white 1.png",
+  "../../OneDrive_2026-03-20/UR LOGO dark 1.png",
   import.meta.url
 ).href;
 
 const PAGE_SIZE = 8;
-const COIN_COST = 3;
-const EMAIL_STORAGE_KEY = "viewer_email";
 
 export const EPISODES = [
   {
@@ -338,7 +336,6 @@ type Episode = {
   tags: string[];
   image?: string | null;
   duration?: number;
-  coinCost?: number;
 };
 
 const formatDuration = (seconds?: number) => {
@@ -353,74 +350,26 @@ const formatDuration = (seconds?: number) => {
 };
 
 export default function Episodes() {
-  const authed = isAuthed();
+  const [isAuthenticated, setIsAuthenticated] = useState(isAuthed());
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [coinBalance, setCoinBalance] = useState<number | null>(null);
+  const [coinNotice, setCoinNotice] = useState("");
+  const [isRedeemingStarter, setIsRedeemingStarter] = useState(false);
+  const [showRedeemPrompt, setShowRedeemPrompt] = useState(false);
+  const [unlockedEpisodeIds, setUnlockedEpisodeIds] = useState<Set<string>>(new Set());
+  const [unlockingEpisodeId, setUnlockingEpisodeId] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingTimer = useRef<number | null>(null);
   const transitionTimer = useRef<number | null>(null);
   const navigate = useNavigate();
   const [logoDance, setLogoDance] = useState(false);
-  const [coinBalance, setCoinBalance] = useState(0);
-  const [coinNotice, setCoinNotice] = useState("");
-  const [coinPulse, setCoinPulse] = useState(false);
-  const [hasBalance, setHasBalance] = useState(false);
-  const [email, setEmail] = useState(() => localStorage.getItem(EMAIL_STORAGE_KEY) || "");
-  const [emailDraft, setEmailDraft] = useState("");
-  const [showEmailGate, setShowEmailGate] = useState(() =>
-    !isAuthed() && !localStorage.getItem(EMAIL_STORAGE_KEY)
-  );
-  const [showRedeemGate, setShowRedeemGate] = useState(false);
-  const [isRedeeming, setIsRedeeming] = useState(false);
-
-  useEffect(() => {
-    if (!email && localStorage.getItem(EMAIL_STORAGE_KEY)) {
-      setEmail(localStorage.getItem(EMAIL_STORAGE_KEY) || "");
-    }
-    const loadBalance = async () => {
-      const token = localStorage.getItem("access_token");
-      const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
-      if (!token && !storedEmail) return;
-      try {
-        const emailParam = storedEmail ? `?email=${encodeURIComponent(storedEmail)}` : "";
-        const res = await fetch(`${API_BASE}/api/coins/balance${emailParam}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (typeof data?.balance === "number") {
-          setCoinBalance(data.balance);
-          setHasBalance(true);
-        }
-      } catch (error) {
-        console.error("Coin balance load failed", error);
-      }
-    };
-    loadBalance();
-    window.addEventListener("focus", loadBalance);
-    const interval = window.setInterval(() => {
-      if (!hasBalance) loadBalance();
-    }, 5000);
-    return () => {
-      window.removeEventListener("focus", loadBalance);
-      window.clearInterval(interval);
-    };
-  }, [hasBalance]);
-
-  useEffect(() => {
-    if (hasBalance && coinBalance === 0 && !showEmailGate) {
-      setShowRedeemGate(true);
-      return;
-    }
-    if (!hasBalance || coinBalance > 0) {
-      setShowRedeemGate(false);
-    }
-  }, [coinBalance, showEmailGate, hasBalance]);
 
   const visibleEpisodes = useMemo(() => episodes.slice(0, visibleCount), [episodes, visibleCount]);
+  const showStarterRedeem = isAuthenticated && coinBalance !== null && coinBalance <= 0;
 
   useEffect(() => {
     let active = true;
@@ -493,100 +442,134 @@ export default function Episodes() {
     };
   }, []);
 
-  const handleEpisodeSelect = (episodeId: string) => {
-    const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
-    if (!authed && !storedEmail) {
-      setShowEmailGate(true);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCoinBalance(null);
+      setUnlockedEpisodeIds(new Set());
       return;
     }
-    const token = localStorage.getItem("access_token");
-    const runSpend = async () => {
+    let active = true;
+    const loadEpisodeState = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/coins/spend`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            episodeId,
-            amount: COIN_COST,
-            eventId: `spend-${episodeId}-${Date.now()}`,
-            ...(storedEmail ? { email: storedEmail } : {}),
+        const token = localStorage.getItem("access_token");
+        const [balanceRes, meRes] = await Promise.all([
+          fetch(`${API_BASE}/api/coins/balance`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           }),
-        });
-        if (res.status === 402) {
-          const data = await res.json();
-          if (typeof data?.balance === "number") setCoinBalance(data.balance);
-          setCoinNotice("Not enough coins to watch this episode.");
-          setCoinPulse(true);
-          window.setTimeout(() => setCoinPulse(false), 600);
-          window.setTimeout(() => setCoinNotice(""), 2500);
-          return;
+          fetch(`${API_BASE}/auth/me`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          }),
+        ]);
+        if (balanceRes.ok) {
+          const data = await balanceRes.json();
+          if (active && typeof data?.balance === "number") {
+            setCoinBalance(data.balance);
+            setShowRedeemPrompt(data.balance <= 0);
+          }
         }
-        if (!res.ok) return;
-        const data = await res.json();
-        if (typeof data?.balance === "number") {
-          setCoinBalance(data.balance);
+        if (meRes.ok) {
+          const data = await meRes.json();
+          const purchased = data?.customObjects?.episodePurchased?.fields || {};
+          const unlocked = new Set<string>();
+          ["episode1", "episode2", "episode3", "episode4", "episode5"].forEach((key) => {
+            const value = String(purchased?.[key] || "").trim();
+            if (value) unlocked.add(value);
+          });
+          if (active) {
+            setUnlockedEpisodeIds(unlocked);
+          }
         }
-        setCoinNotice("");
-        if (isTransitioning) return;
-        setIsTransitioning(true);
-        transitionTimer.current = window.setTimeout(() => {
-          navigate(`/player?episode=${encodeURIComponent(episodeId)}`);
-        }, 900);
       } catch (error) {
-        console.error("Coin spend failed", error);
+        console.error("Coin balance load failed", error);
       }
     };
-    runSpend();
+    loadEpisodeState();
+    window.addEventListener("focus", loadEpisodeState);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", loadEpisodeState);
+    };
+  }, [isAuthenticated]);
+
+  const handleEpisodeSelect = async (episodeId: string) => {
+    if (isTransitioning) return;
+    // if (unlockingEpisodeId) return;
+    // const isUnlocked = unlockedEpisodeIds.has(episodeId);
+    // if (!isUnlocked) {
+    //   try {
+    //     setUnlockingEpisodeId(episodeId);
+    //     setCoinNotice("");
+    //     const token = localStorage.getItem("access_token");
+    //     const res = await fetch(`${API_BASE}/api/episodes/${encodeURIComponent(episodeId)}/unlock`, {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    //       },
+    //       body: JSON.stringify({ email: getAuthEmail() }),
+    //     });
+    //     const data = await res.json().catch(() => ({}));
+    //     if (!res.ok) {
+    //       if (typeof data?.balance === "number") {
+    //         setCoinBalance(data.balance);
+    //         setShowRedeemPrompt(data.balance <= 0);
+    //       }
+    //       setCoinNotice(data?.error || "Unable to unlock this episode.");
+    //       return;
+    //     }
+    //     if (typeof data?.balance === "number") {
+    //       setCoinBalance(data.balance);
+    //       setShowRedeemPrompt(data.balance <= 0);
+    //     }
+    //     setUnlockedEpisodeIds((prev) => {
+    //       const next = new Set(prev);
+    //       next.add(episodeId);
+    //       return next;
+    //     });
+    //   } catch (error) {
+    //     setCoinNotice("Unable to unlock this episode.");
+    //     return;
+    //   } finally {
+    //     setUnlockingEpisodeId(null);
+    //   }
+    // }
+    setIsTransitioning(true);
+    transitionTimer.current = window.setTimeout(() => {
+      navigate(`/player?episode=${encodeURIComponent(episodeId)}`);
+    }, 900);
   };
 
-  const handleEmailSubmit = () => {
-    const trimmed = emailDraft.trim().toLowerCase();
-    if (!trimmed || !trimmed.includes("@")) return;
-    localStorage.setItem(EMAIL_STORAGE_KEY, trimmed);
-    setEmail(trimmed);
-    setEmailDraft("");
-    setShowEmailGate(false);
-  };
-
-  const handleRedeem = async () => {
-    if (isRedeeming) return;
-    const token = localStorage.getItem("access_token");
-    const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
-    if (!token && !storedEmail) {
-      setShowEmailGate(true);
-      return;
-    }
-    setIsRedeeming(true);
+  const handleRedeemStarterCoins = async () => {
+    setIsRedeemingStarter(true);
+    setCoinNotice("");
     try {
-      const res = await fetch(`${API_BASE}/api/coins/reward`, {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_BASE}/api/coins/redeem-starter`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          amount: 3,
-          milestone: "redeem",
-          episodeId: "redeem",
-          eventId: `redeem-${Date.now()}`,
-          ...(storedEmail ? { email: storedEmail } : {}),
-        }),
+        body: JSON.stringify({ email: getAuthEmail() }),
       });
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setCoinNotice(data?.error || "Unable to continue right now.");
+        if (typeof data?.balance === "number") {
+          setCoinBalance(data.balance);
+        }
+        return;
+      }
       if (typeof data?.balance === "number") {
         setCoinBalance(data.balance);
-      } else {
-        setCoinBalance((prev) => prev + 3);
+        setShowRedeemPrompt(data.balance <= 0);
       }
-      setShowRedeemGate(false);
+      setCoinNotice("Access updated.");
+      setShowRedeemPrompt(false);
     } catch (error) {
-      console.error("Redeem failed", error);
+      setCoinNotice("Unable to continue right now.");
     } finally {
-      setIsRedeeming(false);
+      setIsRedeemingStarter(false);
     }
   };
 
@@ -657,12 +640,6 @@ export default function Episodes() {
           opacity: 1;
           pointer-events: auto;
         }
-        @keyframes coinPulse {
-          0% { transform: scale(1); }
-          30% { transform: scale(1.08); }
-          60% { transform: scale(0.96); }
-          100% { transform: scale(1); }
-        }
         .transition-orb {
           width: 140px;
           height: 140px;
@@ -681,6 +658,16 @@ export default function Episodes() {
         .loading-shimmer {
           background: linear-gradient(90deg, rgba(213, 199, 226, 0), rgba(122, 49, 104, 0.35), rgba(213, 199, 226, 0));
           animation: shimmer 1.3s ease-in-out infinite;
+        }
+        .guided-spotlight {
+          box-shadow: 0 0 0 9999px rgba(35, 31, 32, 0.62), 0 28px 60px rgba(59, 44, 87, 0.34);
+        }
+        @keyframes guideBob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        .guide-arrow {
+          animation: guideBob 1.5s ease-in-out infinite;
         }
         @keyframes shimmer {
           0% { transform: translateX(-40%); }
@@ -703,50 +690,34 @@ export default function Episodes() {
         </div>
       </div>
 
-      {showEmailGate ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
-          <div className="w-full max-w-md rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-6 shadow-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Enter Email</p>
-            <h2 className="mt-3 text-2xl font-semibold text-black">Continue to Episodes</h2>
-            <p className="mt-2 text-sm text-[var(--usr-muted)]">
-              Enter your email to track your coins and episode progress.
+      {showRedeemPrompt ? (
+        <div className="fixed inset-0 z-[73] flex items-center justify-center bg-[rgba(17,14,22,0.68)] px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[32px] border border-white/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(236,241,244,0.93))] p-6 shadow-[0_30px_80px_rgba(12,10,18,0.28)]">
+            <p className="text-xs uppercase tracking-[0.38em] text-[var(--usr-primary)]">Episode Access</p>
+            <h2 className="mt-3 text-3xl font-semibold text-black">You need access to continue.</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--usr-muted)]">
+              Continue here to unlock another episode without leaving the library.
             </p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <input
-                type="email"
-                value={emailDraft}
-                onChange={(event) => setEmailDraft(event.target.value)}
-                placeholder="you@email.com"
-                className="w-full rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-4 py-2 text-sm text-[var(--usr-ink)]"
-              />
+            {coinNotice ? (
+              <div className="mt-4 rounded-2xl border border-[var(--usr-line)] bg-white/80 px-4 py-3 text-xs text-[var(--usr-muted)]">
+                {coinNotice}
+              </div>
+            ) : null}
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={handleEmailSubmit}
-                className="rounded-full border border-[var(--usr-primary)] bg-[var(--usr-primary)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white"
+                onClick={handleRedeemStarterCoins}
+                disabled={isRedeemingStarter}
+                className="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-[var(--usr-secondary)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--usr-primary)] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Continue
+                {isRedeemingStarter ? "Updating..." : "Continue"}
               </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {showRedeemGate ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
-          <div className="w-full max-w-md rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-6 shadow-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-[var(--usr-muted)]">Out of Coins</p>
-            <h2 className="mt-3 text-2xl font-semibold text-black">Oh no, you’re out of coins.</h2>
-            <p className="mt-2 text-sm text-[var(--usr-muted)]">
-              Redeem 3 coins now to keep exploring the episode library.
-            </p>
-            <div className="mt-5 flex items-center gap-3">
               <button
                 type="button"
-                onClick={handleRedeem}
-                className="rounded-full border border-[var(--usr-primary)] bg-[var(--usr-primary)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white"
-                disabled={isRedeeming}
+                onClick={() => setShowRedeemPrompt(false)}
+                className="inline-flex min-h-12 flex-1 items-center justify-center rounded-full border-[0.75px] border-[var(--usr-line)] bg-white px-6 py-3 text-sm font-semibold text-[var(--usr-ink)] transition hover:bg-[var(--usr-cloud)]"
               >
-                {isRedeeming ? "Redeeming..." : "Redeem 3 Coins"}
+                Not now
               </button>
             </div>
           </div>
@@ -776,20 +747,22 @@ export default function Episodes() {
               />
             </Link>
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--usr-muted)] ${coinPulse ? "animate-[coinPulse_0.6s_ease]" : ""}`}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
-                  <path
-                    d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
-                    fill="currentColor"
-                  />
-                </svg>
-                {coinBalance}
-              </div>
-              {authed ? (
+              {/* {isAuthenticated ? (
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-white/85 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--usr-primary)] shadow-sm">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                    <path
+                      d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span>{coinBalance ?? "..."}</span>
+                </div>
+              ) : null} */}
+              {isAuthenticated ? (
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-9 w-9 items-center justify-center border-[0.75px] border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -802,7 +775,7 @@ export default function Episodes() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="inline-flex h-9 w-9 items-center justify-center border-[0.75px] border-[var(--usr-line)] bg-[var(--usr-cloud)] text-[var(--usr-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -815,39 +788,29 @@ export default function Episodes() {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.4em] text-[var(--usr-muted)]">
-            <span className="holo-line h-[1px] w-16" />
-            Unscripted Room Episodes
-          </div>
-          {coinNotice ? (
-            <div className="rounded-full border border-[var(--usr-line)] bg-[var(--usr-white)] px-4 py-2 text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
-              {coinNotice}
-            </div>
-          ) : null}
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h1 className="text-balance text-4xl font-semibold text-black md:text-5xl">
-                The Episode Library
+                Inside the Room
               </h1>
-              <p className="mt-4 text-base text-[var(--usr-muted)] md:text-lg">
-                Scroll to keep moving. Each page expands into another layer of the conversation. Tap any episode to
-                open the player and enter the room.
-              </p>
-            </div>
-            <div className="w-full max-w-sm rounded-2xl border border-[var(--usr-line)] bg-[rgba(255,255,255,0.75)] px-5 py-4 text-sm text-[var(--usr-muted)] shadow-sm">
-              <p className="text-xs uppercase tracking-[0.32em] text-[var(--usr-primary)]">Library</p>
-              <p className="mt-2 text-base font-semibold text-[var(--usr-ink)]">{episodes.length} episodes · 3 coins each</p>
-              <p className="text-xs text-[var(--usr-muted)]">Scroll down to load more.</p>
+              <div className="mt-5 space-y-3 text-base leading-relaxed text-[var(--usr-muted)] md:text-[1.05rem]">
+                <p>No scripts. No introductions. No performances.</p>
+                <p>Just 9 curated questions, and the willingness to follow them wherever they lead.</p>
+                <p>
+                  Each episode brings people together to explore a theme that interests them through a sequence of
+                  carefully designed questions. The first three reflect on what we&apos;ve learned, the middle three
+                  focus on the choices we make in the present, and the final three explore our vision for the future.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12">
-        <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
-            <span>Episode Feed</span>
-            <span>{visibleEpisodes.length} / {episodes.length}</span>
-          </div>
+        <div className="flex items-center justify-end text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
+          <span>{visibleEpisodes.length} / {episodes.length}</span>
+        </div>
         <div className="flex flex-col gap-6">
           {hasLoaded && episodes.length === 0 ? (
             <div className="rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] px-6 py-10 text-center text-sm text-[var(--usr-muted)]">
@@ -855,12 +818,16 @@ export default function Episodes() {
               credentials are valid.
             </div>
           ) : null}
-          {visibleEpisodes.map((episode) => (
+          {visibleEpisodes.map((episode) => {
+            const isUnlocked = unlockedEpisodeIds.has(episode.id);
+            const isUnlocking = unlockingEpisodeId === episode.id;
+            return (
             <button
               key={episode.id}
               type="button"
               onClick={() => handleEpisodeSelect(episode.id)}
-              className="episode-card group flex w-full flex-col gap-5 rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-5 text-left shadow-sm md:flex-row md:items-center md:gap-8 md:px-7 md:py-6"
+              disabled={Boolean(unlockingEpisodeId) || isTransitioning}
+              className={`episode-card group flex w-full flex-col gap-5 rounded-3xl border border-[var(--usr-line)] bg-[var(--usr-white)] p-5 text-left shadow-sm md:flex-row md:items-center md:gap-8 md:px-7 md:py-6 ${Boolean(unlockingEpisodeId) || isTransitioning ? "cursor-wait" : ""}`}
             >
               <div className="relative w-full overflow-hidden rounded-2xl bg-[var(--usr-cloud)] md:w-[260px]">
                 {episode.image ? (
@@ -876,15 +843,17 @@ export default function Episodes() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-[rgba(255,255,255,0.92)] px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-[var(--usr-muted)]">
-                  Episode
-                </div>
               </div>
               <div className="flex w-full flex-1 flex-col gap-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
+                    <p
+                      className="mb-1 text-sm uppercase tracking-[0.24em] text-[var(--usr-muted)]"
+                      style={{ fontFamily: "Nunito, sans-serif", fontWeight: 400 }}
+                    >
+                      The Unscripted Room Podcast
+                    </p>
                     <h3 className="text-xl font-semibold text-black">{episode.title}</h3>
-                    <p className="mt-1 text-sm text-[var(--usr-muted)]">with {episode.guest}</p>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-[var(--usr-muted)]">
                     <span>{episode.length}</span>
@@ -904,22 +873,30 @@ export default function Episodes() {
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 rounded-full border border-[var(--usr-line)] bg-[var(--usr-cloud)] px-3 py-1 text-xs font-semibold text-[var(--usr-ink)]">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--usr-secondary)]" aria-hidden="true">
-                      <path
-                        d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1zm0 6c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    {(episode.coinCost ?? 3)} coins
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex min-h-11 items-center justify-center bg-[var(--usr-secondary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--usr-primary)]">
+                      {isUnlocking ? "Unlocking..." : "Watch episode"}
+                    </div>
+                    {/* <div
+                      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                        isUnlocked
+                          ? "border border-[rgba(122,49,104,0.2)] bg-[rgba(213,199,226,0.5)] text-[var(--usr-primary)]"
+                          : "border border-[var(--usr-line)] bg-white text-[var(--usr-muted)]"
+                      }`}
+                    >
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                        <path
+                          d="M12 3c-4.4 0-8 1.34-8 3v12c0 1.66 3.6 3 8 3s8-1.34 8-3V6c0-1.66-3.6-3-8-3zm0 2c3.87 0 6 .97 6 1s-2.13 1-6 1-6-.97-6-1 2.13-1 6-1z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <span>{isUnlocked ? "Unlocked" : "3 coins"}</span>
+                    </div> */}
                   </div>
-                </div>
-                <div className="text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">
-                  Tap to open player →
                 </div>
               </div>
             </button>
-          ))}
+          )})}
         </div>
         <div className="relative mt-2 flex items-center justify-center">
           <div ref={sentinelRef} className="h-10 w-full" />
@@ -932,7 +909,12 @@ export default function Episodes() {
             </div>
           ) : null}
             {visibleCount >= episodes.length ? (
-              <p className="absolute text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]">End of the library</p>
+              <p
+                className="absolute text-xs uppercase tracking-[0.3em] text-[var(--usr-muted)]"
+                style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 400 }}
+              >
+                More Episodes Coming Soon
+              </p>
           ) : null}
         </div>
       </div>
