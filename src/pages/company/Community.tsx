@@ -165,7 +165,7 @@ export default function Community() {
                   setContactMode("contact");
                   setIsContactOpen(true);
                 }}
-                className="border border-white/25 bg-white/90 px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                className="border-[0.75px] border-white/25 bg-white/90 px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
               >
                 Contact Us
               </button>
@@ -173,7 +173,7 @@ export default function Community() {
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -186,7 +186,7 @@ export default function Community() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -252,7 +252,7 @@ export default function Community() {
                   setContactMode("community-guest");
                   setIsContactOpen(true);
                 }}
-                className="inline-flex items-center justify-center border border-[#7A3168] bg-white px-8 py-4 text-sm font-semibold text-[#7A3168] transition hover:bg-[#D5C7E2]/20"
+                className="inline-flex items-center justify-center border-[0.75px] border-[#7A3168] bg-white px-8 py-4 text-sm font-semibold text-[#7A3168] transition hover:bg-[#D5C7E2]/20"
               >
                 Find a Community Room
               </button>

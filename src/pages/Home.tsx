@@ -19,6 +19,10 @@ const hostHeroImageUrl = new URL(
   "../../OneDrive_2026-03-20/Visual assest for podcast page/meet your host image.png",
   import.meta.url
 ).href;
+const brettStoryImageUrl = new URL(
+  "../../OneDrive_2026-03-23 (1)/About page/visual assets/bretts story image.PNG",
+  import.meta.url
+).href;
 const timeFrontImageUrl = new URL("../../OneDrive_2026-03-20/Visual assest for podcast page/time front.png", import.meta.url).href;
 const timeBackImageUrl = new URL("../../OneDrive_2026-03-20/Visual assest for podcast page/time back.png", import.meta.url).href;
 const questionsFrontImageUrl = new URL(
@@ -246,7 +250,7 @@ export default function Home() {
                   setContactMode("contact");
                   setIsContactOpen(true);
                 }}
-                className="border border-white/25 bg-[#ECF1F4] px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                className="border-[0.75px] border-white/25 bg-[#ECF1F4] px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
               >
                 Contact Us
               </button>
@@ -254,7 +258,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -267,7 +271,7 @@ export default function Home() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-[#ECF1F4] text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -299,6 +303,12 @@ export default function Home() {
                 >
                   Be a Podcast Guest
                 </button>
+                <Link
+                  to="/episodes"
+                  className="inline-flex min-h-14 items-center justify-center border-[0.75px] border-white bg-white/10 px-8 py-4 text-xl font-medium text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/18"
+                >
+                  Episodes
+                </Link>
               </div>
             </div>
           </div>
@@ -420,7 +430,7 @@ export default function Home() {
             <div className="mt-8">
               <Link
                 to="/community"
-                className="inline-flex min-h-14 items-center justify-center border border-[var(--usr-secondary)] bg-[var(--usr-white)] px-8 py-4 text-base font-medium text-[var(--usr-secondary)] transition hover:bg-[var(--usr-light-gray)]"
+                className="inline-flex min-h-14 items-center justify-center border-[0.75px] border-[var(--usr-secondary)] bg-[var(--usr-white)] px-8 py-4 text-base font-medium text-[var(--usr-secondary)] transition hover:bg-[var(--usr-light-gray)]"
               >
                 Explore Community Rooms
               </Link>
@@ -445,26 +455,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="reveal-band relative overflow-hidden bg-[#231F20]">
-        <div className="absolute inset-0">
-          <img
-            src={hostHeroImageUrl}
-            alt="Meet your host"
-            className="h-full w-full object-cover"
-          />
-          <div
-            className="absolute inset-0"
-            aria-hidden="true"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(35,31,32,0.08) 0%, rgba(35,31,32,0.22) 42%, rgba(35,31,32,0.78) 66%, rgba(24,20,22,0.96) 100%)",
-              }}
-          />
-        </div>
-
-        <div className="relative mx-auto grid min-h-[540px] max-w-7xl lg:min-h-[660px] lg:grid-cols-[1fr_.95fr]">
-          <div />
-          <div className="flex flex-col justify-center px-8 py-14 text-white sm:px-10 sm:py-16 lg:px-12 lg:py-20">
+      <section className="reveal-band overflow-hidden bg-[#231F20]">
+        <div className="grid lg:grid-cols-[1.05fr_.95fr]">
+          <div className="relative min-h-[360px] sm:min-h-[460px] lg:min-h-[660px]">
+            <img
+              src={brettStoryImageUrl}
+              alt="Brett in The Unscripted Room"
+              className="h-full w-full object-cover object-[30%_center]"
+            />
+          </div>
+          <div className="flex min-h-[460px] flex-col justify-center bg-[#231F20] px-8 py-14 text-white sm:px-10 sm:py-16 lg:min-h-[660px] lg:border-l lg:border-white/10 lg:px-12 lg:py-20 xl:pr-[calc((100vw-80rem)/2+3rem)]">
             <p
               className="text-[1.9rem] uppercase tracking-[0.04em] text-white sm:text-[2.35rem] lg:text-[2.9rem]"
               style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600 }}
@@ -482,10 +482,9 @@ export default function Home() {
             <div className="mt-12">
               <Link
                 to="/about#brett-story"
-                className="inline-flex items-center gap-3 text-[1.05rem] font-medium text-[var(--usr-accent)] transition hover:text-white"
+                className="inline-flex min-h-14 items-center justify-center border-[0.75px] border-white bg-[var(--usr-secondary)] px-8 py-4 text-xl font-medium text-white transition hover:bg-[var(--usr-primary)]"
               >
-                <span>Read Brett&apos;s Full Story</span>
-                <span aria-hidden="true" className="text-[1.5rem] leading-none">›</span>
+                Read Brett&apos;s Full Story
               </Link>
             </div>
           </div>

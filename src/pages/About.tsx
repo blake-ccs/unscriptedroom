@@ -6,7 +6,7 @@ import API_BASE from "../lib/apiBase";
 
 const logoImageUrl = new URL("../../OneDrive_1_12-19-2025/UR LOGO white 1.png", import.meta.url).href;
 const brettStoryImageUrl = new URL(
-  "../../OneDrive_2026-03-23 (1)/About page/visual assets/brett's story image.png",
+  "../../OneDrive_2026-03-23 (1)/About page/visual assets/Bretts Story.png",
   import.meta.url
 ).href;
 const timeIconUrl = new URL(
@@ -122,7 +122,7 @@ export default function About() {
               <button
                 type="button"
                 onClick={() => setIsContactOpen(true)}
-                className="border border-white/25 bg-white/90 px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                className="border-[0.75px] border-white/25 bg-white/90 px-5 py-2 text-sm font-semibold text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
               >
                 Contact Us
               </button>
@@ -130,7 +130,7 @@ export default function About() {
                 <button
                   type="button"
                   onClick={handleAccountClick}
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Account"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -143,7 +143,7 @@ export default function About() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex h-10 w-10 items-center justify-center border border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  className="inline-flex h-10 w-10 items-center justify-center border-[0.75px] border-white/25 bg-white/90 text-[#231F20] shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
                   aria-label="Register or login"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -261,17 +261,17 @@ export default function About() {
         </div>
       </section>
 
-      <section id="brett-story" className="reveal-section relative overflow-hidden bg-[#231F20]">
-        <div className="grid min-h-[420px] items-stretch lg:min-h-[680px] lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative min-h-[320px] bg-[#201a18] lg:min-h-[680px]">
-            <img src={brettStoryImageUrl} alt="Brett in The Unscripted Room" className="h-full w-full object-cover" />
-            <div
-              className="absolute inset-y-0 right-0 hidden w-40 bg-gradient-to-r from-transparent via-[#231F20]/35 to-[#231F20] lg:block"
-              aria-hidden="true"
+      <section id="brett-story" className="reveal-section overflow-hidden bg-[#231F20] px-6 py-10 sm:px-8 lg:px-10 xl:px-12">
+        <div className="mx-auto grid max-w-7xl gap-8 xl:grid-cols-[minmax(260px,1fr)_minmax(0,2fr)] xl:items-center xl:gap-12">
+          <div className="relative min-h-[260px] overflow-hidden sm:min-h-[320px] lg:min-h-[380px] xl:h-[540px] xl:min-h-0">
+            <img
+              src={brettStoryImageUrl}
+              alt="Brett in The Unscripted Room"
+              className="h-full w-full object-cover object-[34%_center]"
             />
           </div>
 
-          <div className="bg-[#231F20] px-8 py-10 text-white sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+          <div className="flex flex-col justify-center bg-[#231F20] py-2 text-white sm:py-4 lg:py-8 xl:border-l xl:border-white/10 xl:pl-12">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#D5C7E2]">Brett&apos;s Story</p>
             <div className="mt-4 h-px w-48 bg-[#D5C7E2]/45" />
             <h2 className="mt-6 max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-[3.5rem]">
@@ -317,6 +317,7 @@ export default function About() {
                 community where thoughtful people come together to create better outcomes for themselves and for others.
               </p>
             </div>
+
           </div>
         </div>
       </section>

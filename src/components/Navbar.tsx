@@ -133,7 +133,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={handleAccountClick}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Account"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -151,7 +151,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/login"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[0.75px] border-black/10 bg-white text-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 aria-label="Register or login"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">

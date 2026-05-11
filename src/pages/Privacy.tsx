@@ -45,9 +45,10 @@ export default function Privacy() {
           <div>
             <h2 className="text-base font-semibold text-ink">Messaging (email & SMS)</h2>
             <p className="mt-2">
-              By providing your contact information, you consent to receive communications from CCS. You may receive
-              email and/or SMS messages about scheduling, updates, and offers. Message frequency varies. Message and data
-              rates may apply. Consent is not a condition of purchase.
+              By providing your contact information, you consent to receive communications from CCS and The Unscripted
+              Room. You may receive email and/or SMS messages about scheduling, updates, and your expressed interest. We
+              do not share or sell your mobile number. Message frequency may vary. Standard message and data rates may
+              apply. Consent is not a condition of purchase.
             </p>
             <p className="mt-2">
               To opt out of SMS, reply <strong>STOP</strong> at any time. For help, reply <strong>HELP</strong>. To

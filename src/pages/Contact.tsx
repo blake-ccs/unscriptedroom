@@ -3,15 +3,21 @@ import { motion } from "framer-motion";
 import API_BASE from "../lib/apiBase";
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", smsOptIn: false, subject: "", message: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const smsOptInCopy =
+    "By providing your phone number, you agree to receive text messages from The Unscripted Room. We will only message you regarding your expressed interest. Message and data rates may apply.";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name || !form.email || !form.subject || !form.message) {
       setError("Please complete all fields.");
+      return;
+    }
+    if (form.phone && !form.smsOptIn) {
+      setError("Please confirm SMS consent to provide your phone number.");
       return;
     }
     setSending(true);
@@ -26,7 +32,7 @@ export default function Contact() {
         throw new Error("Request failed");
       }
       setSent(true);
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({ name: "", email: "", phone: "", smsOptIn: false, subject: "", message: "" });
     } catch {
       setError("Failed to send. Please try again.");
     } finally {
@@ -69,6 +75,21 @@ export default function Contact() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
             />
+            <FloatingInput
+              label="Phone Number"
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+            <label className="flex items-start gap-3 rounded-2xl border border-[#D5C7E2] bg-[#F8F3FB] px-4 py-3 text-left">
+              <input
+                type="checkbox"
+                checked={form.smsOptIn}
+                onChange={(e) => setForm({ ...form, smsOptIn: e.target.checked })}
+                className="mt-1 h-4 w-4 rounded border-[#7A3168] text-[#7A3168] focus:ring-[#7A3168]"
+              />
+              <span className="text-xs leading-relaxed text-gray-700">{smsOptInCopy}</span>
+            </label>
             <FloatingInput
               label="Subject"
               value={form.subject}
