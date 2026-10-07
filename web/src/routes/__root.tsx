@@ -74,7 +74,11 @@ function ErrorComponent({ error, reset }: import("@tanstack/react-router").Error
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ matches }) => {
-    const seo = canonical(matches[matches.length - 1]?.pathname ?? "/");
+    const leaf = matches[matches.length - 1] as
+      { routeId: string; pathname: string; search: Record<string, unknown> } | undefined;
+    // No canonical on the 404 catch-all (the SPA shell's copy is stripped in scripts/postbuild.mjs).
+    const isNotFound = !leaf || leaf.routeId === "/$";
+    const seo = isNotFound ? { meta: [], links: [] } : canonical(leaf?.pathname ?? "/");
     return {
       meta: [
         { charSet: "utf-8" },

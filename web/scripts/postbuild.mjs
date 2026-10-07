@@ -1,5 +1,6 @@
-// Writes dist/client/sitemap.xml from the prerendered pages (one URL per index.html).
-import { readdirSync, statSync, writeFileSync } from "node:fs";
+// Post-build: writes dist/client/sitemap.xml from the prerendered pages (one URL per index.html),
+// and strips the home page's canonical/og:url from the SPA shell, which Netlify serves for 404s.
+import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 const SITE_URL = "https://theunscriptedroom.com";
@@ -27,3 +28,12 @@ ${paths.map((path) => `  <url><loc>${SITE_URL}${path}</loc><lastmod>${today}</la
 `;
 writeFileSync(join(OUT, "sitemap.xml"), xml);
 console.log(`[sitemap] ${paths.length} URLs written to ${OUT}/sitemap.xml`);
+
+const shell = join(OUT, "_shell.html");
+writeFileSync(
+  shell,
+  readFileSync(shell, "utf8")
+    .replace(/<link rel="canonical"[^>]*>/g, "")
+    .replace(/<meta property="og:url"[^>]*>/g, ""),
+);
+console.log("[postbuild] removed canonical/og:url from _shell.html");

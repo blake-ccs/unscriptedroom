@@ -34,7 +34,7 @@ export default defineConfig({
         retryCount: 2,
         retryDelay: 1000,
       },
-      // sitemap.xml is written by scripts/sitemap.mjs after the build.
+      // sitemap.xml is written by scripts/postbuild.mjs after the build.
       pages: [{ path: "/" }, { path: "/qr" }, { path: "/survey" }, { path: "/portal" }],
     }),
     viteReact(),

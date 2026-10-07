@@ -22,3 +22,7 @@
 /services/*           /                     301
 /app/*                /                     301
 /invite/*             /                     301
+
+# Unknown paths: SPA shell with a real 404 status (renders the "Page not found" screen).
+# Must stay last — prerendered pages are served before this rule applies.
+/*                    /_shell.html          404
