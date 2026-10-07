@@ -1,0 +1,422 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Barlow Condensed", Arial, sans-serif;
+  --font-sans: "Barlow", Arial, sans-serif;
+  --font-headline: "Barlow Semi Condensed", "Barlow", Arial, sans-serif;
+  --font-wordmark: "Instrument Sans", "Barlow", Arial, sans-serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-ink: var(--ink);
+  --color-warm-white: var(--warm-white);
+  --color-purple: var(--purple);
+  --color-deep-purple: var(--deep-purple);
+  --color-plum: var(--purple);
+  --color-soft-purple: var(--soft-purple);
+  --color-slate: var(--slate);
+  --color-chartreuse: var(--chartreuse);
+  --color-cream: var(--warm-white);
+  --color-cream-muted: color-mix(in oklab, var(--warm-white) 68%, transparent);
+  --color-warm-black: var(--ink);
+  --color-espresso: var(--ink);
+  --color-ink-true: var(--ink-true);
+  --color-ink-soft: var(--ink-soft);
+  --color-maroon: var(--purple);
+  --color-apply: var(--chartreuse);
+  --color-apply-hover: var(--warm-white);
+  --color-apply-foreground: var(--ink);
+  --color-lilac: var(--purple);
+  --color-lilac-soft: color-mix(in oklab, var(--purple) 20%, var(--warm-white));
+  --color-sage: var(--chartreuse);
+  --color-sage-deep: var(--ink);
+  --color-brass: var(--chartreuse);
+  --color-brass-light: var(--chartreuse);
+  --shadow-warm: 6px 6px 0 var(--soft-purple);
+}
+
+:root {
+  --ink: #231f20;
+  --ink-true: oklch(0.145 0.002 71);
+  --ink-soft: oklch(0.2475 0.007 68);
+  --warm-white: oklch(0.956034 0.011474 84.579);
+  --purple: #4e2a45;
+  --deep-purple: var(--purple);
+  --soft-purple: #d5c7e2;
+  --slate: #5b6064;
+  --chartreuse: #b4bda9;
+  --background: var(--warm-white);
+  --foreground: var(--ink);
+  --card: var(--warm-white);
+  --card-foreground: var(--ink);
+  --popover: var(--warm-white);
+  --popover-foreground: var(--ink);
+  --primary: var(--deep-purple);
+  --primary-foreground: var(--warm-white);
+  --secondary: var(--ink);
+  --secondary-foreground: var(--warm-white);
+  --muted: color-mix(in oklab, var(--ink) 7%, var(--warm-white));
+  --muted-foreground: color-mix(in oklab, var(--ink) 68%, transparent);
+  --accent: var(--chartreuse);
+  --accent-foreground: var(--ink);
+  --destructive: var(--purple);
+  --destructive-foreground: var(--warm-white);
+  --border: color-mix(in oklab, var(--ink) 28%, transparent);
+  --input: color-mix(in oklab, var(--ink) 45%, transparent);
+  --ring: var(--chartreuse);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+  }
+  h3,
+  h4 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    text-transform: none;
+  }
+  h1,
+  h2 {
+    font-family: var(--font-headline);
+    color: inherit;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 3.4vw, 3.3rem);
+    line-height: 1.02;
+  }
+  h2 {
+    font-size: clamp(1.65rem, 2.4vw, 2.4rem);
+    line-height: 1.06;
+  }
+  h1.display-statement,
+  h2.display-statement,
+  .display-statement {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    line-height: 0.98;
+  }
+  h2.display-statement {
+    font-size: clamp(2rem, 3.1vw, 3.35rem);
+    line-height: 1;
+  }
+  h3 {
+    font-size: clamp(1.2rem, 1.45vw, 1.55rem);
+    line-height: 1.2;
+  }
+  p {
+    line-height: 1.65;
+  }
+  ::selection {
+    background: var(--color-chartreuse);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-chartreuse);
+    outline-offset: 3px;
+  }
+}
+
+@utility site-container {
+  width: min(100% - 2rem, 86rem);
+  margin-inline: auto;
+}
+@utility section-pad {
+  padding-block: clamp(4.5rem, 9vw, 9rem);
+}
+@utility hero-title {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  font-size: clamp(2.8rem, 5.2vw, 5.15rem);
+  line-height: 0.94;
+}
+@utility dark-band {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-ink);
+  color: var(--color-warm-white);
+}
+@utility page-hero {
+  min-height: 30rem;
+  display: flex;
+  align-items: end;
+  padding-block: 6rem 4rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--warm-white) 18%, transparent);
+}
+@utility eyebrow {
+  color: var(--color-purple);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+@utility nav-link {
+  color: color-mix(in oklab, var(--warm-white) 92%, transparent);
+  font-family: var(--font-headline);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: color 0.2s;
+  &:hover {
+    color: var(--color-soft-purple);
+  }
+}
+@utility nav-link-active {
+  color: var(--color-soft-purple);
+}
+@utility social-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--warm-white) 35%, transparent);
+  border-radius: 999px;
+  transition: all 0.2s;
+  & svg {
+    width: 1rem;
+  }
+  &:hover {
+    border-color: var(--color-chartreuse);
+    color: var(--color-chartreuse);
+  }
+}
+@utility footer-link {
+  color: color-mix(in oklab, var(--warm-white) 68%, transparent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  &:hover {
+    color: var(--color-chartreuse);
+  }
+}
+@utility season-label {
+  color: var(--color-purple);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@utility tag {
+  border: 1px solid currentColor;
+  color: var(--color-ink);
+  padding: 0.28rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+@utility tag-topic {
+  background: var(--color-chartreuse);
+  border-color: var(--color-chartreuse);
+}
+@utility media-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-purple);
+}
+@utility paper-card {
+  border: 1px solid var(--color-foreground);
+  background: var(--color-card);
+  box-shadow: var(--shadow-warm);
+}
+@utility form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-foreground);
+}
+@utility field-error {
+  margin-top: 0.35rem;
+  color: var(--color-purple);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+@utility rule-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  &::before {
+    content: "";
+    width: 1.25rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.7;
+  }
+}
+@utility tactile {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+  }
+}
+@utility paper-texture {
+  background-image: none;
+}
+@utility groove {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    width: 34rem;
+    aspect-ratio: 1;
+    right: -10rem;
+    bottom: -18rem;
+    border-radius: 999px;
+    opacity: 0.07;
+    background: repeating-radial-gradient(
+      circle,
+      transparent 0 6px,
+      var(--color-chartreuse) 7px 8px
+    );
+    pointer-events: none;
+  }
+}
+@utility groove-light {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    width: 22rem;
+    aspect-ratio: 1;
+    right: -13rem;
+    top: -13rem;
+    border-radius: 999px;
+    opacity: 0.07;
+    background: repeating-radial-gradient(
+      circle,
+      transparent 0 6px,
+      var(--color-chartreuse) 7px 8px
+    );
+    pointer-events: none;
+  }
+}
+@utility groove-edge {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    width: 21rem;
+    aspect-ratio: 1;
+    right: -15rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 999px;
+    opacity: 0.16;
+    background: repeating-radial-gradient(
+      circle,
+      transparent 0 6px,
+      var(--color-chartreuse) 7px 8px
+    );
+    pointer-events: none;
+  }
+}
+@utility hero-shade {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--ink) 94%, transparent) 0%,
+    color-mix(in oklab, var(--ink) 46%, transparent) 54%,
+    transparent 100%
+  );
+}
+@utility media-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(16rem, 28%);
+  gap: 1rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-chartreuse) transparent;
+  padding-bottom: 1rem;
+  & > * {
+    scroll-snap-align: start;
+  }
+}
+@media (max-width: 767px) {
+  .media-rail {
+    grid-auto-columns: 82%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: reveal 0.7s ease-out both;
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility hero-display {
+  font-size: clamp(2.6rem, 5vw, 5rem);
+  line-height: 0.96;
+  font-weight: 700;
+}

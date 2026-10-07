@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /qr
+Disallow: /survey
+Disallow: /portal
+
+Sitemap: https://theunscriptedroom.com/sitemap.xml

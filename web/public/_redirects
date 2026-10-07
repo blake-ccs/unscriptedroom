@@ -1,0 +1,24 @@
+# Legacy URLs from the previous site and earlier drafts (permanent redirects)
+/podcast              /                     301
+/company/podcast      /                     301
+/episodes             /watch                301
+/player               /watch                301
+/why                  /about                301
+/community            /about                301
+/company/community    /about                301
+/contact-us           /contact              301
+/register-interest    /apply                301
+/be-a-guest           /join-a-conversation  301
+/the-room             /about                301
+/partners             /contact              301
+/login                /                     301
+/register             /                     301
+/my                   /                     301
+/profile              /                     301
+/start                /                     301
+/success              /                     301
+/pricing              /                     301
+/platform/*           /                     301
+/services/*           /                     301
+/app/*                /                     301
+/invite/*             /                     301

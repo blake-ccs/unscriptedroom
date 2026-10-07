@@ -1,8 +1,21 @@
+# The website lives in web/ (TanStack Start, prerendered to static HTML).
+# Paths below are relative to the base directory. Forms post to the Express API on Fly.io (server/).
 [build]
+  base = "web"
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/client"
 
+[build.environment]
+  NODE_VERSION = "22"
+
+# Unknown paths get the SPA shell with a real 404 status (the router renders the
+# "Page not found" screen). Prerendered pages and the 301s in web/public/_redirects win first.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/_shell.html"
+  status = 404
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
