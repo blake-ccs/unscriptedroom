@@ -57,7 +57,7 @@ export function EpisodeThumbnails({
               <Play className="h-4 w-4 fill-current" />
             </span>
           </span>
-          <span className="mt-4 block font-display text-xl font-extrabold uppercase leading-tight group-hover:text-purple">
+          <span className="mt-4 block font-headline text-xl font-semibold uppercase leading-tight group-hover:text-purple">
             {episode.title}
           </span>
           <span
@@ -323,9 +323,7 @@ export function EpisodeGrid({ compact = false }: { compact?: boolean }) {
             {String(ep.n).padStart(2, "0")}
           </span>
           <div>
-            <span className="season-label">
-              {ep.value} · {ep.topic}
-            </span>
+            <span className="season-label">{ep.topic}</span>
             <h3 className="mt-2">{ep.title}</h3>
           </div>
           <div>
@@ -413,12 +411,10 @@ export function FollowUpSignup() {
     else setError("We couldn't add you just now. Please try again.");
   }
   return (
-    <section className="paper-texture groove-edge bg-warm-white py-16 sm:py-20">
+    <section className="paper-texture bg-warm-white py-16 sm:py-20">
       <div className="site-container grid gap-8 border-t border-foreground pt-8 lg:grid-cols-[.8fr_1.2fr]">
         <div>
           <p className="eyebrow">Stay connected</p>
-          <div className="mt-6 h-1 w-16 bg-chartreuse" />
-          <div className="mt-3 h-1 w-9 bg-purple" />
         </div>
         <div className="max-w-3xl">
           <h2>There’s more to talk about.</h2>
@@ -488,12 +484,14 @@ type Conversation = {
 export function ConversationCard({ ep }: { ep: Conversation }) {
   const Icon = valueIcons[ep.value] ?? _Eye;
   return (
-    <article className="group relative flex flex-col border border-foreground/10 bg-warm-white p-7 transition-colors hover:border-soft-purple sm:p-8">
+    <article className="group relative flex flex-col border border-foreground/10 bg-card-cream p-7 transition-colors hover:border-soft-purple sm:p-8">
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 h-[3px] bg-soft-purple/0 transition-colors group-hover:bg-soft-purple"
       />
-      <h3 className="font-sans text-lg font-semibold leading-snug text-plum">{ep.title}</h3>
+      {/* The icon carries the episode's framework value (ep.value) without spelling it out. */}
+      <Icon className="h-7 w-7 text-deep-purple" strokeWidth={1.4} aria-hidden="true" />
+      <h3 className="mt-5 font-sans text-lg font-semibold leading-snug text-plum">{ep.title}</h3>
       <p className="mt-4 font-headline text-[1.45rem] font-semibold uppercase leading-[1.12] text-foreground">
         {ep.question}
       </p>
@@ -508,18 +506,9 @@ export function ConversationCard({ ep }: { ep: Conversation }) {
         Explore{" "}
         <_Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
       </_Link>
-      <div className="mt-7 flex items-start gap-2 border-t border-foreground/10 pt-4 text-muted-foreground">
-        <Icon
-          className="mt-[1px] h-3.5 w-3.5 shrink-0 text-deep-purple/70"
-          strokeWidth={1.5}
-          aria-hidden="true"
-        />
-        <p className="text-[.65rem] leading-snug">
-          <span className="font-bold uppercase tracking-[.14em]">{ep.value}</span>
-          <br />
-          {ep.topic}
-        </p>
-      </div>
+      <p className="mt-7 border-t border-foreground/10 pt-4 text-[.65rem] font-bold uppercase leading-snug tracking-[.14em] text-muted-foreground">
+        {ep.topic}
+      </p>
     </article>
   );
 }

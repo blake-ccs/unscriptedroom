@@ -82,7 +82,7 @@ function Page() {
       <PageHero
         eyebrow="Contact"
         title="Send a note to the room."
-        intro="For general questions, topic ideas, collaborations, and media inquiries. Speaker interest belongs on the application page."
+        intro="For general questions, topic ideas, collaborations, and media inquiries. Guest interest belongs on the application page."
         action={false}
       />
       <section className="section-pad">

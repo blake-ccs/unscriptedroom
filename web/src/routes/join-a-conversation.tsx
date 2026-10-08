@@ -58,23 +58,23 @@ const steps = [
   ],
   [
     "Get confirmed",
-    "Selected speakers receive the topic, recording information and next steps. The exact address is shared only with confirmed speakers.",
+    "Selected guests receive the topic, recording information and next steps. The exact address is shared only with confirmed guests.",
   ],
   [
     "Complete a short intake",
-    "A short form helps Brett understand your background and perspective. It prepares the room; it does not script the conversation.",
+    "A short form helps us understand your background and perspective. It prepares the room; it does not script the conversation.",
   ],
   [
     "Meet the table",
-    "Meet the other speakers, see the studio and settle in with support from the team before recording begins.",
+    "Meet the other guests, see the studio and settle in with support from the team before recording begins.",
   ],
   [
     "The conversation",
-    "You know the topic and central question beforehand, but not every question. Each speaker begins by sharing who they are and why the conversation matters to them. There's a break along the way.",
+    "You know the topic and central question beforehand, but not every question. Each guest begins by sharing who they are and why the conversation matters to them. There's a break along the way.",
   ],
   [
     "Wrap and decide",
-    "Recording ends within the scheduled window. Afterward, each speaker has 48 hours to decide whether they're comfortable with publication.",
+    "Recording ends within the scheduled window. Afterward, each guest has 48 hours to decide whether they're comfortable with publication.",
   ],
 ];
 function JoinPage() {
@@ -143,7 +143,7 @@ function JoinPage() {
               <p className="rule-label text-soft-purple">You raise your hand</p>
               <p className="mt-4 text-lg text-warm-white/80">
                 You can express interest yourself, for a specific upcoming conversation or in
-                general. Both paths lead to the same table. Repeat speakers are welcome.
+                general. Both paths lead to the same table. Repeat guests are welcome.
               </p>
             </div>
           </div>
@@ -198,7 +198,7 @@ function JoinPage() {
             <h2 className="mt-5">Where the conversation happens.</h2>
             <p className="mt-5 text-muted-foreground">
               A third-floor studio inside a historic mill building in Amesbury, Massachusetts, with
-              elevator access and a parking lot across the street. Confirmed speakers receive the
+              elevator access and a parking lot across the street. Confirmed guests receive the
               exact address and arrival details.
             </p>
             <div className="mt-8 border-t border-foreground/25 pt-6">
@@ -219,12 +219,12 @@ function JoinPage() {
           </div>
           <div className="space-y-5 text-lg text-muted-foreground">
             <p>
-              Each speaker has 48 hours after filming to decide whether they are comfortable with
-              the conversation being published.
+              Each guest has 48 hours after filming to decide whether they are comfortable with the
+              conversation being published.
             </p>
             <p>
-              Because each episode is shared, choosing not to publish also affects the other
-              speakers. That context matters, but you are not obligated to approve publication.
+              Because each episode is shared, choosing not to publish also affects the other guests.
+              That context matters, but you are not obligated to approve publication.
             </p>
             <p>
               If everyone agrees, the conversation may be published on YouTube, with shorter clips

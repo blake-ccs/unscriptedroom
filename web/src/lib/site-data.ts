@@ -133,10 +133,10 @@ export const faqs = [
     "Adults age 21 and older may apply. Guests do not need to be experts, influencers, or professional speakers.",
   ],
   [
-    "How are speakers selected?",
+    "How are guests selected?",
     "The team reaches out to people throughout the community and also welcomes applications. You can apply generally or identify specific conversations that interest you.",
   ],
-  ["Can I participate more than once?", "Yes. Repeat speakers are welcome."],
+  ["Can I participate more than once?", "Yes. Repeat guests are welcome."],
   ["Is there a cost to participate?", "No. Participation is completely free."],
   [
     "Are you going to try to sell me something?",
@@ -144,7 +144,7 @@ export const faqs = [
   ],
   [
     "Where is the podcast recorded?",
-    "In a third-floor studio inside a historic mill building in Amesbury, Massachusetts. Elevator access is available, and a dedicated parking lot is across the street. The exact address and arrival instructions are sent to confirmed speakers.",
+    "In a third-floor studio inside a historic mill building in Amesbury, Massachusetts. Elevator access is available, and a dedicated parking lot is across the street. The exact address and arrival instructions are sent to confirmed guests.",
   ],
   [
     "How long should I plan to be there?",
@@ -160,7 +160,7 @@ export const faqs = [
   ],
   [
     "Do I need to prepare?",
-    "Confirmed speakers complete a short intake form at least 48 hours before filming. It helps Brett prepare for the conversation but does not script anyone's answers.",
+    "Confirmed guests complete a short intake form at least 48 hours before filming. It helps Brett prepare for the conversation but does not script anyone's answers.",
   ],
   [
     "How personal does the conversation get?",
@@ -172,7 +172,7 @@ export const faqs = [
   ],
   [
     "What happens after we record?",
-    "Each speaker has 48 hours after filming to decide whether they are comfortable with publication. Because it is a shared conversation, a decision not to publish affects all speakers involved. If everyone agrees, the conversation may be published on YouTube and shorter clips may be shared through YouTube and The Unscripted Room social channels.",
+    "Each guest has 48 hours after filming to decide whether they are comfortable with publication. Because it is a shared conversation, a decision not to publish affects all guests involved. If everyone agrees, the conversation may be published on YouTube and shorter clips may be shared through YouTube and The Unscripted Room social channels.",
   ],
   [
     "What are the values that guide The Unscripted Room?",

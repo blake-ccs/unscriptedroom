@@ -1,12 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  ConversationCard,
-  EpisodeThumbnails,
-  FollowUpSignup,
-  ListenPlatforms,
-} from "@/components/site/site-ui";
+import { ConversationCard, FollowUpSignup, ListenPlatforms } from "@/components/site/site-ui";
 import { roomMedia } from "@/lib/site-media";
 import { seasonTwo } from "@/lib/site-data";
 
@@ -52,13 +47,12 @@ function Home() {
         <div className="site-container relative z-10 flex min-h-[38rem] items-end py-14">
           <div className="max-w-5xl reveal">
             <h1 className="display-statement hero-display text-warm-white">
-              <span className="block">A podcast built around</span>
-              <span className="block">
-                <span className="text-soft-purple">community and curiosity.</span>
-              </span>
+              <span className="block">Where lived experience</span>{" "}
+              <span className="block text-soft-purple">meets curiosity.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-warm-white/85">
-              Conversations shaped by lived experience and the perspectives around the table.
+              Different perspectives around one table, with the time and curiosity for deeper
+              conversation.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild variant="darkOutline" size="lg">
@@ -74,25 +68,20 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="bg-ink py-16 text-warm-white sm:py-20">
+      <section className="bg-ink py-12 text-warm-white sm:py-16">
         <div className="site-container">
-          <p className="rule-label text-soft-purple">From Season One</p>
-          <p className="mt-3 max-w-xl text-warm-white/70">
-            A few conversations from where it all started.
+          <p className="max-w-2xl text-lg text-warm-white/80">
+            Season One is now available.{" "}
+            <Link
+              to="/watch"
+              className="text-warm-white underline decoration-soft-purple/60 underline-offset-4 transition-colors hover:text-soft-purple hover:decoration-soft-purple"
+            >
+              Explore the conversations that started it all.
+            </Link>
           </p>
-          <div className="mt-9">
-            <EpisodeThumbnails />
-          </div>
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-warm-white/20 pt-7">
-            <Button asChild variant="darkOutline">
-              <Link to="/watch">
-                View all episodes <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-          <div className="mt-12 flex flex-col gap-7 border-t border-warm-white/20 pt-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-10 flex flex-col gap-7 border-t border-warm-white/20 pt-8 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="font-display text-2xl font-extrabold uppercase tracking-tight text-warm-white">
+              <p className="font-headline text-2xl font-semibold uppercase text-warm-white">
                 Subscribe and keep listening.
               </p>
               <p className="mt-2 text-sm text-warm-white/70">

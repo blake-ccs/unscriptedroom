@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { EpisodeThumbnails, listenPlatforms, youtubePlaylist } from "@/components/site/site-ui";
-import { roomShorts } from "@/lib/site-media";
+import { roomShorts, shortUrl } from "@/lib/site-media";
 
 export const Route = createFileRoute("/watch")({
   head: () => ({
@@ -123,19 +123,33 @@ function Page() {
             aria-label="The Unscripted Room Shorts"
           >
             {roomShorts.map((short) => (
-              <article
+              <a
                 key={short.id}
-                className="relative aspect-[9/16] overflow-hidden border border-warm-white/15 bg-deep-purple"
+                href={shortUrl(short.id)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${short.title} — watch on YouTube (opens in a new tab)`}
+                className="group flex flex-col focus-visible:outline-offset-4"
               >
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${short.id}?rel=0`}
-                  title={short.title}
-                  loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 h-full w-full border-0"
-                />
-              </article>
+                <span className="relative block aspect-[9/16] overflow-hidden border border-warm-white/15 bg-deep-purple">
+                  <img
+                    src={short.thumbnail}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    width={540}
+                    height={960}
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute inset-0 bg-ink/10 transition group-hover:bg-ink/25" />
+                  <span className="absolute bottom-3 left-3 grid h-9 w-9 place-items-center rounded-full bg-chartreuse text-ink">
+                    <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                  </span>
+                </span>
+                <span className="mt-3 block text-sm font-semibold leading-snug text-warm-white/85 transition-colors group-hover:text-soft-purple">
+                  {short.title}
+                </span>
+              </a>
             ))}
           </div>
         </div>

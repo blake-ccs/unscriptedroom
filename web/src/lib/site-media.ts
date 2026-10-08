@@ -8,6 +8,12 @@ import sign from "@/assets/dsc00064.jpg";
 import brettPortrait from "@/assets/brett-studio-portrait.png";
 import seasonOne0001 from "@/assets/season-one-0001.jpg";
 import seasonOne0002 from "@/assets/season-one-0002.jpg";
+import short0 from "@/assets/shorts/maXn6Yjx6HU.jpg";
+import short1 from "@/assets/shorts/uhwc1iVpkQ8.jpg";
+import short2 from "@/assets/shorts/6oci5RvzE0E.jpg";
+import short3 from "@/assets/shorts/I4jRN5SFyuQ.jpg";
+import short4 from "@/assets/shorts/r3vkj9AEfIA.jpg";
+import short5 from "@/assets/shorts/4XLFm8t7lsc.jpg";
 import seasonOne0003 from "@/assets/season-one-0003.jpg";
 
 export const roomMedia = {
@@ -51,16 +57,36 @@ export const seasonOneEpisodes = [
 export type ShortVideo = {
   id: string;
   title: string;
+  /** YouTube's own vertical thumbnail for the Short (i.ytimg.com/vi/<id>/oar2.jpg), resized to 540×960. */
+  thumbnail: string;
 };
+
+export const shortUrl = (id: string) => `https://www.youtube.com/shorts/${id}`;
 
 // Add verified YouTube Shorts IDs here, or populate this array from the
 // YouTube Data API when credentials are available. Never infer Shorts from
 // the main playlist or invent metadata.
 export const roomShorts: ShortVideo[] = [
-  { id: "maXn6Yjx6HU", title: "Trust Your Gut: Intuition vs. Fear" },
-  { id: "uhwc1iVpkQ8", title: "Son Calls Dad an Asshole: A Powerful Parenting Lesson" },
-  { id: "6oci5RvzE0E", title: "Parenting's Hardest Lesson: Breaking Your Own Narcissism" },
-  { id: "I4jRN5SFyuQ", title: "Parenting Without a Roadmap: Navigating the Chaos" },
-  { id: "r3vkj9AEfIA", title: "The Gift of Grief: Embracing Love's True Cost" },
-  { id: "4XLFm8t7lsc", title: "Becoming a Father: Mourning Boyhood, Embracing Manhood" },
+  { id: "maXn6Yjx6HU", title: "Trust Your Gut: Intuition vs. Fear", thumbnail: short0 },
+  {
+    id: "uhwc1iVpkQ8",
+    title: "Son Calls Dad an Asshole: A Powerful Parenting Lesson",
+    thumbnail: short1,
+  },
+  {
+    id: "6oci5RvzE0E",
+    title: "Parenting's Hardest Lesson: Breaking Your Own Narcissism",
+    thumbnail: short2,
+  },
+  {
+    id: "I4jRN5SFyuQ",
+    title: "Parenting Without a Roadmap: Navigating the Chaos",
+    thumbnail: short3,
+  },
+  { id: "r3vkj9AEfIA", title: "The Gift of Grief: Embracing Love's True Cost", thumbnail: short4 },
+  {
+    id: "4XLFm8t7lsc",
+    title: "Becoming a Father: Mourning Boyhood, Embracing Manhood",
+    thumbnail: short5,
+  },
 ];

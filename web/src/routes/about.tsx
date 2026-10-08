@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { roomMedia } from "@/lib/site-media";
 import millPhoto from "@/assets/amesbury-mill.webp";
+import { Testimonials } from "@/components/site/testimonials";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -178,6 +179,8 @@ function AboutPage() {
           </div>
         </div>
       </section>
+
+      <Testimonials />
 
       <section
         className="paper-texture groove-light py-16 sm:py-24"

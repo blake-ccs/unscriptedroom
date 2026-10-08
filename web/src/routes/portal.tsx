@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/portal")({
   head: () => ({
     meta: [
-      { title: "Speaker Portal | The Unscripted Room" },
-      { name: "description", content: "A private space for confirmed speakers is coming soon." },
+      { title: "Guest Portal | The Unscripted Room" },
+      { name: "description", content: "A private space for confirmed guests is coming soon." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -20,11 +20,10 @@ function Page() {
         <div className="paper-card mx-auto max-w-md p-8">
           <span className="tag tag-topic">Coming soon</span>
           <Mic2 className="mt-8 h-8 w-8 text-purple" />
-          <h1 className="mt-5 text-4xl">Speaker Portal</h1>
+          <h1 className="mt-5 text-4xl">Guest Portal</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            A private space for confirmed speakers to complete intake and review recording details
-            is on its way. Until then, the team will reach out to confirmed speakers directly by
-            email.
+            A private space for confirmed guests to complete intake and review recording details is
+            on its way. Until then, the team will reach out to confirmed guests directly by email.
           </p>
           <Button asChild variant="apply" size="lg" className="mt-8 w-full">
             <Link to="/join-a-conversation">What taking part is like</Link>

@@ -39,6 +39,7 @@
   --color-deep-purple: var(--deep-purple);
   --color-plum: var(--purple);
   --color-soft-purple: var(--soft-purple);
+  --color-card-cream: var(--card-cream);
   --color-slate: var(--slate);
   --color-chartreuse: var(--chartreuse);
   --color-cream: var(--warm-white);
@@ -65,11 +66,13 @@
   --ink-true: oklch(0.145 0.002 71);
   --ink-soft: oklch(0.2475 0.007 68);
   --warm-white: oklch(0.956034 0.011474 84.579);
-  --purple: #4e2a45;
+  --purple: #3a294f; /* Aubergine — primary brand purple */
   --deep-purple: var(--purple);
   --soft-purple: #d5c7e2;
   --slate: #5b6064;
   --chartreuse: #b4bda9;
+  /* A half-step deeper than the page cream so conversation cards read as their own surface. */
+  --card-cream: color-mix(in oklab, var(--warm-white) 93%, var(--ink));
   --background: var(--warm-white);
   --foreground: var(--ink);
   --card: var(--warm-white);
@@ -281,18 +284,10 @@
 @utility rule-label {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  &::before {
-    content: "";
-    width: 1.25rem;
-    height: 1px;
-    background: currentColor;
-    opacity: 0.7;
-  }
 }
 @utility tactile {
   position: relative;

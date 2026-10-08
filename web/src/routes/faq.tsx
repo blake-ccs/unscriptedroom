@@ -20,7 +20,7 @@ export const Route = createFileRoute("/faq")({
       { property: "og:title", content: "FAQ | The Unscripted Room" },
       {
         property: "og:description",
-        content: "What prospective speakers need to know before taking a seat at the table.",
+        content: "What prospective guests need to know before taking a seat at the table.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -38,10 +38,10 @@ const publicFaqs: [string, string][] = [
     "Adults age 21 and older. You don't need to be an expert, an influencer or a professional speaker. Everyday perspectives are the point.",
   ],
   [
-    "How are speakers selected?",
+    "How are guests selected?",
     "The team reaches out to people throughout the community and also welcomes interest directly. You can raise your hand for a specific upcoming conversation or let us know you're open to others.",
   ],
-  ["Can I participate more than once?", "Yes. Repeat speakers are welcome."],
+  ["Can I participate more than once?", "Yes. Repeat guests are welcome."],
   ["Does it cost anything to participate?", "No. Participation is completely free."],
   [
     "Is there a sales pitch or anything I'm expected to buy?",
@@ -49,11 +49,11 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "Where is The Unscripted Room?",
-    "In a historic mill building in Amesbury, Massachusetts. The studio has elevator access and nearby parking. Exact location and arrival details are shared once you're a confirmed speaker.",
+    "In a historic mill building in Amesbury, Massachusetts. The studio has elevator access and nearby parking. Exact location and arrival details are shared once you're a confirmed guest.",
   ],
   [
     "How much time should I expect to spend there?",
-    "Plan on about four hours: a relaxed meet-and-greet with the other speakers, followed by the recorded conversation.",
+    "Plan on about four hours: a relaxed meet-and-greet with the other guests, followed by the recorded conversation.",
   ],
   [
     "How long is each conversation?",
@@ -65,7 +65,7 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "How much do I need to prepare?",
-    "Very little. This isn't a performance to rehearse. Confirmed speakers complete a short form beforehand so Brett can prepare, but nothing about your answers is scripted.",
+    "Very little. This isn't a performance to rehearse. Confirmed guests complete a short form beforehand so Brett can prepare, but nothing about your answers is scripted.",
   ],
   [
     "How personal do the conversations get?",
@@ -73,7 +73,7 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "What happens after the conversation is recorded?",
-    "Each speaker has 48 hours after recording to decide whether they're comfortable with it being published. If everyone agrees, the conversation may be published on YouTube, with shorter clips shared on YouTube and The Unscripted Room's social channels.",
+    "Each guest has 48 hours after recording to decide whether they're comfortable with it being published. If everyone agrees, the conversation may be published on YouTube, with shorter clips shared on YouTube and The Unscripted Room's social channels.",
   ],
   [
     "What if I decide afterward that I don't want it published?",

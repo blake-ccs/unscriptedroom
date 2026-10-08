@@ -54,9 +54,7 @@ function EpisodePage() {
               <span className="font-display text-7xl text-soft-purple">
                 {String(episode.n).padStart(2, "0")}
               </span>
-              <p className="season-label mt-4 text-chartreuse">
-                {episode.value} · {episode.topic}
-              </p>
+              <p className="season-label mt-4 text-chartreuse">{episode.topic}</p>
             </div>
             <div>
               <h1 className="text-warm-white">{episode.title}</h1>
