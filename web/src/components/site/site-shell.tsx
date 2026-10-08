@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Menu, Music2, Youtube } from "lucide-react";
 import logoFooter from "@/assets/logo-footer.png";
+import micCream from "@/assets/mic-cream.png";
 import { Button } from "@/components/ui/button";
 import { SeasonTwoInvite } from "@/components/site/season-two-invite";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -31,9 +32,10 @@ export function Brand() {
   return (
     <Link
       to="/"
-      className={`min-w-0 justify-self-start ${wordmarkClass}`}
+      className={`flex min-w-0 items-center gap-3 justify-self-start ${wordmarkClass}`}
       aria-label="The Unscripted Room home"
     >
+      <img src={micCream} alt="" className="h-7 w-auto shrink-0" />
       The Unscripted Room
     </Link>
   );
@@ -73,7 +75,10 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent className="border-warm-white/20 bg-ink text-warm-white">
-              <SheetTitle className={wordmarkClass}>The Unscripted Room</SheetTitle>
+              <SheetTitle className={`flex items-center gap-3 ${wordmarkClass}`}>
+                <img src={micCream} alt="" className="h-7 w-auto shrink-0" />
+                The Unscripted Room
+              </SheetTitle>
               <nav className="mt-10 flex flex-col" aria-label="Mobile navigation">
                 {primaryLinks.map(([label, to]) => (
                   <SheetClose asChild key={to}>
