@@ -2,7 +2,10 @@
 
 Nothing in this file is live on the site yet.
 
-## 1. Header lockup (Prompt #1) — see `header-lockup.png`
+## 1. Header lockup (Prompt #1) — DONE
+
+Implemented with the supplied one-line SVG (`web/src/assets/logo-one-line.svg`) in the header and mobile menu.
+Original proposal kept below for reference.
 
 Recommendation: replace the typed "The Unscripted Room" (Instrument Sans) with a horizontal lockup made
 from the official logo artwork — the microphone on the left, the script "Unscripted Room" wordmark on

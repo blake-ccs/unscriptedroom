@@ -461,18 +461,39 @@ export function FollowUpSignup() {
   );
 }
 
-import {
-  Eye as _Eye,
-  Compass as _Compass,
-  Sprout as _Sprout,
-  ArrowRight as _Arrow,
-} from "lucide-react";
+import { ArrowRight as _Arrow } from "lucide-react";
 import { Link as _Link } from "@tanstack/react-router";
-const valueIcons: Record<string, typeof _Eye> = {
-  "Self-Awareness": _Eye,
-  "Self-Discipline": _Compass,
-  Resilience: _Sprout,
+import questionIcon from "@/assets/icons/question.png";
+import timeIcon from "@/assets/icons/time.png";
+import communityIcon from "@/assets/icons/community.png";
+
+// The Unscripted Room's own brand icons (from the original site), one per framework value.
+// Rendered as a mask so they take the brand colour at any size.
+const valueIcons: Record<string, string> = {
+  "Self-Awareness": questionIcon,
+  "Self-Discipline": timeIcon,
+  Resilience: communityIcon,
 };
+
+function ValueIcon({ value, className = "" }: { value: string; className?: string }) {
+  const src = valueIcons[value] ?? questionIcon;
+  return (
+    <span
+      aria-hidden="true"
+      className={`block bg-deep-purple ${className}`}
+      style={{
+        maskImage: `url(${src})`,
+        WebkitMaskImage: `url(${src})`,
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "left center",
+        WebkitMaskPosition: "left center",
+      }}
+    />
+  );
+}
 type Conversation = {
   n: number;
   title: string;
@@ -482,7 +503,6 @@ type Conversation = {
   description: string;
 };
 export function ConversationCard({ ep }: { ep: Conversation }) {
-  const Icon = valueIcons[ep.value] ?? _Eye;
   return (
     <article className="group relative flex flex-col border border-foreground/10 bg-card-cream p-7 transition-colors hover:border-soft-purple sm:p-8">
       <span
@@ -490,7 +510,7 @@ export function ConversationCard({ ep }: { ep: Conversation }) {
         className="absolute inset-x-0 top-0 h-[3px] bg-soft-purple/0 transition-colors group-hover:bg-soft-purple"
       />
       {/* The icon carries the episode's framework value (ep.value) without spelling it out. */}
-      <Icon className="h-7 w-7 text-deep-purple" strokeWidth={1.4} aria-hidden="true" />
+      <ValueIcon value={ep.value} className="h-8 w-8" />
       <h3 className="mt-5 font-sans text-lg font-semibold leading-snug text-plum">{ep.title}</h3>
       <p className="mt-4 font-headline text-[1.45rem] font-semibold uppercase leading-[1.12] text-foreground">
         {ep.question}

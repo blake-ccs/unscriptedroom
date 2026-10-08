@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Menu, Music2, Youtube } from "lucide-react";
 import logoFooter from "@/assets/logo-footer.png";
-import micCream from "@/assets/mic-cream.png";
+import logoOneLine from "@/assets/logo-one-line.svg";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -26,10 +26,13 @@ const footerLinks = [
 export function Brand() {
   return (
     <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="The Unscripted Room home">
-      <img src={micCream} alt="" className="h-7 w-auto shrink-0" />
-      <span className="font-wordmark text-xl font-semibold leading-none tracking-[-0.01em] text-warm-white">
-        The Unscripted Room
-      </span>
+      <img
+        src={logoOneLine}
+        alt="The Unscripted Room Podcast"
+        width={1640}
+        height={250}
+        className="h-8 w-auto max-w-full sm:h-9"
+      />
     </Link>
   );
 }
@@ -68,9 +71,14 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent className="border-warm-white/20 bg-ink text-warm-white">
-              <SheetTitle className="flex items-center gap-3 font-wordmark text-xl font-semibold leading-none tracking-[-0.01em] text-warm-white">
-                <img src={micCream} alt="" className="h-7 w-auto shrink-0" />
-                The Unscripted Room
+              <SheetTitle>
+                <img
+                  src={logoOneLine}
+                  alt="The Unscripted Room Podcast"
+                  width={1640}
+                  height={250}
+                  className="h-8 w-auto max-w-full"
+                />
               </SheetTitle>
               <nav className="mt-10 flex flex-col" aria-label="Mobile navigation">
                 {primaryLinks.map(([label, to]) => (

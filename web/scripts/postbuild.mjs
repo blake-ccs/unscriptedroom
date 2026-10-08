@@ -6,7 +6,7 @@ import { join, relative, sep } from "node:path";
 const SITE_URL = "https://theunscriptedroom.com";
 const OUT = "dist/client";
 // Utility pages that are linked from emails/QR codes and shouldn't be indexed.
-const EXCLUDE = new Set(["/qr", "/survey", "/portal"]);
+const EXCLUDE = new Set(["/qr", "/survey", "/portal", "/guest-intake"]);
 
 function walk(dir) {
   return readdirSync(dir).flatMap((name) => {

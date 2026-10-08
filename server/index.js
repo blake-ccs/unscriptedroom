@@ -3161,6 +3161,95 @@ app.post("/api/qr/lead", rateLimit, async (req, res) => {
   }
 });
 
+// --- Guest intake (confirmed guests only; unlisted page /guest-intake) ---
+// Stored as records of the ActiveCampaign "Guest Intake" custom object (create it once with
+// scripts/create-guest-intake-schema.js, then set AC_GUEST_INTAKE_SCHEMA_ID). Responses are never
+// logged or written to submissions.txt, and there is no endpoint that reads them back; the team
+// reviews them inside ActiveCampaign, filtered by episode.
+// Keep this list in sync with seasonTwo in web/src/lib/site-data.ts (slug = kebab-case title).
+const GUEST_INTAKE_EPISODES = {
+  "based-on-a-true-story": "Based on a True Story",
+  "listen-closely": "Listen Closely",
+  "permission-to-play-hard": "Permission to Play Hard",
+  "healthy-at-what-cost": "Healthy at What Cost",
+  "rethinking-education": "Rethinking Education",
+  "labor-of-love": "Labor of Love",
+  "life-is-the-lesson": "Life Is the Lesson",
+  "you-cant-win-them-all": "You Can't Win Them All",
+  "dream-on": "Dream On",
+};
+const GUEST_INTAKE_TAGGING_OPTIONS = ["Yes", "No", "Please ask me first"];
+const AC_GUEST_INTAKE_SCHEMA_ID = process.env.AC_GUEST_INTAKE_SCHEMA_ID;
+const GUEST_INTAKE_SUBMITTED_TAG = "Action: Guest Intake Submitted";
+const clipText = (value, max) => String(value ?? "").trim().slice(0, max);
+
+app.post("/api/guest-intake", rateLimit, async (req, res) => {
+  try {
+    const payload = req.body ?? {};
+    const email = normalizeEmail(payload.email);
+    const firstName = clipText(payload.firstName, 60);
+    const lastName = clipText(payload.lastName, 60);
+    const episodeId = clipText(payload.episode, 80);
+    const episodeTitle = GUEST_INTAKE_EPISODES[episodeId];
+    const drawnTo = clipText(payload.drawnTo, 3000);
+    const taggingConsent = clipText(payload.taggingConsent, 40);
+
+    const problems = [];
+    if (!firstName) problems.push("firstName");
+    if (!lastName) problems.push("lastName");
+    if (!/^\S+@\S+\.\S+$/.test(email)) problems.push("email");
+    if (!episodeTitle) problems.push("episode");
+    if (!drawnTo) problems.push("drawnTo");
+    if (!GUEST_INTAKE_TAGGING_OPTIONS.includes(taggingConsent)) problems.push("taggingConsent");
+    if (problems.length) {
+      return res.status(400).json({ error: `Invalid or missing fields: ${problems.join(", ")}` });
+    }
+    if (!AC_GUEST_INTAKE_SCHEMA_ID) {
+      console.error("Guest intake rejected: AC_GUEST_INTAKE_SCHEMA_ID is not configured.");
+      return res.status(503).json({ error: "Guest intake is not available right now." });
+    }
+
+    const contact = await upsertContact({ email, firstName, lastName });
+    if (!contact?.id) {
+      return res.status(500).json({ error: "Failed to save responses." });
+    }
+
+    // One record per guest per episode: resubmitting updates the same record instead of duplicating it.
+    await acV3Request("POST", `/api/3/customObjects/records/${AC_GUEST_INTAKE_SCHEMA_ID}`, {
+      record: {
+        externalId: `guest-intake-${episodeId}-${contact.id}`,
+        fields: [
+          { id: "first-name", value: firstName },
+          { id: "last-name", value: lastName },
+          { id: "email", value: email },
+          { id: "episode-id", value: episodeId },
+          { id: "episode-title", value: episodeTitle },
+          { id: "about-you", value: clipText(payload.aboutYou, 3000) },
+          { id: "links", value: clipText(payload.links, 500) },
+          { id: "drawn-to", value: drawnTo },
+          { id: "experience", value: clipText(payload.experience, 3000) },
+          { id: "hope-to-explore", value: clipText(payload.hopeToExplore, 3000) },
+          { id: "avoid-topics", value: clipText(payload.avoidTopics, 3000) },
+          { id: "tagging-consent", value: taggingConsent },
+          { id: "anything-else", value: clipText(payload.anythingElse, 3000) },
+          { id: "submitted-at", value: new Date().toISOString() },
+          { id: "status", value: "New" },
+        ],
+        relationships: { "primary-contact": [Number(contact.id)] },
+      },
+    });
+
+    await addTagsToContactWithRetry(contact.id, [GUEST_INTAKE_SUBMITTED_TAG, `guest-intake:${episodeId}`]).catch(
+      (error) => console.warn("Guest intake tagging failed", { contactId: contact.id, error: error?.message || error })
+    );
+    console.log("Guest intake saved", { contactId: contact.id, episodeId });
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Guest intake failed", error?.message || error);
+    return res.status(500).json({ error: "Failed to save responses." });
+  }
+});
+
 app.get("/api/submissions", requireBasicAuth, (req, res) => {
   fs.readFile(submissionsLogPath, "utf8", (err, data) => {
     if (err && err.code !== "ENOENT") {

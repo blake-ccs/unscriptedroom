@@ -8,16 +8,20 @@ import { seasonTwo } from "@/lib/site-data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Unscripted Room | A Podcast Built Around Community and Curiosity" },
+      { title: "The Unscripted Room | Where Lived Experience Meets Curiosity" },
       {
         name: "description",
         content:
-          "A podcast built around community and curiosity. Conversations shaped by lived experience and the perspectives around the table.",
+          "Where lived experience meets curiosity. Different perspectives around one table, with the time and curiosity for deeper conversation.",
       },
-      { property: "og:title", content: "The Unscripted Room" },
+      {
+        property: "og:title",
+        content: "The Unscripted Room | Where Lived Experience Meets Curiosity",
+      },
       {
         property: "og:description",
-        content: "Conversations shaped by lived experience and the perspectives around the table.",
+        content:
+          "Different perspectives around one table, with the time and curiosity for deeper conversation.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

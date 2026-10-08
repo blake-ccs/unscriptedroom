@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "create-ac-list": "node scripts/create-ac-list.js"
+    "create-ac-list": "node scripts/create-ac-list.js",
+    "create-guest-intake-schema": "node scripts/create-guest-intake-schema.js"
   },
   "dependencies": {
     "cors": "2.8.5",

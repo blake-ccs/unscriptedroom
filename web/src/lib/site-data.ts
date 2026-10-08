@@ -188,3 +188,14 @@ export const faqs = [
 export const INTEREST_OPEN_OPTION = "I'm open to different conversations";
 export const INTEREST_FUTURE_OPTION =
   "I don't see one yet, but I'd like to be considered for a future conversation";
+
+/** URL-safe id for a Season Two conversation, e.g. "Listen Closely" → "listen-closely". */
+export const episodeSlug = (title: string) =>
+  title
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+export const findEpisodeBySlug = (slug: string | undefined) =>
+  slug ? seasonTwo.find((ep) => episodeSlug(ep.title) === slug) : undefined;

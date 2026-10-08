@@ -15,6 +15,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as GuestIntakeRouteImport } from './routes/guest-intake'
 import { Route as JoinAConversationRouteImport } from './routes/join-a-conversation'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -54,6 +55,11 @@ const ContactRoute = ContactRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestIntakeRoute = GuestIntakeRouteImport.update({
+  id: '/guest-intake',
+  path: '/guest-intake',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinAConversationRoute = JoinAConversationRouteImport.update({
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
   '/privacy': typeof PrivacyRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
   '/privacy': typeof PrivacyRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
   '/privacy': typeof PrivacyRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
     | '/privacy'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
     | '/privacy'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
     | '/privacy'
@@ -224,6 +236,7 @@ export interface RootRouteChildren {
   ApplyRoute: typeof ApplyRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  GuestIntakeRoute: typeof GuestIntakeRoute
   JoinAConversationRoute: typeof JoinAConversationRoute
   PortalRoute: typeof PortalRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-intake': {
+      id: '/guest-intake'
+      path: '/guest-intake'
+      fullPath: '/guest-intake'
+      preLoaderRoute: typeof GuestIntakeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join-a-conversation': {
@@ -372,6 +392,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyRoute: ApplyRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  GuestIntakeRoute: GuestIntakeRoute,
   JoinAConversationRoute: JoinAConversationRoute,
   PortalRoute: PortalRoute,
   PrivacyRoute: PrivacyRoute,

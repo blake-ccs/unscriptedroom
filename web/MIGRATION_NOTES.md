@@ -51,3 +51,41 @@ Supabase (client, server function, `conversation_interests` table migration, `.e
 build wrapper, error telemetry and plan files, the fake portal login, and the placeholder testimonials
 on `/about`. Images and video previously served from Lovable's asset host are now real files in
 `src/assets/` and `public/media/` (byte sizes verified against Lovable's manifests).
+
+## Guest Intake (`/guest-intake`)
+
+Unlisted page for confirmed guests, emailed as `https://theunscriptedroom.com/guest-intake?episode=<slug>`.
+Not in navigation, the footer, the sitemap or `robots.txt`. It sends `noindex, nofollow` as both a meta tag
+and an `X-Robots-Tag` header (`public/_headers`).
+
+| Episode | Link |
+|---|---|
+| Based on a True Story | `/guest-intake?episode=based-on-a-true-story` |
+| Listen Closely | `/guest-intake?episode=listen-closely` |
+| Permission to Play Hard | `/guest-intake?episode=permission-to-play-hard` |
+| Healthy at What Cost | `/guest-intake?episode=healthy-at-what-cost` |
+| Rethinking Education | `/guest-intake?episode=rethinking-education` |
+| Labor of Love | `/guest-intake?episode=labor-of-love` |
+| Life Is the Lesson | `/guest-intake?episode=life-is-the-lesson` |
+| You Can't Win Them All | `/guest-intake?episode=you-cant-win-them-all` |
+| Dream On | `/guest-intake?episode=dream-on` |
+
+Without a valid `episode`, the guest picks their conversation from a dropdown built from `seasonTwo`.
+
+**Storage:** `POST /api/guest-intake` (server) validates every field, and checks the episode against
+`GUEST_INTAKE_EPISODES` (keep in sync with `seasonTwo`). It then upserts the guest's contact and writes one
+record per guest per episode to the ActiveCampaign custom object **Guest Intake**: name, email, episode id
+and title, all answers, submitted-at and status (`New` / `Reviewed` / `Archived`). It also tags the contact
+`Action: Guest Intake Submitted` and `guest-intake:<slug>`. Resubmitting updates the same record.
+Answers are never logged or written to `submissions.txt`, and no endpoint reads them back.
+
+**Team access:** in ActiveCampaign, open the guest's contact (Guest Intakes panel) or the Guest Intake
+object list and filter by Episode. Only ActiveCampaign users can see them.
+
+**One-time setup before the form works in production:**
+1. `cd server && npm install && node scripts/create-guest-intake-schema.js` (needs `ACTIVECAMPAIGN_BASE_URL`
+   and `ACTIVECAMPAIGN_API_TOKEN`; add `--dry-run` to preview the request).
+2. `fly secrets set AC_GUEST_INTAKE_SCHEMA_ID=<id it prints>`, then `fly deploy` from `server/`.
+
+Until both are done the endpoint answers 503 and guests see "We couldn't send your responses…"; it never
+shows a false success.
