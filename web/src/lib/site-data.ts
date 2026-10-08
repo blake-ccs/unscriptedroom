@@ -1,6 +1,8 @@
+// recordingDate: the day the conversation is recorded (ISO yyyy-mm-dd), not a release date.
 export const seasonTwo = [
   {
     n: 1,
+    recordingDate: "2026-10-22",
     title: "Based on a True Story",
     question: "What can someone else's true story help us discover about our own?",
     value: "Self-Awareness",
@@ -9,6 +11,7 @@ export const seasonTwo = [
   },
   {
     n: 2,
+    recordingDate: "2026-10-29",
     title: "Listen Closely",
     question: "What is music telling you?",
     value: "Self-Awareness",
@@ -17,6 +20,7 @@ export const seasonTwo = [
   },
   {
     n: 3,
+    recordingDate: "2026-11-05",
     title: "Permission to Play Hard",
     question: "What can sports teach us about competing with other people?",
     value: "Self-Awareness",
@@ -25,6 +29,7 @@ export const seasonTwo = [
   },
   {
     n: 4,
+    recordingDate: "2026-11-12",
     title: "Healthy at What Cost",
     question: "When does the pursuit of health stop being healthy?",
     value: "Self-Discipline",
@@ -33,6 +38,7 @@ export const seasonTwo = [
   },
   {
     n: 5,
+    recordingDate: "2026-11-19",
     title: "Rethinking Education",
     question: "What skills actually matter?",
     value: "Self-Discipline",
@@ -41,6 +47,7 @@ export const seasonTwo = [
   },
   {
     n: 6,
+    recordingDate: "2026-11-24",
     title: "Labor of Love",
     question: "Does inspiration create great work, or does great work create inspiration?",
     value: "Self-Discipline",
@@ -50,6 +57,7 @@ export const seasonTwo = [
   },
   {
     n: 7,
+    recordingDate: "2026-12-03",
     title: "Life Is the Lesson",
     question: "What can adventure teach us that staying comfortable can't?",
     value: "Resilience",
@@ -59,6 +67,7 @@ export const seasonTwo = [
   },
   {
     n: 8,
+    recordingDate: "2026-12-10",
     title: "You Can't Win Them All",
     question: "Is how you lose just as important as how you win?",
     value: "Resilience",
@@ -67,6 +76,7 @@ export const seasonTwo = [
   },
   {
     n: 9,
+    recordingDate: "2026-12-17",
     title: "Dream On",
     question: "What makes certain dreams impossible to let go?",
     value: "Resilience",
@@ -199,3 +209,12 @@ export const episodeSlug = (title: string) =>
 
 export const findEpisodeBySlug = (slug: string | undefined) =>
   slug ? seasonTwo.find((ep) => episodeSlug(ep.title) === slug) : undefined;
+
+/** "2026-10-22" → "October 22, 2026". Formatted in UTC so the day never shifts with the viewer's time zone. */
+export const formatRecordingDate = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });

@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Menu, Music2, Youtube } from "lucide-react";
 import logoFooter from "@/assets/logo-footer.png";
-import logoOneLine from "@/assets/logo-one-line.svg";
 import { Button } from "@/components/ui/button";
+import { SeasonTwoInvite } from "@/components/site/season-two-invite";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const playlist = "https://www.youtube.com/playlist?list=OLFuQWeBrfBe0nnsvOBj4GDE5jYCKscX_jw";
@@ -23,23 +23,25 @@ const footerLinks = [
   ["Privacy Policy", "/privacy"],
   ["Terms", "/terms"],
 ] as const;
+// Header wordmark: the "Subscribe and keep listening." headline font, set in title case.
+// The footer keeps the official logo (BrandLogo); the two treatments are intentionally different.
+const wordmarkClass =
+  "whitespace-nowrap font-headline text-[1.3rem] font-semibold normal-case leading-none tracking-[.01em] text-warm-white sm:text-[1.55rem]";
 export function Brand() {
   return (
-    <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="The Unscripted Room home">
-      <img
-        src={logoOneLine}
-        alt="The Unscripted Room Podcast"
-        width={1640}
-        height={250}
-        className="h-8 w-auto max-w-full sm:h-9"
-      />
+    <Link
+      to="/"
+      className={`min-w-0 justify-self-start ${wordmarkClass}`}
+      aria-label="The Unscripted Room home"
+    >
+      The Unscripted Room
     </Link>
   );
 }
 export function BrandLogo() {
   return (
     <Link to="/" aria-label="The Unscripted Room home">
-      <img src={logoFooter} alt="The Unscripted Room Podcast" className="h-32 w-auto" />
+      <img src={logoFooter} alt="The Unscripted Room Podcast" className="h-40 w-auto" />
     </Link>
   );
 }
@@ -71,15 +73,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent className="border-warm-white/20 bg-ink text-warm-white">
-              <SheetTitle>
-                <img
-                  src={logoOneLine}
-                  alt="The Unscripted Room Podcast"
-                  width={1640}
-                  height={250}
-                  className="h-8 w-auto max-w-full"
-                />
-              </SheetTitle>
+              <SheetTitle className={wordmarkClass}>The Unscripted Room</SheetTitle>
               <nav className="mt-10 flex flex-col" aria-label="Mobile navigation">
                 {primaryLinks.map(([label, to]) => (
                   <SheetClose asChild key={to}>
@@ -171,6 +165,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <Header />
       <main>{children}</main>
       <Footer />
+      <SeasonTwoInvite />
     </>
   );
 }

@@ -64,7 +64,7 @@
   --ink: #231f20;
   --ink-true: oklch(0.145 0.002 71);
   --ink-soft: oklch(0.2475 0.007 68);
-  --warm-white: oklch(0.956034 0.011474 84.579);
+  --warm-white: #f3efe7; /* Warm Cream */
   --purple: #3a294f; /* Aubergine — primary brand purple */
   --deep-purple: var(--purple);
   --soft-purple: #d5c7e2;

@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Mail, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { seasonTwo } from "@/lib/site-data";
+import { formatRecordingDate, seasonTwo } from "@/lib/site-data";
 import { roomMedia, roomShorts, seasonOneEpisodes } from "@/lib/site-media";
 import { postJson } from "@/lib/api";
 import { getUtm } from "@/lib/attribution";
@@ -505,6 +505,7 @@ function ValueIcon({ value, className = "" }: { value: string; className?: strin
 }
 type Conversation = {
   n: number;
+  recordingDate: string;
   title: string;
   question: string;
   value: string;
@@ -535,9 +536,13 @@ export function ConversationCard({ ep }: { ep: Conversation }) {
         Explore{" "}
         <_Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
       </_Link>
-      <p className="mt-7 border-t border-foreground/10 pt-4 text-[.65rem] font-bold uppercase leading-snug tracking-[.14em] text-muted-foreground">
-        {ep.topic}
-      </p>
+      <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-foreground/10 pt-4 text-[.65rem] leading-snug text-muted-foreground">
+        <p className="font-bold uppercase tracking-[.14em]">{ep.topic}</p>
+        <p>
+          <span className="font-bold uppercase tracking-[.14em]">Recording:</span>{" "}
+          <time dateTime={ep.recordingDate}>{formatRecordingDate(ep.recordingDate)}</time>
+        </p>
+      </div>
     </article>
   );
 }

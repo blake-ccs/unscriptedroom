@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { postJson } from "@/lib/api";
-import { episodeSlug, findEpisodeBySlug, seasonTwo } from "@/lib/site-data";
+import { episodeSlug, findEpisodeBySlug, formatRecordingDate, seasonTwo } from "@/lib/site-data";
 
 // Unlisted page for confirmed guests, linked from emails as /guest-intake?episode=<slug>.
 // Kept out of navigation, the sitemap and search (noindex here + X-Robots-Tag in public/_headers).
@@ -159,6 +159,12 @@ function GuestIntakePage() {
                 <p className="eyebrow">Your upcoming conversation</p>
                 <p className="mt-3 font-headline text-2xl font-semibold uppercase">
                   {selected.title}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-foreground">
+                  Recording:{" "}
+                  <time dateTime={selected.recordingDate}>
+                    {formatRecordingDate(selected.recordingDate)}
+                  </time>
                 </p>
                 <p className="mt-2 text-muted-foreground">{selected.question}</p>
                 <button
