@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "youtube:refresh": "node scripts/youtube-most-viewed.mjs"
+    "youtube:refresh": "node scripts/youtube-most-viewed.mjs",
+    "package": "node scripts/package-release.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
