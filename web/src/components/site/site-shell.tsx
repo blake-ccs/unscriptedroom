@@ -24,10 +24,10 @@ const footerLinks = [
   ["Privacy Policy", "/privacy"],
   ["Terms", "/terms"],
 ] as const;
-// Header wordmark in Playball, title case.
+// Header wordmark: the "Subscribe and keep listening." headline font, set in title case.
 // The footer keeps the official logo (BrandLogo); the two treatments are intentionally different.
 const wordmarkClass =
-  "whitespace-nowrap font-script text-[1.55rem] font-normal normal-case leading-none tracking-normal text-warm-white sm:text-[1.85rem]";
+  "whitespace-nowrap font-headline text-[1.3rem] font-semibold normal-case leading-none tracking-[.01em] text-warm-white sm:text-[1.55rem]";
 export function Brand() {
   return (
     <Link
