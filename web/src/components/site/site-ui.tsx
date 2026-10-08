@@ -57,7 +57,16 @@ export function EpisodeThumbnails({
               <Play className="h-4 w-4 fill-current" />
             </span>
           </span>
-          <span className="mt-4 block font-headline text-xl font-semibold uppercase leading-tight group-hover:text-purple">
+          {episode.label && (
+            <span
+              className={`mt-4 block text-[.7rem] font-extrabold uppercase tracking-[.12em] ${isDark ? "text-soft-purple" : "text-purple"}`}
+            >
+              {episode.label}
+            </span>
+          )}
+          <span
+            className={`${episode.label ? "mt-1.5" : "mt-4"} block font-headline text-xl font-semibold uppercase leading-tight group-hover:text-purple`}
+          >
             {episode.title}
           </span>
           <span

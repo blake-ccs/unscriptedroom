@@ -6,15 +6,7 @@ import hourglass from "@/assets/dsc00119.jpg";
 import microphone from "@/assets/dsc00036.jpg";
 import sign from "@/assets/dsc00064.jpg";
 import brettPortrait from "@/assets/brett-studio-portrait.png";
-import seasonOne0001 from "@/assets/season-one-0001.jpg";
-import seasonOne0002 from "@/assets/season-one-0002.jpg";
-import short0 from "@/assets/shorts/maXn6Yjx6HU.jpg";
-import short1 from "@/assets/shorts/uhwc1iVpkQ8.jpg";
-import short2 from "@/assets/shorts/6oci5RvzE0E.jpg";
-import short3 from "@/assets/shorts/I4jRN5SFyuQ.jpg";
-import short4 from "@/assets/shorts/r3vkj9AEfIA.jpg";
-import short5 from "@/assets/shorts/4XLFm8t7lsc.jpg";
-import seasonOne0003 from "@/assets/season-one-0003.jpg";
+import mostViewed from "@/data/youtube-most-viewed.json";
 
 export const roomMedia = {
   table: table,
@@ -27,66 +19,47 @@ export const roomMedia = {
   brettPortrait: brettPortrait,
 } as const;
 
-export const seasonOneEpisodes = [
-  {
-    id: "zK1nmVflNoo",
-    number: "0001",
-    title: "All At Once",
-    description:
-      "Theo and Kate open up about raising a young family while building multiple businesses at once — and how they stay grounded, connected and resilient as a team.",
-    thumbnail: seasonOne0001,
-  },
-  {
-    id: "IX_19LrVykg",
-    number: "0002",
-    title: "Becoming Through Listening",
-    description:
-      "Troy, host of the podcast Seacoast Stories, on how listening shapes identity, creativity and personal growth.",
-    thumbnail: seasonOne0002,
-  },
-  {
-    id: "-oe9Aqa0h3g",
-    number: "0003",
-    title: "Risk VS Reward",
-    description:
-      "Brandon, a skilled driver turned business owner, on how lessons from high-level racing translate into real-world decision-making.",
-    thumbnail: seasonOne0003,
-  },
-] as const;
+// Videos on the site are the channel's most-viewed uploads, refreshed with
+// `npm run youtube:refresh` (scripts/youtube-most-viewed.mjs). Titles, descriptions and
+// thumbnails all come from YouTube; nothing here is written by hand.
+const thumbnails = import.meta.glob<string>("/src/assets/youtube/*.jpg", {
+  eager: true,
+  import: "default",
+});
+const thumbnailFor = (id: string) =>
+  Object.entries(thumbnails).find(([file]) => file.endsWith(`/${id}.jpg`))?.[1] ?? "";
+
+export type EpisodeVideo = {
+  id: string;
+  title: string;
+  label: string;
+  description: string;
+  views: number;
+  thumbnail: string;
+};
+
+export const seasonOneEpisodes: EpisodeVideo[] = mostViewed.episodes.map((v) => ({
+  id: v.id,
+  title: v.title,
+  label: v.label,
+  description: v.description,
+  views: v.views,
+  thumbnail: thumbnailFor(v.id),
+}));
 
 export type ShortVideo = {
   id: string;
   title: string;
-  /** YouTube's own vertical thumbnail for the Short (i.ytimg.com/vi/<id>/oar2.jpg), resized to 540×960. */
+  /** YouTube's own vertical thumbnail for the Short, resized to 540×960. */
   thumbnail: string;
 };
 
 export const shortUrl = (id: string) => `https://www.youtube.com/shorts/${id}`;
 
-// Add verified YouTube Shorts IDs here, or populate this array from the
-// YouTube Data API when credentials are available. Never infer Shorts from
-// the main playlist or invent metadata.
-export const roomShorts: ShortVideo[] = [
-  { id: "maXn6Yjx6HU", title: "Trust Your Gut: Intuition vs. Fear", thumbnail: short0 },
-  {
-    id: "uhwc1iVpkQ8",
-    title: "Son Calls Dad an Asshole: A Powerful Parenting Lesson",
-    thumbnail: short1,
-  },
-  {
-    id: "6oci5RvzE0E",
-    title: "Parenting's Hardest Lesson: Breaking Your Own Narcissism",
-    thumbnail: short2,
-  },
-  {
-    id: "I4jRN5SFyuQ",
-    title: "Parenting Without a Roadmap: Navigating the Chaos",
-    thumbnail: short3,
-  },
-  { id: "r3vkj9AEfIA", title: "The Gift of Grief: Embracing Love's True Cost", thumbnail: short4 },
-  {
-    id: "4XLFm8t7lsc",
-    title: "Becoming a Father: Mourning Boyhood, Embracing Manhood",
-    thumbnail: short5,
-  },
-];
+export const roomShorts: ShortVideo[] = mostViewed.shorts.map((v) => ({
+  id: v.id,
+  title: v.title,
+  thumbnail: thumbnailFor(v.id),
+}));
+
+export const mostViewedFetchedAt = mostViewed.fetchedAt;

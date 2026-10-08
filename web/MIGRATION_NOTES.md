@@ -89,3 +89,14 @@ object list and filter by Episode. Only ActiveCampaign users can see them.
 
 Until both are done the endpoint answers 503 and guests see "We couldn't send your responses…"; it never
 shows a false success.
+
+## Videos: most viewed on YouTube
+
+The Season One episode cards and the "Moments Worth Replaying" Shorts on Watch show the channel's
+most-viewed uploads (top 3 full-length episodes, top 6 Shorts), read from
+`src/data/youtube-most-viewed.json` with thumbnails in `src/assets/youtube/`.
+
+Refresh: `npm run youtube:refresh`, then commit and deploy. It reads YouTube's public pages for
+`@unscriptedroompodcast` (no API key), ranks by view count, takes titles and descriptions from YouTube,
+and downloads the thumbnails. Run it locally rather than in the Netlify build, because YouTube can rate-limit or
+block build servers. Episodes are uploads at least 20 minutes long from the Videos tab; clips come from the Shorts tab.
