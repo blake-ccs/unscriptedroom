@@ -136,11 +136,11 @@ export const values = [
 export const faqs = [
   [
     "What is The Unscripted Room?",
-    "A conversation podcast that brings people with different backgrounds and lived experiences together around one question worth exploring.",
+    "A conversation podcast that brings together people with different backgrounds and lived experiences around one table, to explore questions that matter.",
   ],
   [
     "Who can join a conversation?",
-    "Adults age 21 and older may apply. Guests do not need to be experts, influencers, or professional speakers.",
+    "Adults 18 and older may apply, and in some cases we may make an exception for guests under 18. Guests do not need to be experts, influencers, or professional speakers.",
   ],
   [
     "How are guests selected?",
@@ -158,7 +158,7 @@ export const faqs = [
   ],
   [
     "How long should I plan to be there?",
-    "Guests arrive at 12:00 PM for a meet-and-greet. Recording runs from 1:00 PM to 4:00 PM and includes a break.",
+    "Guests arrive at 12:00 PM for a meet-and-greet. Recording runs from 1:00 PM to 4:00 PM.",
   ],
   [
     "Is the podcast really three hours?",
@@ -166,7 +166,7 @@ export const faqs = [
   ],
   [
     "Will I know the questions beforehand?",
-    "Guests know the overall topic and central question. They do not receive every question in advance. Some questions are revealed during the conversation to keep it genuinely unscripted.",
+    "Guests know the theme and a question connected to it. The questions asked during the recording are never shared in advance with anyone at the table; they're revealed during the conversation itself.",
   ],
   [
     "Do I need to prepare?",

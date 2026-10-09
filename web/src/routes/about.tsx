@@ -85,7 +85,7 @@ function AboutPage() {
               </p>
               <p>
                 The Unscripted Room was created to make space for the other kind: real people with
-                different lived experiences, sitting around one table, following one question with
+                different lived experiences, sitting around one table, following questions with
                 curiosity instead of a script.
               </p>
             </div>

@@ -86,7 +86,7 @@ function EpisodePage() {
             className="aspect-[4/3] h-full w-full object-cover"
           />
           <div className="flex flex-col justify-end border-t-4 border-chartreuse pt-6">
-            <p className="eyebrow">One question. Four seats.</p>
+            <p className="eyebrow">One table. Four seats.</p>
             <h2 className="mt-5">Bring the experience behind your answer.</h2>
             <p className="mt-5 text-muted-foreground">
               You do not need a polished point of view. The room is interested in what you have

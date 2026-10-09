@@ -164,7 +164,7 @@ function ApplyPage() {
             like to be part of, tell us a little about yourself.
           </p>
           <p className="mt-5 text-sm text-muted-foreground">
-            Adults age 21+ are welcome. Participation is free. This is a first hello, not an
+            Adults 18 and older are welcome. Participation is free. This is a first hello, not an
             application you have to get right.
           </p>
         </div>

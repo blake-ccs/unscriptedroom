@@ -70,7 +70,7 @@ const steps = [
   ],
   [
     "The conversation",
-    "You know the topic and central question beforehand, but not every question. Each guest begins by sharing who they are and why the conversation matters to them. There's a break along the way.",
+    "You'll know the theme and a question connected to it beforehand, but the questions asked during the recording are revealed at the table. Each guest begins by sharing who they are and why the conversation matters to them.",
   ],
   [
     "Wrap and decide",
@@ -84,7 +84,7 @@ function JoinPage() {
         <div className="site-container relative z-10">
           <h1 className="max-w-4xl text-warm-white">Be on the podcast.</h1>
           <p className="mt-6 max-w-2xl text-lg text-warm-white/70">
-            You don't need to be an expert, influencer or public speaker. Adults 21+ with
+            You don't need to be an expert, influencer or public speaker. Adults 18+ with
             experiences and perspectives to share are welcome.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
