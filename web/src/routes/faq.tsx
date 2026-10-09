@@ -61,7 +61,7 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "Will I know the topic or questions ahead of time?",
-    "You'll know the theme, a question connected to it to get you thinking, but the questions asked during the recording are never shared in advance with anyone at the table. They're revealed during the conversation itself, so every answer is genuinely unscripted.",
+    "You'll know the theme, and a question connected to it to get you thinking, but the questions asked during the recording are never shared in advance with anyone at the table. They're revealed during the conversation itself, so every answer is genuinely unscripted.",
   ],
   [
     "How much do I need to prepare?",
