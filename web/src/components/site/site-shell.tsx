@@ -27,7 +27,7 @@ const footerLinks = [
 // Header wordmark: the "Subscribe and keep listening." headline font, set in title case.
 // The footer keeps the official logo (BrandLogo); the two treatments are intentionally different.
 const wordmarkClass =
-  "whitespace-nowrap font-headline text-[1.3rem] font-semibold normal-case leading-none tracking-[.01em] text-warm-white sm:text-[1.55rem]";
+  "whitespace-nowrap font-headline text-[1.3rem] font-semibold uppercase leading-none tracking-[.04em] text-warm-white sm:text-[1.55rem]";
 export function Brand() {
   return (
     <Link
