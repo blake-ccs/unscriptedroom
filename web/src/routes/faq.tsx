@@ -31,11 +31,11 @@ export const Route = createFileRoute("/faq")({
 const publicFaqs: [string, string][] = [
   [
     "What is The Unscripted Room?",
-    "A conversation podcast that brings people with different backgrounds and lived experiences together around one table and one question worth exploring.",
+    "A conversation podcast that brings together people with different backgrounds and lived experiences around one table, to explore questions that matter.",
   ],
   [
     "Who can be part of a conversation?",
-    "Adults age 21 and older. You don't need to be an expert, an influencer or a professional speaker. Everyday perspectives are the point.",
+    "Adults 18 and older. In some cases, we may make an exception for guests under 18. You don't need to be an expert, an influencer or a professional speaker. Everyday perspectives are the point.",
   ],
   [
     "How are guests selected?",
@@ -57,11 +57,11 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "How long is each conversation?",
-    "We reserve up to three hours for each conversation. That gives us the freedom to explore the topic without rushing, while still keeping things relaxed and natural. We'll take a break along the way, too.",
+    "We reserve three hours for each conversation. That gives us the freedom to explore the topic without rushing, while keeping things relaxed and natural.",
   ],
   [
     "Will I know the topic or questions ahead of time?",
-    "You'll know the overall topic and the central question. You won't receive every question in advance, and some are revealed during the conversation so it stays genuinely unscripted.",
+    "You'll know the theme, a question connected to it to get you thinking, but the questions asked during the recording are never shared in advance with anyone at the table. They're revealed during the conversation itself, so every answer is genuinely unscripted.",
   ],
   [
     "How much do I need to prepare?",
