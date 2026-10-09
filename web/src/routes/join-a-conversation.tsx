@@ -48,7 +48,7 @@ const benefits = [
   ],
   [
     "Let your perspective travel beyond the room.",
-    "If everyone agrees to publication, the conversation may become a full YouTube episode and shorter clips.",
+    "Once the conversation is shared, it can become a full episode, short clips and more.",
   ],
 ];
 const steps = [
@@ -74,7 +74,7 @@ const steps = [
   ],
   [
     "Wrap and decide",
-    "Recording ends within the scheduled window. Afterward, each guest has 48 hours to decide whether they're comfortable with publication.",
+    "Recording ends within the scheduled window. Afterward, each guest has 48 hours to let us know if they're not comfortable with the conversation being shared.",
   ],
 ];
 function JoinPage() {
@@ -219,16 +219,18 @@ function JoinPage() {
           </div>
           <div className="space-y-5 text-lg text-muted-foreground">
             <p>
-              Each guest has 48 hours after filming to decide whether they are comfortable with the
-              conversation being published.
+              Each guest has 48 hours after filming to let us know if they're not comfortable with
+              the conversation being shared.
             </p>
             <p>
               Because each episode is shared, choosing not to publish also affects the other guests.
-              That context matters, but you are not obligated to approve publication.
+              That context matters, but you are never obligated to agree to it being shared.
             </p>
             <p>
-              If everyone agrees, the conversation may be published on YouTube, with shorter clips
-              shared on YouTube Shorts and The Unscripted Room social channels.
+              Once that window closes, the recording becomes part of The Unscripted Room's library.
+              We may use it across everything we create, from full episodes and short clips to our
+              website, social channels, thumbnails and promotional materials, as well as future
+              Unscripted Room projects.
             </p>
           </div>
         </div>

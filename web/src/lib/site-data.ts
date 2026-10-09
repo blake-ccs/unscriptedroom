@@ -182,7 +182,7 @@ export const faqs = [
   ],
   [
     "What happens after we record?",
-    "Each guest has 48 hours after filming to decide whether they are comfortable with publication. Because it is a shared conversation, a decision not to publish affects all guests involved. If everyone agrees, the conversation may be published on YouTube and shorter clips may be shared through YouTube and The Unscripted Room social channels.",
+    "After recording, each guest has 48 hours to let us know if they're not comfortable with the conversation being shared. Once that window closes, the recording becomes part of The Unscripted Room's library. We may use it across everything we create, from full episodes and short clips to our website, social channels, thumbnails and promotional materials, as well as future Unscripted Room projects.",
   ],
   [
     "What are the values that guide The Unscripted Room?",

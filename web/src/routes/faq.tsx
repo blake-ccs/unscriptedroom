@@ -73,7 +73,7 @@ const publicFaqs: [string, string][] = [
   ],
   [
     "What happens after the conversation is recorded?",
-    "Each guest has 48 hours after recording to decide whether they're comfortable with it being published. If everyone agrees, the conversation may be published on YouTube, with shorter clips shared on YouTube and The Unscripted Room's social channels.",
+    "After recording, each guest has 48 hours to let us know if they're not comfortable with the conversation being shared. Once that window closes, the recording becomes part of The Unscripted Room's library. We may use it across everything we create, from full episodes and short clips to our website, social channels, thumbnails and promotional materials, as well as future Unscripted Room projects.",
   ],
   [
     "What if I decide afterward that I don't want it published?",
