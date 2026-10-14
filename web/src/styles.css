@@ -402,3 +402,16 @@
   line-height: 0.96;
   font-weight: 700;
 }
+
+/* Background hero video: never show browser media controls or Safari's "start playback" button. */
+.hero-video::-webkit-media-controls,
+.hero-video::-webkit-media-controls-start-playback-button,
+.hero-video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-video {
+    transition: none;
+  }
+}

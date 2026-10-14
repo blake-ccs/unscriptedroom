@@ -36,6 +36,9 @@ function Home() {
   // with a single MP4 `src`, full preload, and an explicit muted play(). Until it starts, the
   // first frame of the clip shows as a still, so there's no visible swap.
   const [videoReady, setVideoReady] = useState(false);
+  // The video stays invisible until it is actually playing, so Safari's own "play" overlay
+  // (drawn on a video it hasn't autoplayed yet) is never seen; the first-frame still shows instead.
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const heroVideo = useRef<HTMLVideoElement>(null);
   useEffect(() => setVideoReady(true), []);
   useEffect(() => {
@@ -96,7 +99,8 @@ function Home() {
             preload="auto"
             aria-hidden="true"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full object-cover object-center opacity-85"
+            onPlaying={() => setVideoPlaying(true)}
+            className={`hero-video absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 ${videoPlaying ? "opacity-85" : "opacity-0"}`}
           />
         )}
         <div className="hero-shade absolute inset-0" />
