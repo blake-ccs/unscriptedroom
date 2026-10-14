@@ -470,35 +470,29 @@ export function FollowUpSignup() {
 
 import { ArrowRight as _Arrow } from "lucide-react";
 import { Link as _Link } from "@tanstack/react-router";
-import questionIcon from "@/assets/icons/question.png";
-import timeIcon from "@/assets/icons/time.png";
-import communityIcon from "@/assets/icons/community.png";
+import awarenessIcon from "@/assets/icons/season-two/awareness.png";
+import disciplineIcon from "@/assets/icons/season-two/discipline.png";
+import resilienceIcon from "@/assets/icons/season-two/resilience.png";
 
-// The Unscripted Room's own brand icons (from the original site), one per framework value.
-// Rendered as a mask so they take the brand colour at any size.
+// Approved Season Two icons (lightbulb, head with clock, opposing arrows): the exact linework from the
+// originally approved artwork, drawn in aubergine on a cream circle via CSS mask. One per framework value;
+// the value itself is never shown as a label.
 const valueIcons: Record<string, string> = {
-  "Self-Awareness": questionIcon,
-  "Self-Discipline": timeIcon,
-  Resilience: communityIcon,
+  "Self-Awareness": awarenessIcon,
+  "Self-Discipline": disciplineIcon,
+  Resilience: resilienceIcon,
 };
 
-function ValueIcon({ value, className = "" }: { value: string; className?: string }) {
-  const src = valueIcons[value] ?? questionIcon;
+function EpisodeIcon({ value }: { value: string }) {
+  const src = valueIcons[value] ?? awarenessIcon;
+  const mask = `url(${src}) center / contain no-repeat`;
   return (
     <span
       aria-hidden="true"
-      className={`block bg-deep-purple ${className}`}
-      style={{
-        maskImage: `url(${src})`,
-        WebkitMaskImage: `url(${src})`,
-        maskSize: "contain",
-        WebkitMaskSize: "contain",
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskPosition: "left center",
-        WebkitMaskPosition: "left center",
-      }}
-    />
+      className="grid h-15 w-15 shrink-0 place-items-center rounded-full bg-warm-white"
+    >
+      <span className="h-15 w-15 bg-purple" style={{ mask, WebkitMask: mask }} />
+    </span>
   );
 }
 type Conversation = {
@@ -512,34 +506,36 @@ type Conversation = {
 };
 export function ConversationCard({ ep }: { ep: Conversation }) {
   return (
-    <article className="group relative flex flex-col border border-foreground/10 bg-soft-sage p-7 transition-colors hover:border-purple sm:p-8">
+    <article className="group relative flex flex-col bg-soft-sage p-7 sm:p-8">
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 h-[3px] bg-purple/0 transition-colors group-hover:bg-purple"
       />
-      {/* The icon carries the episode's framework value (ep.value) without spelling it out. */}
-      <ValueIcon value={ep.value} className="h-8 w-8" />
-      <h3 className="mt-5 font-sans text-lg font-semibold leading-snug text-purple">{ep.title}</h3>
-      <p className="mt-4 font-headline text-[1.45rem] font-semibold uppercase leading-[1.12] text-foreground">
+      <div className="flex items-center justify-between gap-4">
+        <p className="eyebrow">Episode {String(ep.n).padStart(2, "0")}</p>
+        <EpisodeIcon value={ep.value} />
+      </div>
+      <h3 className="mt-4 font-headline text-[1.7rem] font-semibold leading-[1.1] text-foreground">
+        {ep.title}
+      </h3>
+      <p className="mt-3 text-[1.3rem] font-medium italic leading-[1.32] text-purple">
         {ep.question}
       </p>
-      <p className="mt-4 grow text-[.95rem] leading-relaxed text-muted-foreground">
-        {ep.description}
-      </p>
-      <_Link
-        to="/season-two/$episode"
-        params={{ episode: String(ep.n) }}
-        className="mt-7 inline-flex items-center gap-2 self-start border-b border-foreground/25 pb-1 text-xs font-semibold uppercase tracking-[.14em] text-foreground transition-colors hover:border-purple hover:text-purple after:absolute after:inset-0"
-      >
-        Explore{" "}
-        <_Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-      </_Link>
-      <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-foreground/10 pt-4 text-[.65rem] leading-snug text-muted-foreground">
-        <p className="font-bold uppercase tracking-[.14em]">{ep.topic}</p>
+      <p className="mt-4 grow text-[.97rem] leading-relaxed text-foreground/80">{ep.description}</p>
+      <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-t border-foreground/12 pt-4 text-[.8rem] text-foreground/75">
         <p>
-          <span className="font-bold uppercase tracking-[.14em]">Recording:</span>{" "}
+          <span className="text-[.72rem] font-bold uppercase tracking-[.14em]">Recording:</span>{" "}
           <time dateTime={ep.recordingDate}>{formatRecordingDate(ep.recordingDate)}</time>
         </p>
+        <_Link
+          to="/season-two/$episode"
+          params={{ episode: String(ep.n) }}
+          aria-label={`Explore ${ep.title}`}
+          className="inline-flex items-center gap-2 border-b border-foreground/25 pb-1 text-xs font-semibold uppercase tracking-[.14em] text-foreground transition-colors hover:border-purple hover:text-purple after:absolute after:inset-0"
+        >
+          Explore{" "}
+          <_Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+        </_Link>
       </div>
     </article>
   );

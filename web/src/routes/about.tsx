@@ -149,32 +149,29 @@ function AboutPage() {
           </div>
           <div className="max-w-3xl space-y-5 text-lg text-muted-foreground lg:pt-14">
             <p>
-              Brett has spent much of his career helping people develop skills and confidence
-              through coaching and training. Over the past decade, he has led thousands of hours of
-              facilitated learning experiences for professionals through the company he founded,
-              CCS.
+              {
+                "Brett has spent most of his career in rooms full of people learning something new. Over the past decade, through CCS, the company he founded, he has led thousands of hours of coaching, training and facilitated learning for professionals."
+              }
             </p>
             <p>
-              Both professionally and personally, Brett has experienced the loneliness that can come
-              from holding a singular perspective.
+              {
+                "He knows, professionally and personally, how lonely it can feel to be stuck with only your own point of view. What has pulled him out of it, again and again, is an honest conversation, whether through his work, as a father, in his relationships or in the things he loves to do."
+              }
             </p>
             <p>
-              But his craft, fatherhood, relationships, and passions have also taught him that
-              feeling disappears the moment an honest conversation begins.
+              {
+                "That's why he believes everyone knows something worth hearing, and deserves a respectful conversation to share it."
+              }
             </p>
             <p>
-              Those moments are reminders that everyone knows something and deserves a dignified
-              conversation to share it.
+              {
+                "At The Unscripted Room, his job isn't to have the answers. It's to ask good questions, listen closely and make room for each guest to say what they actually think."
+              }
             </p>
             <p>
-              For Brett, The Unscripted Room is the first step in a larger effort to help people
-              build a curiosity mindset, and to help people escape the prison of their own
-              self-doubt through the pursuit of mastering themselves.
-            </p>
-            <p>
-              If the work stays focused and true to its values, his hope is that this podcast will
-              grow into a community where thoughtful people come together to create better outcomes
-              for themselves and for others.
+              {
+                "He sees the podcast as a first step toward something bigger: helping people build a more curious mindset and, if it stays true to its values, growing a community of thoughtful people working toward better outcomes for themselves and each other."
+              }
             </p>
           </div>
         </div>
