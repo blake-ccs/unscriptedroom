@@ -36,8 +36,7 @@ function Home() {
   // with a single MP4 `src`, full preload, and an explicit muted play(). Until it starts, the
   // first frame of the clip shows as a still, so there's no visible swap.
   const [videoReady, setVideoReady] = useState(false);
-  // The video stays invisible until it is actually playing, so Safari's own "play" overlay
-  // (drawn on a video it hasn't autoplayed yet) is never seen; the first-frame still shows instead.
+  // Until the video is actually playing, a first-frame still covers it completely.
   const [videoPlaying, setVideoPlaying] = useState(false);
   const heroVideo = useRef<HTMLVideoElement>(null);
   useEffect(() => setVideoReady(true), []);
@@ -81,17 +80,10 @@ function Home() {
   return (
     <>
       <section className="tactile relative min-h-[38rem] overflow-hidden bg-ink text-warm-white">
-        <img
-          src={heroPoster}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-85"
-        />
         {videoReady && (
           <video
             ref={heroVideo}
             src="/media/hero-shot.mp4"
-            poster={heroPoster}
             autoPlay
             muted
             loop
@@ -100,9 +92,21 @@ function Home() {
             aria-hidden="true"
             tabIndex={-1}
             onPlaying={() => setVideoPlaying(true)}
-            className={`hero-video absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 ${videoPlaying ? "opacity-85" : "opacity-0"}`}
+            className="hero-video absolute inset-0 h-full w-full object-cover object-center opacity-85"
           />
         )}
+        {/* First-frame still, layered ON TOP of the video until playback really starts, so nothing a
+            browser draws on a paused video (e.g. Safari's play button) can ever show through. */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-ink transition-opacity duration-500 motion-reduce:transition-none ${videoPlaying ? "opacity-0" : "opacity-100"}`}
+        >
+          <img
+            src={heroPoster}
+            alt=""
+            className="h-full w-full object-cover object-center opacity-85"
+          />
+        </div>
         <div className="hero-shade absolute inset-0" />
         <div className="site-container relative z-10 flex min-h-[38rem] items-end py-14">
           <div className="max-w-5xl reveal">
