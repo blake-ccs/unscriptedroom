@@ -97,7 +97,7 @@ function FaqPage() {
           <Accordion type="single" collapsible className="border-t border-foreground/20">
             {publicFaqs.map(([q, a], i) => (
               <AccordionItem key={q} value={`q-${i}`} className="border-foreground/15">
-                <AccordionTrigger className="py-6 text-left text-lg font-semibold text-foreground hover:text-plum hover:no-underline focus-visible:text-plum data-[state=open]:text-plum">
+                <AccordionTrigger className="py-6 text-left text-lg font-semibold text-foreground hover:text-purple hover:no-underline focus-visible:text-purple data-[state=open]:text-purple">
                   {q}
                 </AccordionTrigger>
                 <AccordionContent className="max-w-2xl pb-7 text-base leading-relaxed text-muted-foreground">

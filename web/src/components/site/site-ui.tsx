@@ -519,7 +519,7 @@ export function ConversationCard({ ep }: { ep: Conversation }) {
       />
       {/* The icon carries the episode's framework value (ep.value) without spelling it out. */}
       <ValueIcon value={ep.value} className="h-8 w-8" />
-      <h3 className="mt-5 font-sans text-lg font-semibold leading-snug text-plum">{ep.title}</h3>
+      <h3 className="mt-5 font-sans text-lg font-semibold leading-snug text-purple">{ep.title}</h3>
       <p className="mt-4 font-headline text-[1.45rem] font-semibold uppercase leading-[1.12] text-foreground">
         {ep.question}
       </p>
@@ -529,7 +529,7 @@ export function ConversationCard({ ep }: { ep: Conversation }) {
       <_Link
         to="/season-two/$episode"
         params={{ episode: String(ep.n) }}
-        className="mt-7 inline-flex items-center gap-2 self-start border-b border-foreground/25 pb-1 text-xs font-semibold uppercase tracking-[.14em] text-foreground transition-colors hover:border-plum hover:text-plum after:absolute after:inset-0"
+        className="mt-7 inline-flex items-center gap-2 self-start border-b border-foreground/25 pb-1 text-xs font-semibold uppercase tracking-[.14em] text-foreground transition-colors hover:border-purple hover:text-purple after:absolute after:inset-0"
       >
         Explore{" "}
         <_Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />

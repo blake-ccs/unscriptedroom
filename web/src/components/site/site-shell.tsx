@@ -93,7 +93,7 @@ export function Header() {
                 <SheetClose asChild>
                   <Link
                     to="/join-a-conversation"
-                    className="mt-5 bg-chartreuse px-5 py-4 text-center text-xs font-headline font-semibold tracking-[.1em] uppercase text-ink"
+                    className="mt-5 bg-chartreuse px-5 py-4 text-center text-xs font-headline font-semibold tracking-[.1em] uppercase text-ink transition-colors hover:bg-purple hover:text-warm-white"
                   >
                     Be on the Podcast
                   </Link>

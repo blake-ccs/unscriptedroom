@@ -120,7 +120,7 @@ function AboutPage() {
                 {i < 3 && (
                   <span
                     aria-hidden="true"
-                    className="absolute -right-5 top-[-0.6rem] hidden text-plum md:block"
+                    className="absolute -right-5 top-[-0.6rem] hidden text-purple md:block"
                   >
                     →
                   </span>
@@ -220,7 +220,7 @@ function AboutPage() {
                     )}
                     <span
                       className={
-                        j === 1 ? "text-plum" : j === 2 ? "text-deep-purple" : "text-foreground"
+                        j === 1 ? "text-purple" : j === 2 ? "text-deep-purple" : "text-foreground"
                       }
                     >
                       {v}

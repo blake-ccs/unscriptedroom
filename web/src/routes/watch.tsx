@@ -65,7 +65,7 @@ function Page() {
                   href={p.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex items-center gap-2.5 border-b border-foreground/25 pb-1.5 text-xs font-semibold uppercase tracking-[.14em] transition-colors hover:border-plum hover:text-plum"
+                  className="group inline-flex items-center gap-2.5 border-b border-foreground/25 pb-1.5 text-xs font-semibold uppercase tracking-[.14em] transition-colors hover:border-purple hover:text-purple"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ function Page() {
             Season Two is taking shape.{" "}
             <Link
               to="/season-two"
-              className="group ml-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.14em] text-foreground hover:text-plum"
+              className="group ml-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.14em] text-foreground hover:text-purple"
             >
               Explore what's coming{" "}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />

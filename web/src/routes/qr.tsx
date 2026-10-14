@@ -94,7 +94,7 @@ function QrPage() {
                     setStep("choice");
                     setError("");
                   }}
-                  className="text-xs font-semibold uppercase tracking-[.14em] hover:text-plum"
+                  className="text-xs font-semibold uppercase tracking-[.14em] hover:text-purple"
                 >
                   Back
                 </button>

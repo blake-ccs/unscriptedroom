@@ -72,14 +72,14 @@ function Home() {
           </div>
         </div>
       </section>
-      {/* Season One CTA: a compact aubergine band, the one deliberate purple surface on the page. */}
-      <section className="bg-deep-purple text-warm-white" aria-labelledby="season-one-heading">
-        <div className="site-container flex flex-col gap-7 py-12 sm:py-14 md:flex-row md:items-center md:justify-between md:gap-12">
+      {/* Season One CTA on warm cream, flowing straight into the Season Two conversations below. */}
+      <section className="paper-texture" aria-labelledby="season-one-heading">
+        <div className="site-container flex flex-col gap-7 pt-16 pb-12 sm:pt-20 md:flex-row md:items-center md:justify-between md:gap-12">
           <div>
-            <h2 id="season-one-heading" className="text-warm-white">
+            <h2 id="season-one-heading" className="text-purple">
               Season One Is Now Available
             </h2>
-            <p className="mt-3 text-lg text-warm-white/80">
+            <p className="mt-3 text-lg text-foreground">
               Explore the conversations that started it all.
             </p>
           </div>
@@ -91,7 +91,10 @@ function Home() {
         </div>
       </section>
 
-      <section className="paper-texture section-pad" aria-labelledby="season-two-heading">
+      <section
+        className="paper-texture pt-8 pb-[clamp(4.5rem,9vw,9rem)] sm:pt-10"
+        aria-labelledby="season-two-heading"
+      >
         <div className="site-container">
           <p id="season-two-heading" className="eyebrow">
             Upcoming Season Two conversations

@@ -310,7 +310,7 @@ function ChoiceRow({
               className={`grid h-11 min-w-11 cursor-pointer place-items-center border px-4 text-sm font-semibold transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 ${
                 value === option
                   ? "border-purple bg-purple text-warm-white"
-                  : "border-foreground/25 bg-background hover:border-plum"
+                  : "border-foreground/25 bg-background hover:border-purple"
               }`}
             >
               <input

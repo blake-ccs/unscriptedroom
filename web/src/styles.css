@@ -36,19 +36,15 @@
   --color-warm-white: var(--warm-white);
   --color-purple: var(--purple);
   --color-deep-purple: var(--deep-purple);
-  --color-plum: var(--purple);
   --color-soft-sage: var(--soft-sage);
   --color-chartreuse: var(--chartreuse);
   --color-cream: var(--warm-white);
   --color-cream-muted: color-mix(in oklab, var(--warm-white) 68%, transparent);
   --color-warm-black: var(--ink);
   --color-espresso: var(--ink);
-  --color-maroon: var(--purple);
   --color-apply: var(--chartreuse);
   --color-apply-hover: var(--warm-white);
   --color-apply-foreground: var(--ink);
-  --color-lilac: var(--purple);
-  --color-lilac-soft: color-mix(in oklab, var(--purple) 20%, var(--warm-white));
   --color-sage: var(--chartreuse);
   --color-sage-deep: var(--ink);
   --color-brass: var(--chartreuse);
@@ -60,7 +56,7 @@
   /* Approved palette */
   --ink: #2b2728; /* Charcoal */
   --warm-white: #f3efe7; /* Warm Cream */
-  --purple: #3a294f; /* Aubergine — primary brand accent */
+  --purple: #4e2a45; /* Aubergine — editorial emphasis, questions, icon linework */
   --deep-purple: var(--purple);
   --chartreuse: #b8c3ae; /* Light Sage — CTAs and supporting accents */
   --soft-sage: #e6ebdd; /* Soft Warm Sage — larger surfaces such as Season Two cards */

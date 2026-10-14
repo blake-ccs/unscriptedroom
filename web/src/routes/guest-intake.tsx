@@ -170,7 +170,7 @@ function GuestIntakePage() {
                 <button
                   type="button"
                   onClick={() => setLockedEpisode(false)}
-                  className="mt-3 text-xs font-semibold uppercase tracking-[.14em] text-foreground underline underline-offset-4 hover:text-plum"
+                  className="mt-3 text-xs font-semibold uppercase tracking-[.14em] text-foreground underline underline-offset-4 hover:text-purple"
                 >
                   Not your conversation? Choose another
                 </button>

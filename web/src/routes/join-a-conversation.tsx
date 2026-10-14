@@ -111,7 +111,7 @@ function JoinPage() {
                 key={title}
                 className="grid gap-2 border-b border-foreground/15 py-7 sm:grid-cols-[4rem_1fr_1fr] sm:items-baseline sm:gap-8 sm:py-9"
               >
-                <span className="font-headline text-sm font-medium tracking-[.14em] text-plum">
+                <span className="font-headline text-sm font-medium tracking-[.14em] text-purple">
                   0{i + 1}
                 </span>
                 <p className="font-headline text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
@@ -158,9 +158,9 @@ function JoinPage() {
               <li key={title} className="relative pb-12 last:pb-0">
                 <span
                   aria-hidden="true"
-                  className="absolute -left-[calc(2rem+4.5px)] top-2 h-2 w-2 rounded-full bg-plum sm:-left-[calc(3rem+4.5px)]"
+                  className="absolute -left-[calc(2rem+4.5px)] top-2 h-2 w-2 rounded-full bg-purple sm:-left-[calc(3rem+4.5px)]"
                 />
-                <span className="font-headline text-sm font-medium tracking-[.14em] text-plum">
+                <span className="font-headline text-sm font-medium tracking-[.14em] text-purple">
                   0{i + 1}
                 </span>
                 <h3 className="mt-2 font-headline text-2xl font-semibold text-foreground">
@@ -202,7 +202,7 @@ function JoinPage() {
               exact address and arrival details.
             </p>
             <div className="mt-8 border-t border-foreground/25 pt-6">
-              <p className="rule-label text-plum">Come as yourself</p>
+              <p className="rule-label text-purple">Come as yourself</p>
               <p className="mt-3 text-muted-foreground">
                 No formal dress code. Wear something comfortable that you feel good in on camera.
               </p>

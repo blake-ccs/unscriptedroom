@@ -73,7 +73,7 @@ function Privacy() {
       <LegalSection title="Contact">
         <p>
           Questions? Contact us at{" "}
-          <Link className="text-foreground underline hover:text-plum" to="/contact">
+          <Link className="text-foreground underline hover:text-purple" to="/contact">
             /contact
           </Link>
           .
