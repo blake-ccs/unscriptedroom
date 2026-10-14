@@ -5,7 +5,7 @@ import principles from "@/assets/dsc00112.jpg";
 import hourglass from "@/assets/dsc00119.jpg";
 import microphone from "@/assets/dsc00036.jpg";
 import sign from "@/assets/dsc00064.jpg";
-import brettPortrait from "@/assets/brett-studio-portrait.png";
+import brettPortrait from "@/assets/brett-portrait.jpg";
 import mostViewed from "@/data/youtube-most-viewed.json";
 
 export const roomMedia = {
