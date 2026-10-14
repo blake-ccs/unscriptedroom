@@ -231,7 +231,7 @@ function AboutPage() {
       </section>
 
       <section
-        className="bg-deep-purple py-16 text-warm-white sm:py-24"
+        className="bg-ink py-16 text-warm-white sm:py-24"
         aria-labelledby="principles-heading"
       >
         <div className="site-container grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
