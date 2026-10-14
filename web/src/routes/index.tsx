@@ -143,7 +143,13 @@ function Home() {
               Explore the conversations that started it all.
             </p>
           </div>
-          <Button asChild variant="apply" size="lg" className="self-start md:self-auto">
+          {/* Inverted from the standard CTA so it stands out on cream: aubergine, sage on hover. */}
+          <Button
+            asChild
+            variant="apply"
+            size="lg"
+            className="self-start bg-purple text-warm-white hover:bg-chartreuse hover:text-ink md:self-auto"
+          >
             <Link to="/watch">
               Explore Season One <ArrowRight />
             </Link>
