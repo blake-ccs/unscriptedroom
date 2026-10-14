@@ -1,0 +1,18 @@
+# Season Two descriptions: proposed (awaiting approval)
+
+Titles and questions unchanged. Proposed copy draws on the fuller descriptions from the version currently live
+on theunscriptedroom.com, condensed to two sentences that expand on the question rather than repeat it.
+
+| # | Title | Question | Current (staging) | Proposed |
+|---|---|---|---|---|
+| 01 | Based on a True Story | What can someone else's true story help us discover about our own? | A look at how someone else's true story can reveal something about our own. | Documentaries, biopics, memoirs: some true stories stay with us long after they end. Guests share the ones that changed how they see themselves, and what a stranger's life revealed about their own choices and blind spots. |
+| 02 | Listen Closely | What is music telling you? | What songs, sounds, and artists can tell us about who we are. | A song can move us before we understand why. Guests share the music that has marked their lives, and what the sounds they keep returning to might say about who they are. |
+| 03 | Permission to Play Hard | What can sports teach us about competing with other people? | What competing hard against other people can teach us about ourselves. | Competition can bring out the best in people, and sometimes the worst. Guests dig into the spoken and unspoken agreements that make playing hard possible, and where the line falls between intensity and going too far. |
+| 04 | Healthy at What Cost | When does the pursuit of health stop being healthy? | When does chasing health stop being healthy? | For some, the routine keeps going long after the original goal has been met. Guests talk about what keeps them training, where discipline turns into identity, and what it costs when enough never feels like enough. |
+| 05 | Rethinking Education | What skills actually matter? | Rethinking which skills actually deserve a place in how we're taught. | Some of the most useful things we know were never taught in a classroom. Guests share the lessons they had to learn on their own, and what they think deserves a place in how we prepare people for the world. |
+| 06 | Labor of Love | Does inspiration create great work, or does great work create inspiration? | Does passion create great work, or does the discipline of doing the work create the passion? | Building something you're proud of rarely looks like the highlight reel. Guests share what the work actually took, and whether the passion came first or grew out of showing up anyway. |
+| 07 | Life Is the Lesson | What can adventure teach us that staying comfortable can't? | What stepping outside our comfort zone can teach us that playing it safe never could. | Some lessons only arrive once we leave what's familiar. Guests share the trips, risks and unplanned turns that changed them, and what they brought home that playing it safe never could have taught them. |
+| 08 | You Can't Win Them All | Is how you lose just as important as how you win? | What losing teaches us that winning never could. | Everyone remembers a loss that stung. Guests share the defeats that stayed with them the longest, and what a hard loss taught them that a win never could. |
+| 09 | Dream On | What makes certain dreams impossible to let go? | What makes certain dreams impossible to set aside, no matter the odds. | Some ambitions refuse to fade, even when an easier path is right there. Guests share the dreams they've carried the longest, and what has kept them alive against the odds. |
+
+Note: the live site words Dream On's question as "What makes **some** dreams impossible to let go?"; staging says "**certain**".
