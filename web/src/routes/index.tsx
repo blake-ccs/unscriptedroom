@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,10 +31,23 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 function Home() {
+  // The page is prerendered, and Safari doesn't always honour `autoplay` on server-rendered video.
+  // Start it explicitly once the page has loaded (muted, so autoplay policies allow it).
+  const heroVideo = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = heroVideo.current;
+    if (!video) return;
+    video.muted = true;
+    video.play()?.catch(() => {
+      // Autoplay blocked (e.g. iPhone Low Power Mode): the poster image stays, which is fine.
+    });
+  }, []);
+
   return (
     <>
       <section className="tactile relative min-h-[38rem] overflow-hidden bg-ink text-warm-white">
         <video
+          ref={heroVideo}
           poster={roomMedia.microphone}
           autoPlay
           muted
@@ -44,8 +58,9 @@ function Home() {
           tabIndex={-1}
           className="absolute inset-0 h-full w-full object-cover object-center opacity-85"
         >
-          <source src="/media/hero-shot.webm" type="video/webm" />
+          {/* MP4 (H.264) first: every browser plays it, and Safari can stall on WebM without falling back. */}
           <source src="/media/hero-shot.mp4" type="video/mp4" />
+          <source src="/media/hero-shot.webm" type="video/webm" />
         </video>
         <div className="hero-shade absolute inset-0" />
         <div className="site-container relative z-10 flex min-h-[38rem] items-end py-14">
