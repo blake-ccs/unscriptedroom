@@ -41,10 +41,38 @@ function Home() {
   useEffect(() => {
     const video = heroVideo.current;
     if (!video) return;
-    video.muted = true;
-    video.play()?.catch(() => {
-      // Autoplay refused (e.g. iPhone Low Power Mode): the first-frame still remains.
-    });
+    // Muted autoplay is normally allowed on load. Some Safari setups (a site set to "Never
+    // Auto-Play", Low Power Mode) refuse it until the visitor interacts with the page, so keep
+    // retrying at the moments playback becomes possible: when data has loaded, when the tab
+    // becomes visible again, and on the visitor's first tap, click or key press.
+    const tryPlay = () => {
+      if (!video.paused) return;
+      video.muted = true;
+      video.play()?.catch(() => {
+        // Still refused: the first-frame still stays until the next attempt.
+      });
+    };
+    const gestures = ["pointerdown", "touchend", "click", "keydown"] as const;
+    const onGesture = () => {
+      tryPlay();
+      if (!video.paused) gestures.forEach((g) => window.removeEventListener(g, onGesture, true));
+    };
+    const onVisible = () => document.visibilityState === "visible" && tryPlay();
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", tryPlay);
+    gestures.forEach((g) =>
+      window.addEventListener(g, onGesture, { capture: true, passive: true }),
+    );
+    tryPlay();
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("canplay", tryPlay);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", tryPlay);
+      gestures.forEach((g) => window.removeEventListener(g, onGesture, true));
+    };
   }, [videoReady]);
 
   return (
