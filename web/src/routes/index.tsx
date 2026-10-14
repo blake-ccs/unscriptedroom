@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConversationCard, FollowUpSignup, ListenPlatforms } from "@/components/site/site-ui";
-import { roomMedia } from "@/lib/site-media";
+import heroPoster from "@/assets/hero-poster.jpg";
 import { seasonTwo } from "@/lib/site-data";
 
 export const Route = createFileRoute("/")({
@@ -31,37 +31,46 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 function Home() {
-  // The page is prerendered, and Safari doesn't always honour `autoplay` on server-rendered video.
-  // Start it explicitly once the page has loaded (muted, so autoplay policies allow it).
+  // Hero video, set up the way the previous site did (which played reliably in Safari): the
+  // <video> is created in the browser after load rather than shipped in the prerendered HTML,
+  // with a single MP4 `src`, full preload, and an explicit muted play(). Until it starts, the
+  // first frame of the clip shows as a still, so there's no visible swap.
+  const [videoReady, setVideoReady] = useState(false);
   const heroVideo = useRef<HTMLVideoElement>(null);
+  useEffect(() => setVideoReady(true), []);
   useEffect(() => {
     const video = heroVideo.current;
     if (!video) return;
     video.muted = true;
     video.play()?.catch(() => {
-      // Autoplay blocked (e.g. iPhone Low Power Mode): the poster image stays, which is fine.
+      // Autoplay refused (e.g. iPhone Low Power Mode): the first-frame still remains.
     });
-  }, []);
+  }, [videoReady]);
 
   return (
     <>
       <section className="tactile relative min-h-[38rem] overflow-hidden bg-ink text-warm-white">
-        <video
-          ref={heroVideo}
-          poster={roomMedia.microphone}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
+        <img
+          src={heroPoster}
+          alt=""
           aria-hidden="true"
-          tabIndex={-1}
           className="absolute inset-0 h-full w-full object-cover object-center opacity-85"
-        >
-          {/* MP4 (H.264) first: every browser plays it, and Safari can stall on WebM without falling back. */}
-          <source src="/media/hero-shot.mp4" type="video/mp4" />
-          <source src="/media/hero-shot.webm" type="video/webm" />
-        </video>
+        />
+        {videoReady && (
+          <video
+            ref={heroVideo}
+            src="/media/hero-shot.mp4"
+            poster={heroPoster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            tabIndex={-1}
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-85"
+          />
+        )}
         <div className="hero-shade absolute inset-0" />
         <div className="site-container relative z-10 flex min-h-[38rem] items-end py-14">
           <div className="max-w-5xl reveal">
