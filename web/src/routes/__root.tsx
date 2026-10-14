@@ -89,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: "A conversation podcast and community studio in Amesbury, Massachusetts.",
         },
         { name: "author", content: "The Unscripted Room" },
-        { name: "theme-color", content: "#1F1A17" },
+        { name: "theme-color", content: "#2B2728" },
         { property: "og:site_name", content: "The Unscripted Room" },
         { property: "og:locale", content: "en_US" },
         { property: "og:type", content: "website" },

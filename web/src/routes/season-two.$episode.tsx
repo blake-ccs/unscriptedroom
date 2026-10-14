@@ -51,7 +51,7 @@ function EpisodePage() {
           </Link>
           <div className="mt-12 grid gap-10 lg:grid-cols-[.35fr_1fr]">
             <div>
-              <span className="font-display text-7xl text-soft-purple">
+              <span className="font-display text-7xl text-chartreuse">
                 {String(episode.n).padStart(2, "0")}
               </span>
               <p className="season-label mt-4 text-chartreuse">{episode.topic}</p>

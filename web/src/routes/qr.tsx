@@ -68,7 +68,7 @@ function QrPage() {
         <div className="mt-10">
           {step === "choice" && (
             <>
-              <p className="rule-label text-soft-purple">What would you like to do next?</p>
+              <p className="rule-label text-chartreuse">What would you like to do next?</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild variant="apply" size="lg">
                   <Link to="/apply">Reserve a Seat</Link>

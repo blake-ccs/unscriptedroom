@@ -145,7 +145,7 @@ function GuestIntakePage() {
               sit down.
             </p>
           </div>
-          <p className="rule-label mt-8 text-soft-purple">About 5 minutes to complete</p>
+          <p className="rule-label mt-8 text-chartreuse">About 5 minutes to complete</p>
         </div>
       </section>
 
@@ -155,7 +155,7 @@ function GuestIntakePage() {
             <Honeypot value={trap} onChange={setTrap} />
 
             {lockedEpisode && selected ? (
-              <div className="border-l-4 border-chartreuse bg-card-cream px-6 py-5">
+              <div className="border-l-4 border-chartreuse bg-soft-sage px-6 py-5">
                 <p className="eyebrow">Your upcoming conversation</p>
                 <p className="mt-3 font-headline text-2xl font-semibold uppercase">
                   {selected.title}

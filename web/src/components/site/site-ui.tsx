@@ -59,7 +59,7 @@ export function EpisodeThumbnails({
           </span>
           {episode.label && (
             <span
-              className={`mt-4 block text-[.7rem] font-extrabold uppercase tracking-[.12em] ${isDark ? "text-soft-purple" : "text-purple"}`}
+              className={`mt-4 block text-[.7rem] font-extrabold uppercase tracking-[.12em] ${isDark ? "text-chartreuse" : "text-purple"}`}
             >
               {episode.label}
             </span>
@@ -206,7 +206,7 @@ export function ShortsCarousel() {
               </div>
             </div>
             <div className="max-w-xl">
-              <p className="rule-label text-soft-purple">Ready for the real clips</p>
+              <p className="rule-label text-chartreuse">Ready for the real clips</p>
               <h3 className="mt-5 text-warm-white">
                 The carousel is built. The Shorts still need their YouTube links.
               </h3>
@@ -251,9 +251,7 @@ export function SectionHeading({
 }) {
   return (
     <div className="max-w-4xl">
-      {eyebrow && (
-        <div className={light ? "rule-label text-soft-purple" : "eyebrow"}>{eyebrow}</div>
-      )}
+      {eyebrow && <div className={light ? "rule-label text-chartreuse" : "eyebrow"}>{eyebrow}</div>}
       <h2 className={light ? "mt-5 text-warm-white" : "mt-5"}>{title}</h2>
       {intro && (
         <p
@@ -285,7 +283,7 @@ export function PageHero({
   return (
     <section className="dark-band tactile page-hero">
       <div className="site-container relative z-10">
-        <div className="rule-label text-soft-purple">{eyebrow}</div>
+        <div className="rule-label text-chartreuse">{eyebrow}</div>
         <h1 className={`${display ? "display-statement " : ""}mt-6 max-w-5xl text-warm-white`}>
           {title}
         </h1>
@@ -310,7 +308,7 @@ export function CTA({
     <section className="bg-purple text-warm-white">
       <div className="site-container grid items-center gap-8 py-20 md:grid-cols-[1fr_auto]">
         <div>
-          <p className="rule-label text-soft-purple">The empty chair</p>
+          <p className="rule-label text-chartreuse">The empty chair</p>
           <h2 className="mt-5 text-warm-white">{title}</h2>
           <p className="mt-4 max-w-2xl text-warm-white/75">{text}</p>
         </div>
@@ -421,7 +419,7 @@ export function FollowUpSignup() {
   }
   return (
     <section className="paper-texture bg-warm-white py-16 sm:py-20">
-      <div className="site-container grid gap-8 border-t border-foreground pt-8 lg:grid-cols-[.8fr_1.2fr]">
+      <div className="site-container grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
         <div>
           <p className="eyebrow">Stay connected</p>
         </div>
@@ -514,10 +512,10 @@ type Conversation = {
 };
 export function ConversationCard({ ep }: { ep: Conversation }) {
   return (
-    <article className="group relative flex flex-col border border-foreground/10 bg-card-cream p-7 transition-colors hover:border-soft-purple sm:p-8">
+    <article className="group relative flex flex-col border border-foreground/10 bg-soft-sage p-7 transition-colors hover:border-purple sm:p-8">
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-[3px] bg-soft-purple/0 transition-colors group-hover:bg-soft-purple"
+        className="absolute inset-x-0 top-0 h-[3px] bg-purple/0 transition-colors group-hover:bg-purple"
       />
       {/* The icon carries the episode's framework value (ep.value) without spelling it out. */}
       <ValueIcon value={ep.value} className="h-8 w-8" />

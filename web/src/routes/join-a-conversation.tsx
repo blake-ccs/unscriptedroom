@@ -133,14 +133,14 @@ function JoinPage() {
           <h2 className="max-w-2xl text-warm-white">An invitation can begin two ways.</h2>
           <div className="mt-12 grid gap-10 border-t border-warm-white/20 pt-10 md:grid-cols-2 md:gap-16">
             <div>
-              <p className="rule-label text-soft-purple">We reach out</p>
+              <p className="rule-label text-chartreuse">We reach out</p>
               <p className="mt-4 text-lg text-warm-white/80">
                 We reach out to people throughout the community whose experiences or perspectives
                 may add something meaningful to a conversation.
               </p>
             </div>
             <div>
-              <p className="rule-label text-soft-purple">You raise your hand</p>
+              <p className="rule-label text-chartreuse">You raise your hand</p>
               <p className="mt-4 text-lg text-warm-white/80">
                 You can express interest yourself, for a specific upcoming conversation or in
                 general. Both paths lead to the same table. Repeat guests are welcome.

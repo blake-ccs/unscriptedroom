@@ -102,7 +102,7 @@ function Page() {
         <div className="site-container">
           <div className="flex flex-col gap-4 border-t border-warm-white/25 pt-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="rule-label text-soft-purple">Shorter clips</p>
+              <p className="rule-label text-chartreuse">Shorter clips</p>
               <h2 className="mt-5 text-warm-white">Moments worth replaying.</h2>
               <p className="mt-4 max-w-md text-sm text-warm-white/60">
                 The people, the room and the questions — in a minute or less.
@@ -146,7 +146,7 @@ function Page() {
                     <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                   </span>
                 </span>
-                <span className="mt-3 block text-sm font-semibold leading-snug text-warm-white/85 transition-colors group-hover:text-soft-purple">
+                <span className="mt-3 block text-sm font-semibold leading-snug text-warm-white/85 transition-colors group-hover:text-chartreuse">
                   {short.title}
                 </span>
               </a>

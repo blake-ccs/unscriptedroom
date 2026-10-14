@@ -52,7 +52,7 @@ function Home() {
           <div className="max-w-5xl reveal">
             <h1 className="display-statement hero-display text-warm-white">
               <span className="block">Where lived experience</span>{" "}
-              <span className="block text-soft-purple">meets curiosity.</span>
+              <span className="block text-chartreuse">meets curiosity.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-warm-white/85">
               Different perspectives around one table, with the time and curiosity for deeper
@@ -72,72 +72,58 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="bg-ink py-12 text-warm-white sm:py-16">
-        <div className="site-container">
-          <p className="max-w-2xl text-lg text-warm-white/80">
-            Season One is now available.{" "}
-            <Link
-              to="/watch"
-              className="text-warm-white underline decoration-soft-purple/60 underline-offset-4 transition-colors hover:text-soft-purple hover:decoration-soft-purple"
-            >
+      {/* Season One CTA: a compact aubergine band, the one deliberate purple surface on the page. */}
+      <section className="bg-deep-purple text-warm-white" aria-labelledby="season-one-heading">
+        <div className="site-container flex flex-col gap-7 py-12 sm:py-14 md:flex-row md:items-center md:justify-between md:gap-12">
+          <div>
+            <h2 id="season-one-heading" className="text-warm-white">
+              Season One Is Now Available
+            </h2>
+            <p className="mt-3 text-lg text-warm-white/80">
               Explore the conversations that started it all.
+            </p>
+          </div>
+          <Button asChild variant="apply" size="lg" className="self-start md:self-auto">
+            <Link to="/watch">
+              Explore Season One <ArrowRight />
             </Link>
+          </Button>
+        </div>
+      </section>
+
+      <section className="paper-texture section-pad" aria-labelledby="season-two-heading">
+        <div className="site-container">
+          <p id="season-two-heading" className="eyebrow">
+            Upcoming Season Two conversations
           </p>
-          <div className="mt-10 flex flex-col gap-7 border-t border-warm-white/20 pt-8 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="font-headline text-2xl font-semibold uppercase text-warm-white">
-                Subscribe and keep listening.
-              </p>
-              <p className="mt-2 text-sm text-warm-white/70">
-                Find The Unscripted Room wherever you listen.
-              </p>
-            </div>
-            <ListenPlatforms />
+          <div className="mx-auto mt-8 max-w-6xl grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {seasonTwo.map((ep) => (
+              <ConversationCard key={ep.n} ep={ep} />
+            ))}
           </div>
+          <p className="mt-8 text-muted-foreground">
+            More Season Two conversations will be announced.
+          </p>
         </div>
       </section>
-      <section className="paper-texture groove-light relative overflow-hidden pt-[clamp(4.5rem,9vw,9rem)] pb-[clamp(2.5rem,5vw,5rem)]">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-4 select-none whitespace-nowrap text-center font-display text-[24vw] leading-none text-foreground/[.045]"
-        >
-          SEASON 02
-        </div>
-        <div className="site-container relative">
-          <div className="max-w-3xl">
-            <p className="rule-label text-purple">Season Two · Coming soon</p>
-            <h2 className="display-statement mt-6">Every conversation starts with why.</h2>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              New conversations. New perspectives. More reasons to take a seat at the table.
+
+      <section
+        className="bg-ink py-14 text-warm-white sm:py-16"
+        aria-label="Subscribe and keep listening"
+      >
+        <div className="site-container flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="font-headline text-2xl font-semibold uppercase text-warm-white">
+              Subscribe and keep listening.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild variant="apply" size="lg">
-                <Link to="/season-two">
-                  Explore Season Two <ArrowRight />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/join-a-conversation">
-                  Be on the Podcast <ArrowRight />
-                </Link>
-              </Button>
-            </div>
-          </div>
-          <div className="mt-16 border-t border-foreground pt-8">
-            <p className="rule-label">Upcoming Season Two conversations</p>
-            <div className="mt-8">
-              <div className="mx-auto max-w-6xl grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-                {seasonTwo.map((ep) => (
-                  <ConversationCard key={ep.n} ep={ep} />
-                ))}
-              </div>
-            </div>
-            <p className="mt-8 text-muted-foreground">
-              More Season Two conversations will be announced.
+            <p className="mt-2 text-sm text-warm-white/70">
+              Find The Unscripted Room wherever you listen.
             </p>
           </div>
+          <ListenPlatforms />
         </div>
       </section>
+
       <FollowUpSignup />
     </>
   );

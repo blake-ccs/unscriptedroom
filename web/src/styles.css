@@ -37,16 +37,12 @@
   --color-purple: var(--purple);
   --color-deep-purple: var(--deep-purple);
   --color-plum: var(--purple);
-  --color-soft-purple: var(--soft-purple);
-  --color-card-cream: var(--card-cream);
-  --color-slate: var(--slate);
+  --color-soft-sage: var(--soft-sage);
   --color-chartreuse: var(--chartreuse);
   --color-cream: var(--warm-white);
   --color-cream-muted: color-mix(in oklab, var(--warm-white) 68%, transparent);
   --color-warm-black: var(--ink);
   --color-espresso: var(--ink);
-  --color-ink-true: var(--ink-true);
-  --color-ink-soft: var(--ink-soft);
   --color-maroon: var(--purple);
   --color-apply: var(--chartreuse);
   --color-apply-hover: var(--warm-white);
@@ -57,21 +53,17 @@
   --color-sage-deep: var(--ink);
   --color-brass: var(--chartreuse);
   --color-brass-light: var(--chartreuse);
-  --shadow-warm: 6px 6px 0 var(--soft-purple);
+  --shadow-warm: 6px 6px 0 var(--chartreuse);
 }
 
 :root {
-  --ink: #231f20;
-  --ink-true: oklch(0.145 0.002 71);
-  --ink-soft: oklch(0.2475 0.007 68);
+  /* Approved palette */
+  --ink: #2b2728; /* Charcoal */
   --warm-white: #f3efe7; /* Warm Cream */
-  --purple: #4e2a45; /* Aubergine — primary brand purple */
+  --purple: #3a294f; /* Aubergine — primary brand accent */
   --deep-purple: var(--purple);
-  --soft-purple: #d5c7e2;
-  --slate: #5b6064;
-  --chartreuse: #b4bda9;
-  /* A half-step deeper than the page cream so conversation cards read as their own surface. */
-  --card-cream: color-mix(in oklab, var(--warm-white) 93%, var(--ink));
+  --chartreuse: #b8c3ae; /* Light Sage — CTAs and supporting accents */
+  --soft-sage: #e6ebdd; /* Soft Warm Sage — larger surfaces such as Season Two cards */
   --background: var(--warm-white);
   --foreground: var(--ink);
   --card: var(--warm-white);
@@ -189,7 +181,7 @@
 }
 @utility eyebrow {
   color: var(--color-purple);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -203,11 +195,11 @@
   letter-spacing: 0.1em;
   transition: color 0.2s;
   &:hover {
-    color: var(--color-soft-purple);
+    color: var(--color-chartreuse);
   }
 }
 @utility nav-link-active {
-  color: var(--color-soft-purple);
+  color: var(--color-chartreuse);
 }
 @utility social-icon {
   display: grid;
@@ -237,7 +229,7 @@
 }
 @utility season-label {
   color: var(--color-purple);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -283,7 +275,7 @@
 @utility rule-label {
   display: flex;
   align-items: center;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;

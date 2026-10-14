@@ -214,7 +214,7 @@ function AboutPage() {
                 {row.map((v, j) => (
                   <span key={v} className="inline-flex items-baseline gap-4">
                     {j > 0 && (
-                      <span aria-hidden="true" className="text-soft-purple">
+                      <span aria-hidden="true" className="text-purple">
                         ·
                       </span>
                     )}
@@ -239,7 +239,7 @@ function AboutPage() {
       >
         <div className="site-container grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
           <div>
-            <p className="rule-label text-soft-purple">Conversation principles</p>
+            <p className="rule-label text-chartreuse">Conversation principles</p>
             <h2 id="principles-heading" className="mt-5 max-w-sm text-warm-white">
               Three principles. One goal.
             </h2>
@@ -264,12 +264,12 @@ function AboutPage() {
               ],
             ].map(([t, d], k) => (
               <li key={t} className="grid gap-3 py-9 sm:grid-cols-[3.5rem_1fr] sm:py-11">
-                <span className="pt-2 font-headline text-sm font-medium tracking-[.14em] text-soft-purple/80">
+                <span className="pt-2 font-headline text-sm font-medium tracking-[.14em] text-chartreuse/80">
                   0{k + 1}
                 </span>
                 <div>
                   <h3
-                    className={`font-headline text-2xl font-semibold uppercase leading-tight tracking-[.01em] sm:text-3xl ${k === 2 ? "text-soft-purple" : "text-warm-white"}`}
+                    className={`font-headline text-2xl font-semibold uppercase leading-tight tracking-[.01em] sm:text-3xl ${k === 2 ? "text-chartreuse" : "text-warm-white"}`}
                   >
                     {t}
                   </h3>
