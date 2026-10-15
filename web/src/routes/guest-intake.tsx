@@ -32,7 +32,9 @@ type FormData = {
   lastName: string;
   email: string;
   aboutYou: string;
-  links: string;
+  website: string;
+  instagram: string;
+  facebook: string;
   episode: string;
   drawnTo: string;
   experience: string;
@@ -46,7 +48,9 @@ const empty: FormData = {
   lastName: "",
   email: "",
   aboutYou: "",
-  links: "",
+  website: "",
+  instagram: "",
+  facebook: "",
   episode: "",
   drawnTo: "",
   experience: "",
@@ -100,8 +104,20 @@ function GuestIntakePage() {
     }
     setSending(true);
     setSendError(null);
+    // The three link fields are stored together in the intake record's "links" field.
+    const { website, instagram, facebook, ...answers } = data;
+    const linkFields: [string, string][] = [
+      ["Website", website],
+      ["Instagram", instagram],
+      ["Facebook", facebook],
+    ];
+    const links = linkFields
+      .filter(([, value]) => value.trim())
+      .map(([label, value]) => `${label}: ${value.trim()}`)
+      .join("\n");
     const result = await postJson("/api/guest-intake", {
-      ...data,
+      ...answers,
+      links,
       email: data.email.trim().toLowerCase(),
     });
     setSending(false);
@@ -231,16 +247,40 @@ function GuestIntakePage() {
                   className="min-h-36"
                 />
               </Field>
-              <Field
-                label="Website or social media links (Optional)"
-                hint="Feel free to share any links you'd like us to have."
-              >
-                <Input
-                  value={data.links}
-                  onChange={(e) => update("links", e.target.value)}
-                  maxLength={500}
-                />
-              </Field>
+              <fieldset>
+                <legend className="form-label">Website and social media (Optional)</legend>
+                <span className="-mt-1 mb-3 block text-sm text-muted-foreground">
+                  Feel free to share any you&apos;d like us to have.
+                </span>
+                <div className="grid gap-5 sm:grid-cols-3">
+                  <Field label="Website">
+                    <Input
+                      value={data.website}
+                      onChange={(e) => update("website", e.target.value)}
+                      maxLength={150}
+                      inputMode="url"
+                      autoComplete="url"
+                      placeholder="yourwebsite.com"
+                    />
+                  </Field>
+                  <Field label="Instagram">
+                    <Input
+                      value={data.instagram}
+                      onChange={(e) => update("instagram", e.target.value)}
+                      maxLength={150}
+                      placeholder="@handle or link"
+                    />
+                  </Field>
+                  <Field label="Facebook">
+                    <Input
+                      value={data.facebook}
+                      onChange={(e) => update("facebook", e.target.value)}
+                      maxLength={150}
+                      placeholder="Handle or link"
+                    />
+                  </Field>
+                </div>
+              </fieldset>
             </FormSection>
 
             <FormSection title="Your perspective">
