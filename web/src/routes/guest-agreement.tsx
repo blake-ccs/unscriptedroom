@@ -1,7 +1,6 @@
 import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, Printer } from "lucide-react";
-import { z } from "zod";
 import { Honeypot } from "@/components/site/honeypot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,17 +11,13 @@ import {
   agreementConfirmations,
   agreementSections,
 } from "@/lib/guest-agreement";
-import { episodeSlug, findEpisodeBySlug, formatRecordingDate, seasonTwo } from "@/lib/site-data";
 
-// Unlisted page where confirmed guests sign the Guest Participation Agreement, linked from emails as
-// /guest-agreement?episode=<slug>. Kept out of navigation, the sitemap and search.
+// Unlisted page where confirmed guests sign the Guest Participation Agreement — one link for everyone:
+// /guest-agreement. Kept out of navigation, the sitemap and search.
 // Signatures go to the existing POST /api/contact endpoint (server code is not modified): it creates a
 // separate ActiveCampaign "Contact Message" record per signature, so a signed agreement is never
 // overwritten by later submissions.
-const searchSchema = z.object({ episode: z.string().max(80).optional() });
-
 export const Route = createFileRoute("/guest-agreement")({
-  validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     meta: [
       { title: "Guest Participation Agreement | The Unscripted Room" },
@@ -37,16 +32,13 @@ const noConfirmations = Object.fromEntries(
   agreementConfirmations.map((c) => [c.id, false]),
 ) as Record<ConfirmationId, boolean>;
 
-type ErrorKey = "fullName" | "email" | "episode" | "signature" | ConfirmationId;
+type ErrorKey = "fullName" | "email" | "signature" | ConfirmationId;
 
 const normalise = (name: string) => name.trim().replace(/\s+/g, " ").toLowerCase();
 
 function GuestAgreementPage() {
-  const { episode: episodeParam } = Route.useSearch();
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [episode, setEpisode] = React.useState("");
-  const [lockedEpisode, setLockedEpisode] = React.useState(false);
   const [signature, setSignature] = React.useState("");
   const [confirmed, setConfirmed] = React.useState(noConfirmations);
   const [errors, setErrors] = React.useState<Partial<Record<ErrorKey, string>>>({});
@@ -55,16 +47,6 @@ function GuestAgreementPage() {
   const [signedAt, setSignedAt] = React.useState<Date | null>(null);
   const [trap, setTrap] = React.useState("");
 
-  // The page is prerendered without a query string, so apply ?episode= after hydration.
-  React.useEffect(() => {
-    const match = findEpisodeBySlug(episodeParam);
-    if (match) {
-      setEpisode(episodeSlug(match.title));
-      setLockedEpisode(true);
-    }
-  }, [episodeParam]);
-
-  const selected = findEpisodeBySlug(episode);
   const today = new Date().toLocaleDateString("en-US", { dateStyle: "long" });
 
   async function submit(event: React.FormEvent) {
@@ -72,7 +54,6 @@ function GuestAgreementPage() {
     const next: Partial<Record<ErrorKey, string>> = {};
     if (!fullName.trim()) next.fullName = "Your full name is required.";
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) next.email = "Enter a valid email address.";
-    if (!selected) next.episode = "Choose the conversation you're joining.";
     for (const c of agreementConfirmations)
       if (!confirmed[c.id]) next[c.id] = "Please confirm to continue.";
     if (!signature.trim()) next.signature = "Type your full name to sign.";
@@ -91,7 +72,6 @@ function GuestAgreementPage() {
     }
     setSending(true);
     setSendError(null);
-    const ep = selected!;
     const message = [
       `GUEST PARTICIPATION AGREEMENT — SIGNED`,
       `Agreement version: ${AGREEMENT_VERSION}`,
@@ -99,7 +79,6 @@ function GuestAgreementPage() {
       `Signature (typed): ${signature.trim()}`,
       `Full name: ${fullName.trim()}`,
       `Email: ${email.trim().toLowerCase()}`,
-      `Conversation: ${ep.title} (recording ${formatRecordingDate(ep.recordingDate)})`,
       `Signed: ${now.toLocaleString("en-US", { dateStyle: "long", timeStyle: "long" })} (${now.toISOString()})`,
       ``,
       ...agreementConfirmations.map((c) => `[x] ${c.label}`),
@@ -131,9 +110,8 @@ function GuestAgreementPage() {
           <CheckCircle2 className="mx-auto h-12 w-12 text-purple" aria-hidden="true" />
           <h1 className="mt-6">Thank you, {fullName.trim().split(" ")[0]}.</h1>
           <p className="mt-6 text-lg text-muted-foreground">
-            Your signed Guest Participation Agreement has been received
-            {selected ? ` for ${selected.title}` : ""}. We&apos;re looking forward to having you
-            join us at The Unscripted Room!
+            Your signed Guest Participation Agreement has been received. We&apos;re looking forward
+            to having you join us at The Unscripted Room!
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
             Signed by {signature.trim()} on{" "}
@@ -186,36 +164,6 @@ function GuestAgreementPage() {
           >
             <Honeypot value={trap} onChange={setTrap} />
             <h2>Sign the agreement</h2>
-
-            {lockedEpisode && selected ? (
-              <div className="border-l-4 border-chartreuse bg-soft-sage px-6 py-5">
-                <p className="eyebrow">Your upcoming conversation</p>
-                <p className="mt-3 font-headline text-2xl font-semibold uppercase">
-                  {selected.title}
-                </p>
-                <p className="mt-1 text-sm font-semibold text-foreground">
-                  Recording:{" "}
-                  <time dateTime={selected.recordingDate}>
-                    {formatRecordingDate(selected.recordingDate)}
-                  </time>
-                </p>
-              </div>
-            ) : (
-              <Field label="Which conversation are you joining?" error={errors.episode}>
-                <select
-                  value={episode}
-                  onChange={(e) => setEpisode(e.target.value)}
-                  className="h-11 w-full border border-input bg-background px-3"
-                >
-                  <option value="">Choose your conversation</option>
-                  {seasonTwo.map((ep) => (
-                    <option key={ep.n} value={episodeSlug(ep.title)}>
-                      {ep.title}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            )}
 
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Full name" error={errors.fullName}>
