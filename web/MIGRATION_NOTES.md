@@ -72,23 +72,17 @@ and an `X-Robots-Tag` header (`public/_headers`).
 
 Without a valid `episode`, the guest picks their conversation from a dropdown built from `seasonTwo`.
 
-**Storage:** `POST /api/guest-intake` (server) validates every field, and checks the episode against
-`GUEST_INTAKE_EPISODES` (keep in sync with `seasonTwo`). It then upserts the guest's contact and writes one
-record per guest per episode to the ActiveCampaign custom object **Guest Intake**: name, email, episode id
-and title, all answers, submitted-at and status (`New` / `Reviewed` / `Archived`). It also tags the contact
-`Action: Guest Intake Submitted` and `guest-intake:<slug>`. Resubmitting updates the same record.
-Answers are never logged or written to `submissions.txt`, and no endpoint reads them back.
+**Storage:** the server code is not modified (team rule). Intake posts to the existing `POST /api/lead`
+with `offer: "guest-intake"`, `reasonsForJoining: <episode title>`, `instagramHandle`, and every answer in
+`bioAboutMe` as a labelled block headed `GUEST INTAKE — <episode> (recording <date>)`.
 
-**Team access:** in ActiveCampaign, open the guest's contact (Guest Intakes panel) or the Guest Intake
-object list and filter by Episode. Only ActiveCampaign users can see them.
+**ActiveCampaign result:** the contact is upserted and added to the main and master lists. It's tagged
+`offer:guest-intake`, `podcast:conversation-interest:<episode-slug>`, `LIFECYCLE: Lead` and `src:web`. The
+Offer Registered, Reasons for Joining, Instagram and Bio / About Me fields are set, and Bio / About Me
+**replaces** whatever the guest's application put there.
 
-**One-time setup before the form works in production:**
-1. `cd server && npm install && node scripts/create-guest-intake-schema.js` (needs `ACTIVECAMPAIGN_BASE_URL`
-   and `ACTIVECAMPAIGN_API_TOKEN`; add `--dry-run` to preview the request).
-2. `fly secrets set AC_GUEST_INTAKE_SCHEMA_ID=<id it prints>`, then `fly deploy` from `server/`.
-
-Until both are done the endpoint answers 503 and guests see "We couldn't send your responses…"; it never
-shows a false success.
+**Team access:** in ActiveCampaign, filter contacts by tag `offer:guest-intake` (and by the episode tag), then
+read Bio / About Me.
 
 ## Videos: most viewed on YouTube
 

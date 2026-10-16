@@ -11,7 +11,7 @@ import { episodeSlug, findEpisodeBySlug, formatRecordingDate, seasonTwo } from "
 
 // Unlisted page for confirmed guests, linked from emails as /guest-intake?episode=<slug>.
 // Kept out of navigation, the sitemap and search (noindex here + X-Robots-Tag in public/_headers).
-// Submissions go to POST /api/guest-intake, stored as ActiveCampaign "Guest Intake" records.
+// Submissions go to the existing POST /api/lead endpoint (see the submit handler for the mapping).
 const searchSchema = z.object({ episode: z.string().max(80).optional() });
 
 export const Route = createFileRoute("/guest-intake")({
@@ -104,21 +104,37 @@ function GuestIntakePage() {
     }
     setSending(true);
     setSendError(null);
-    // The three link fields are stored together in the intake record's "links" field.
-    const { website, instagram, facebook, ...answers } = data;
-    const linkFields: [string, string][] = [
-      ["Website", website],
-      ["Instagram", instagram],
-      ["Facebook", facebook],
-    ];
-    const links = linkFields
-      .filter(([, value]) => value.trim())
-      .map(([label, value]) => `${label}: ${value.trim()}`)
-      .join("\n");
-    const result = await postJson("/api/guest-intake", {
-      ...answers,
-      links,
+    // Sent to the existing guest endpoint (POST /api/lead) — the server code is not modified.
+    // ActiveCampaign result: contact upserted; tags offer:guest-intake and
+    // podcast:conversation-interest:<episode>; Instagram in its own field; every answer in the
+    // contact's Bio / About Me field as one labelled block (this replaces what was there).
+    const episode = selected!;
+    const answer = (value: string) => value.trim() || "—";
+    const bio = [
+      `GUEST INTAKE — ${episode.title} (recording ${formatRecordingDate(episode.recordingDate)})`,
+      `Submitted: ${new Date().toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}`,
+      "",
+      `About you: ${answer(data.aboutYou)}`,
+      `Website: ${answer(data.website)}`,
+      `Instagram: ${answer(data.instagram)}`,
+      `Facebook: ${answer(data.facebook)}`,
+      "",
+      `What drew you to this conversation: ${answer(data.drawnTo)}`,
+      `Experience or perspective to bring: ${answer(data.experience)}`,
+      `Hopes we explore: ${answer(data.hopeToExplore)}`,
+      `Prefers not to discuss: ${answer(data.avoidTopics)}`,
+      `OK to tag in clips/photos: ${data.taggingConsent}`,
+      `Anything else for Brett: ${answer(data.anythingElse)}`,
+    ].join("\n");
+    const result = await postJson("/api/lead", {
       email: data.email.trim().toLowerCase(),
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      offer: "guest-intake",
+      source: "web",
+      reasonsForJoining: episode.title,
+      instagramHandle: data.instagram.trim(),
+      bioAboutMe: bio,
     });
     setSending(false);
     if (result.ok) {
