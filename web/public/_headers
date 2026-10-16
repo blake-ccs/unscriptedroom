@@ -14,3 +14,9 @@
   X-Robots-Tag: noindex, nofollow
 /guest-intake/*
   X-Robots-Tag: noindex, nofollow
+
+# Unlisted Guest Participation Agreement (linked from emails only)
+/guest-agreement
+  X-Robots-Tag: noindex, nofollow
+/guest-agreement/*
+  X-Robots-Tag: noindex, nofollow

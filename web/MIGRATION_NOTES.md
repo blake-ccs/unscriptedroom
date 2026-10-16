@@ -94,3 +94,18 @@ Refresh: `npm run youtube:refresh`, then commit and deploy. It reads YouTube's p
 `@unscriptedroompodcast` (no API key), ranks by view count, takes titles and descriptions from YouTube,
 and downloads the thumbnails. Run it locally rather than in the Netlify build, because YouTube can rate-limit or
 block build servers. Episodes are uploads at least 20 minutes long from the Videos tab; clips come from the Shorts tab.
+
+## Guest Participation Agreement (`/guest-agreement`)
+
+Unlisted page (noindex, `X-Robots-Tag`, not in the sitemap, not linked from anywhere, no pop-up). Send it as
+`/guest-agreement?episode=<slug>`, using the same slugs as Guest Intake. The agreement text lives in
+`src/lib/guest-agreement.ts`; bump `AGREEMENT_VERSION` whenever the wording changes.
+
+Guests enter their full name and email, tick the four confirmations, and type their name as a signature (it
+must match the full name). The form posts to the existing `POST /api/contact` with
+`subject: "Guest Participation Agreement (signed)"`, and the message holds the signature record: version, typed
+signature, name, email, episode, timestamp, confirmations, page and browser.
+
+**ActiveCampaign result:** a separate **Contact Message** record per signature, so nothing is overwritten. The
+contact is tagged `contact us: GuestParticipationAgreementsigned` and `LIFECYCLE: Engaged`. The server also
+appends the submission to its `submissions.txt` log.

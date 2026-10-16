@@ -15,6 +15,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as GuestAgreementRouteImport } from './routes/guest-agreement'
 import { Route as GuestIntakeRouteImport } from './routes/guest-intake'
 import { Route as JoinAConversationRouteImport } from './routes/join-a-conversation'
 import { Route as PortalRouteImport } from './routes/portal'
@@ -55,6 +56,11 @@ const ContactRoute = ContactRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestAgreementRoute = GuestAgreementRouteImport.update({
+  id: '/guest-agreement',
+  path: '/guest-agreement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuestIntakeRoute = GuestIntakeRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-agreement': typeof GuestAgreementRoute
   '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-agreement': typeof GuestAgreementRoute
   '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/apply': typeof ApplyRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/guest-agreement': typeof GuestAgreementRoute
   '/guest-intake': typeof GuestIntakeRoute
   '/join-a-conversation': typeof JoinAConversationRoute
   '/portal': typeof PortalRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-agreement'
     | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-agreement'
     | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/contact'
     | '/faq'
+    | '/guest-agreement'
     | '/guest-intake'
     | '/join-a-conversation'
     | '/portal'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   ApplyRoute: typeof ApplyRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  GuestAgreementRoute: typeof GuestAgreementRoute
   GuestIntakeRoute: typeof GuestIntakeRoute
   JoinAConversationRoute: typeof JoinAConversationRoute
   PortalRoute: typeof PortalRoute
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-agreement': {
+      id: '/guest-agreement'
+      path: '/guest-agreement'
+      fullPath: '/guest-agreement'
+      preLoaderRoute: typeof GuestAgreementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guest-intake': {
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyRoute: ApplyRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  GuestAgreementRoute: GuestAgreementRoute,
   GuestIntakeRoute: GuestIntakeRoute,
   JoinAConversationRoute: JoinAConversationRoute,
   PortalRoute: PortalRoute,

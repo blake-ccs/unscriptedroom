@@ -16,7 +16,7 @@ const FORM_IDLE_MS = 20_000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DISMISS_DAYS = 7;
 const CTA_DAYS = 30;
-const EXCLUDED_PATHS = ["/apply", "/join-a-conversation", "/guest-intake"];
+const EXCLUDED_PATHS = ["/apply", "/join-a-conversation", "/guest-intake", "/guest-agreement"];
 
 const KEY_HIDE_UNTIL = "ur_s2_invite_hide_until"; // localStorage, epoch ms
 const KEY_SHOWN = "ur_s2_invite_shown"; // sessionStorage
