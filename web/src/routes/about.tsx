@@ -200,7 +200,7 @@ function AboutPage() {
             aria-label="Ideas behind the conversations"
           >
             {[
-              ["Empathy", "Balance", "Self-Awareness"],
+              ["Self-Awareness", "Empathy", "Balance"],
               ["Discipline", "Honesty", "Focus"],
               ["Resilience", "Consistency", "Gratitude"],
             ].map((row) => (

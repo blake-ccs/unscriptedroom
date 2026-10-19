@@ -12,7 +12,7 @@ export const seasonTwo = [
   },
   {
     n: 2,
-    recordingDate: "2026-10-29",
+    recordingDate: "2026-11-05",
     title: "Listen Closely",
     question: "What is music telling you?",
     value: "Self-Awareness",
@@ -22,7 +22,7 @@ export const seasonTwo = [
   },
   {
     n: 3,
-    recordingDate: "2026-11-05",
+    recordingDate: "2026-10-29",
     title: "Permission to Play Hard",
     question: "What can sports teach us about competing with other people?",
     value: "Self-Awareness",
