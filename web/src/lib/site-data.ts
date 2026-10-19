@@ -12,16 +12,6 @@ export const seasonTwo = [
   },
   {
     n: 2,
-    recordingDate: "2026-11-05",
-    title: "Listen Closely",
-    question: "What is music telling you?",
-    value: "Self-Awareness",
-    topic: "Music",
-    description:
-      "A song can move us before we understand why. Guests share the music that has marked their lives, and what the sounds they keep returning to might say about who they are.",
-  },
-  {
-    n: 3,
     recordingDate: "2026-10-29",
     title: "Permission to Play Hard",
     question: "What can sports teach us about competing with other people?",
@@ -29,6 +19,16 @@ export const seasonTwo = [
     topic: "Sports and Competition",
     description:
       "Competition can bring out the best in people, and sometimes the worst. Guests dig into the spoken and unspoken agreements that make playing hard possible, and where the line falls between intensity and going too far.",
+  },
+  {
+    n: 3,
+    recordingDate: "2026-11-05",
+    title: "Listen Closely",
+    question: "What is music telling you?",
+    value: "Self-Awareness",
+    topic: "Music",
+    description:
+      "A song can move us before we understand why. Guests share the music that has marked their lives, and what the sounds they keep returning to might say about who they are.",
   },
   {
     n: 4,
