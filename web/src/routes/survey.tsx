@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { postJson } from "@/lib/api";
 
-// Post-session reflection survey. Linked from ActiveCampaign emails — keep the URL and payload stable.
+// Post-session reflection survey. Linked from ActiveCampaign emails. Keep the URL and payload stable.
 export const Route = createFileRoute("/survey")({
   head: () => ({
     meta: [

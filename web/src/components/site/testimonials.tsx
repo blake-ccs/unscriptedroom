@@ -1,4 +1,4 @@
-// "From the other side of the table" — hidden until real, approved guest quotes exist.
+// "From the other side of the table": hidden until real, approved guest quotes exist.
 // To publish: add entries to `guestTestimonials` and set SHOW_TESTIMONIALS to true.
 // Only use real quotes approved by the guest, and candid photos from their own recording.
 

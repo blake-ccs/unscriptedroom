@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { postJson } from "@/lib/api";
 
-// Landing page for the purple-envelope QR codes printed around the community — keep this URL stable.
+// Landing page for the purple-envelope QR codes printed around the community. Keep this URL stable.
 export const Route = createFileRoute("/qr")({
   head: () => ({
     meta: [
@@ -136,7 +136,7 @@ function QrPage() {
               <CheckCircle2 className="h-10 w-10 text-purple" />
               <h2 className="mt-5">Saved.</h2>
               <p className="mt-3 text-muted-foreground">
-                Thanks — we&apos;ll be in touch. In the meantime, have a look around.
+                Thanks! We&apos;ll be in touch. In the meantime, have a look around.
               </p>
               <Button asChild variant="apply" size="lg" className="mt-6">
                 <Link to="/">Go to website</Link>

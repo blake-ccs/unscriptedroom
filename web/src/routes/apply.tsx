@@ -63,7 +63,7 @@ const empty: FormData = {
 function ApplyPage() {
   const { conversation } = Route.useSearch();
   // The page is prerendered without a query string, so start empty (matching the static HTML)
-  // and apply ?conversation= after hydration — otherwise the <select> shows blank.
+  // and apply ?conversation= after hydration; otherwise the <select> shows blank.
   const [data, setData] = React.useState<FormData>(empty);
   React.useEffect(() => {
     const valid =
@@ -118,7 +118,7 @@ function ApplyPage() {
         `Phone Number: ${data.phone.trim() || "Not provided"}`,
         `Why interested: ${data.why.trim()}`,
         `Perspective/experience: ${data.perspective.trim()}`,
-        `Anything else: ${data.anythingElse.trim() || "—"}`,
+        `Anything else: ${data.anythingElse.trim() || "(not answered)"}`,
       ].join("\n"),
       ...getUtm(),
     });
@@ -260,7 +260,7 @@ function ApplyPage() {
                 onChange={(e) => update("conversation", e.target.value)}
                 className="h-10 w-full border border-input bg-transparent px-3 text-sm focus-visible:border-chartreuse focus-visible:outline-none"
               >
-                <option value="">Choose one — or leave blank</option>
+                <option value="">Choose one, or leave blank</option>
                 {seasonTwo.map((item) => (
                   <option key={item.n} value={item.title}>
                     {String(item.n).padStart(2, "0")} · {item.title}

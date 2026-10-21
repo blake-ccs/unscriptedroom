@@ -1,6 +1,6 @@
 // Guest Participation Agreement, exactly as supplied by the team (October 2026).
 // Change AGREEMENT_VERSION whenever the wording changes, so each signature records which text was signed.
-export const AGREEMENT_VERSION = "2026-10-16";
+export const AGREEMENT_VERSION = "2026-10-21";
 export const AGREEMENT_TITLE = "Guest Participation Agreement";
 
 type Block = { kind: "p"; text: string } | { kind: "list"; items: string[] };
@@ -80,7 +80,10 @@ export const agreementSections: AgreementSection[] = [
         "After the conversation is recorded, we provide a 48-hour reflection window before anything is publicly shared. This time is intended to give participants space to reflect on the experience and feel confident about what was shared during the conversation.",
       ),
       p(
-        "If within that window you decide that you would prefer not to have your participation included in publicly shared content, you can simply let us know and we will honor that request. Your portion of the conversation will not be published.",
+        "If within that window you decide that you would prefer not to have your participation included in publicly shared content, you can simply let us know and we will honor that request.",
+      ),
+      p(
+        "Because each conversation is recorded together as one shared experience, we are not able to remove one person's portion and publish the rest. If any participant chooses not to have the conversation shared, the conversation will not be published. You are never obligated to approve publication, and this window exists so that every participant can feel confident and comfortable with what is shared.",
       ),
       p(
         "We offer this reflection period because conversations in The Unscripted Room are designed to be open, thoughtful, and sometimes deeply personal. Providing this space allows participants to revisit the experience with clarity and comfort before the conversation is shared with a wider audience.",

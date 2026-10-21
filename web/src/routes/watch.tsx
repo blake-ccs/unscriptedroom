@@ -105,7 +105,7 @@ function Page() {
               <p className="rule-label text-chartreuse">Shorter clips</p>
               <h2 className="mt-5 text-warm-white">Moments worth replaying.</h2>
               <p className="mt-4 max-w-md text-sm text-warm-white/60">
-                The people, the room and the questions — in a minute or less.
+                The people, the room and the questions, in a minute or less.
               </p>
             </div>
             <a
@@ -128,7 +128,7 @@ function Page() {
                 href={shortUrl(short.id)}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`${short.title} — watch on YouTube (opens in a new tab)`}
+                aria-label={`${short.title}. Watch on YouTube (opens in a new tab)`}
                 className="group flex flex-col focus-visible:outline-offset-4"
               >
                 <span className="relative block aspect-[9/16] overflow-hidden border border-warm-white/15 bg-deep-purple">

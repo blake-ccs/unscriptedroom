@@ -22,7 +22,7 @@ export function captureUtm() {
     }
     if (Object.keys(utm).length) sessionStorage.setItem(KEY, JSON.stringify(utm));
   } catch {
-    // Storage unavailable (private mode etc.) — attribution is best-effort.
+    // Storage unavailable (private mode etc.); attribution is best-effort.
   }
 }
 

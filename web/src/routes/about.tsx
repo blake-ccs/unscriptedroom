@@ -191,7 +191,7 @@ function AboutPage() {
             </h2>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               The conversations in The Unscripted Room are inspired by ideas we all encounter in
-              life — things like empathy, balance, honesty, resilience and self-awareness. They help
+              life: things like empathy, balance, honesty, resilience and self-awareness. They help
               us find interesting questions to explore, not tell anyone what to think.
             </p>
           </div>

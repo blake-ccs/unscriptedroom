@@ -299,7 +299,7 @@ export function PageHero({
 }
 export function CTA({
   title = "Take a seat. Tell us why.",
-  text = "The room is ready for your lived experience—not a polished performance.",
+  text = "The room is ready for your lived experience, not a polished performance.",
 }: {
   title?: string;
   text?: string;

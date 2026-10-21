@@ -56,10 +56,10 @@
   /* Approved palette */
   --ink: #2b2728; /* Charcoal */
   --warm-white: #f3efe7; /* Warm Cream */
-  --purple: #4e2a45; /* Aubergine — editorial emphasis, questions, icon linework */
+  --purple: #4e2a45; /* Aubergine: editorial emphasis, questions, icon linework */
   --deep-purple: var(--purple);
-  --chartreuse: #b8c3ae; /* Light Sage — CTAs and supporting accents */
-  --soft-sage: #e6ebdd; /* Soft Warm Sage — larger surfaces such as Season Two cards */
+  --chartreuse: #b8c3ae; /* Light Sage: CTAs and supporting accents */
+  --soft-sage: #e6ebdd; /* Soft Warm Sage: larger surfaces such as Season Two cards */
   --background: var(--warm-white);
   --foreground: var(--ink);
   --card: var(--warm-white);

@@ -12,7 +12,7 @@ import {
   agreementSections,
 } from "@/lib/guest-agreement";
 
-// Unlisted page where confirmed guests sign the Guest Participation Agreement — one link for everyone:
+// Unlisted page where confirmed guests sign the Guest Participation Agreement, one link for everyone:
 // /guest-agreement. Kept out of navigation, the sitemap and search.
 // Signatures go to the existing POST /api/contact endpoint (server code is not modified): it creates a
 // separate ActiveCampaign "Contact Message" record per signature, so a signed agreement is never
@@ -73,7 +73,7 @@ function GuestAgreementPage() {
     setSending(true);
     setSendError(null);
     const message = [
-      `GUEST PARTICIPATION AGREEMENT — SIGNED`,
+      `GUEST PARTICIPATION AGREEMENT: SIGNED`,
       `Agreement version: ${AGREEMENT_VERSION}`,
       ``,
       `Signature (typed): ${signature.trim()}`,
@@ -98,7 +98,7 @@ function GuestAgreementPage() {
       window.scrollTo({ top: 0 });
     } else {
       setSendError(
-        "We couldn't submit your agreement just now. Your entries are still here — please try again in a moment.",
+        "We couldn't submit your agreement just now. Your entries are still here. Please try again in a moment.",
       );
     }
   }

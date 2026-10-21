@@ -104,14 +104,14 @@ function GuestIntakePage() {
     }
     setSending(true);
     setSendError(null);
-    // Sent to the existing guest endpoint (POST /api/lead) — the server code is not modified.
+    // Sent to the existing guest endpoint (POST /api/lead); the server code is not modified.
     // ActiveCampaign result: contact upserted; tags offer:guest-intake and
     // podcast:conversation-interest:<episode>; Instagram in its own field; every answer in the
     // contact's Bio / About Me field as one labelled block (this replaces what was there).
     const episode = selected!;
-    const answer = (value: string) => value.trim() || "—";
+    const answer = (value: string) => value.trim() || "(not answered)";
     const bio = [
-      `GUEST INTAKE — ${episode.title} (recording ${formatRecordingDate(episode.recordingDate)})`,
+      `GUEST INTAKE: ${episode.title} (recording ${formatRecordingDate(episode.recordingDate)})`,
       `Submitted: ${new Date().toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}`,
       "",
       `About you: ${answer(data.aboutYou)}`,
@@ -124,7 +124,7 @@ function GuestIntakePage() {
       `Hopes we explore: ${answer(data.hopeToExplore)}`,
       `Prefers not to discuss: ${answer(data.avoidTopics)}`,
       `OK to tag in clips/photos: ${data.taggingConsent}`,
-      `Anything else for Brett: ${answer(data.anythingElse)}`,
+      `Anything else to know: ${answer(data.anythingElse)}`,
     ].join("\n");
     const result = await postJson("/api/lead", {
       email: data.email.trim().toLowerCase(),
@@ -142,7 +142,7 @@ function GuestIntakePage() {
       window.scrollTo({ top: 0 });
     } else {
       setSendError(
-        "We couldn't send your responses just now. Your answers are still here — please try again in a moment.",
+        "We couldn't send your responses just now. Your answers are still here. Please try again in a moment.",
       );
     }
   }
@@ -173,7 +173,7 @@ function GuestIntakePage() {
               you'll bring to the conversation.
             </p>
             <p>
-              There are no right or wrong answers. This simply helps Brett get to know you before we
+              There are no right or wrong answers. This simply helps us get to know you before we
               sit down.
             </p>
           </div>
@@ -254,7 +254,7 @@ function GuestIntakePage() {
               </Field>
               <Field
                 label="Tell us a little about yourself. (Optional)"
-                hint="This could include what you do, your interests, your background, or anything else you'd like Brett to know before the conversation."
+                hint="This could include what you do, your interests, your background, or anything else you'd like us to know before the conversation."
               >
                 <Textarea
                   value={data.aboutYou}
@@ -367,7 +367,7 @@ function GuestIntakePage() {
                   </span>
                 )}
               </fieldset>
-              <Field label="Anything else you'd like Brett to know before we meet? (Optional)">
+              <Field label="Anything else you'd like us to know before we meet? (Optional)">
                 <Textarea
                   value={data.anythingElse}
                   onChange={(e) => update("anythingElse", e.target.value)}
